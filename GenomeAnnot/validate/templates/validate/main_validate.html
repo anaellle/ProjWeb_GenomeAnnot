@@ -1,8 +1,18 @@
 {% extends 'base.html' %}
 
+<!-- --------------- SEARCHBAR --------------- -->
 
-{% block  body %}
+
+{% block  search %}
+{% include 'validate/searchbar_validate.html' %}
+{% endblock %}
+
+
+<!-- --------------- CONTENT --------------- -->
+
+{% block body %}  
     <br><br><br><br>
     This is the body of validate
     <br><br><br><br>
 {% endblock %}
+

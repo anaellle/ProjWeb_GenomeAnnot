@@ -1,9 +1,18 @@
 {% extends 'base.html' %}
 
-{% block  body %}
-      
+<!-- --------------- SEARCHBAR --------------- -->
+
+
+{% block  search %}
+{% include 'annotate/searchbar_annotate.html' %}
+{% endblock %}
+
+
+<!-- --------------- CONTENT --------------- -->
+
+{% block body %}  
     <br><br><br><br>
     This is the body of annotate
     <br><br><br><br>
-    
 {% endblock %}
+

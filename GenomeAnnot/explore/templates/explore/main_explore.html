@@ -1,8 +1,18 @@
 {% extends 'base.html' %}
 
+<!-- --------------- SEARCHBAR --------------- -->
 
-{% block  body %}
+
+{% block  search %}
+{% include 'explore/searchbar_explore.html' %}
+{% endblock %}
+
+
+<!-- --------------- CONTENT --------------- -->
+
+{% block body %}  
     <br><br><br><br>
     This is the body of explore
     <br><br><br><br>
 {% endblock %}
+
