@@ -1,0 +1,15 @@
+:root {
+  --green: rgb(87, 152, 87);
+}
+
+header {
+  background-color: var(--green);
+}
+
+.nav-pills {
+  --bs-nav-pills-link-active-color: #fff;
+  --bs-nav-pills-link-active-bg: var(--green);
+}
+.nav-link {
+  color: var(--green);
+}
