@@ -58,11 +58,7 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            os.path.join(BASE_DIR, "GenomeAnnot", "templates"),
-            os.path.join(BASE_DIR, "explore", "templates"),
-            os.path.join(BASE_DIR, "blast", "templates"),
-            os.path.join(BASE_DIR, "annotate", "templates"),
-            os.path.join(BASE_DIR, "validate", "templates"),
+            os.path.join(BASE_DIR, "main", "templates"),
         ],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -126,11 +122,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "GenomeAnnot", "static"),
-    os.path.join(BASE_DIR, "explore", "static"),
-    os.path.join(BASE_DIR, "blast", "static"),
-    os.path.join(BASE_DIR, "annotate", "static"),
-    os.path.join(BASE_DIR, "validate", "static"),
+    os.path.join(BASE_DIR, "main", "static"),
 ]
 
 # Default primary key field type
