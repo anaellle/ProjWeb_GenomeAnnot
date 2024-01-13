@@ -1,10 +1,34 @@
 :root {
   --green: rgb(87, 152, 87);
+  --shadow: rgba(0, 0, 255, 0.2);
+  --height_header: 100px;
+  --bottomNav: 8px;
 }
+/*--------------------------- Header --------------------------- */
 
 header {
+  position: fixed;
+  z-index: 2;
+  width: 100%;
+  height: var(--height_header);
   background-color: var(--green);
 }
+header:hover {
+  box-shadow: 0px 5px 2px 1px var(--shadow);
+}
+#nameSite {
+  padding: 0 30px;
+  color: black;
+}
+#LoginModal {
+  position: fixed;
+}
+
+#login {
+  padding-right: 30px;
+  font-size: 20px;
+}
+/*--------------------------- Navigation --------------------------- */
 
 .nav-pills {
   --bs-nav-pills-link-active-color: #fff;
@@ -12,4 +36,46 @@ header {
 }
 .nav-link {
   color: var(--green);
+}
+
+#navigLeft {
+  position: fixed;
+  z-index: 1;
+  top: var(--height_header);
+  height: calc(100% - var(--height_header) - var(--bottomNav));
+  bottom: var(--bottomNav);
+  margin-left: 0.5%;
+  border-left: 0.4px var(--shadow) solid;
+  border-right: 0.4px var(--shadow) solid;
+}
+#navigLeft:hover {
+  box-shadow: 0 0 15px var(--shadow);
+}
+
+#nav-admin {
+  position: absolute;
+  top: calc(100% - var(--height_header) - var(--bottomNav));
+  width: 90%;
+}
+
+/*--------------------------- Body --------------------------- */
+
+main {
+  position: relative;
+  top: var(--height_header);
+  height: auto;
+  padding-top: 20px;
+}
+
+/*--------------------------- Footer --------------------------- */
+
+footer {
+  position: fixed;
+  z-index: 2;
+  width: 100%;
+  bottom: 0;
+  background-color: #fff;
+}
+footer span {
+  padding: 0 10px;
 }
