@@ -1,0 +1,10 @@
+
+<!-- --------------- TABS --------------- -->
+
+
+<div class="nav nav-tabs" id="nav-tab" role="tablist">
+    <a class="nav-link {% if active_tab_admin == 'genome' %}active{% endif %}" id="nav-genome-tab" href="{% url 'main:genomeAdmin' %}" role="tab" >Genomes</a>
+    <a class="nav-link {% if active_tab_admin == 'sequence' %}active{% endif %}" id="nav-sequence-tab" href="{% url 'main:sequenceAdmin' %}" role="tab" >Sequences</a>
+    <a class="nav-link {% if active_tab_admin == 'account' %}active{% endif %}" id="nav-account-tab" href="{% url 'main:accountAdmin' %}" role="tab"  >Accounts</a>
+</div>
+
