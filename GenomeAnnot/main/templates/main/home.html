@@ -1,11 +1,94 @@
 {% extends 'main/base.html' %}
 
 
-<!-- --------------- CONTENT --------------- -->
 
 {% block body %}  
     <br><br><br><br>
-    This is the body of home
+
+    <div id="mediumTxt"> goal of web site/roles ....</div>
+
+    <br><br><br><br>
+
+<!-- --------------- CARDS --------------- -->
+
+    <div class="container text-center">
+        <div class="row row-cols-3">
+    
+            <!-- ------------- Explore ------------- -->
+
+            <div class="card col" style="width: 18rem;">
+                <img src="..." class="card-img-top" alt="...">
+                <div class="card-body">
+                <h5 class="card-title">Explore Genomes</h5>
+                <h6 class="card-subtitle mb-2 text-body-secondary">Readers</h6>
+                <p class="card-text"> Text of card explore ...</p>
+                <a href="{% url 'main:explore' %}" class="btn btn-primary">Go to Explore</a>
+                </div>
+            </div>
+
+            <!-- ------------- AddGenome ------------- -->
+
+            <div class="card col" style="width: 18rem;">
+                <img src="..." class="card-img-top" alt="...">
+                <div class="card-body">
+                <h5 class="card-title">Add Genomes</h5>
+                <h6 class="card-subtitle mb-2 text-body-secondary">Readers</h6>
+                <p class="card-text"> Text of card add genome ...</p>
+                <a href="{% url 'main:addGenome' %}" class="btn btn-primary">Go to AddGenome</a>
+                </div>
+            </div>
+
+            <!-- ------------- Blast ------------- -->
+
+            <div class="card col" style="width: 18rem;">
+                <img src="..." class="card-img-top" alt="...">
+                <div class="card-body">
+                <h5 class="card-title">Blast Sequences</h5>
+                <h6 class="card-subtitle mb-2 text-body-secondary">Readers</h6>
+                <p class="card-text"> Text of card blast ...</p>
+                <a href="{% url 'main:blast' %}" class="btn btn-primary">Go to Blast</a>
+                </div>
+            </div>
+
+            <!-- ------------- Annotate ------------- -->
+
+                <div class="card col" style="width: 18rem;">
+                    <img src="..." class="card-img-top" alt="...">
+                    <div class="card-body">
+                    <h5 class="card-title">Annotate Sequences</h5>
+                    <h6 class="card-subtitle mb-2 text-body-secondary">Annotators</h6>
+                    <p class="card-text"> Text of card annotate ...</p>
+                    <a href="{% url 'main:annotate' %}" class="btn btn-primary">Go to Annotate</a>
+                    </div>
+                </div>
+            
+                <!-- ------------- Validate ------------- -->
+
+                <div class="card col" style="width: 18rem;">
+                    <img src="..." class="card-img-top" alt="...">
+                    <div class="card-body">
+                    <h5 class="card-title">Validate annotation</h5>
+                    <h6 class="card-subtitle mb-2 text-body-secondary">Validators</h6>
+                    <p class="card-text"> Text of card validate ...</p>
+                    <a href="{% url 'main:validate' %}" class="btn btn-primary">Go to Validate</a>
+                    </div>
+                </div>
+
+                <!-- ------------- Admin ------------- -->
+
+                <div class="card col" style="width: 18rem;">
+                    <img src="..." class="card-img-top" alt="...">
+                    <div class="card-body">
+                    <h5 class="card-title">Manage Annotations</h5>
+                    <h6 class="card-subtitle mb-2 text-body-secondary">Administrator</h6>
+                    <p class="card-text"> Text of card admin ...</p>
+                    <a href="{% url 'main:genomeAdmin' %}" class="btn btn-primary">Go to Admin</a>
+                    </div>
+                </div>
+    
+        </div>
+    </div>
+
     <br><br><br><br>
 {% endblock %}
 
