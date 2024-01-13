@@ -1,10 +1,15 @@
 {% extends 'main/base.html' %}
 
+<!-- --------------- TABS --------------- -->
+
+{% block  tabs %}
+{% include 'main/admin/tabs_admin.html' %}
+{% endblock %}
+
 <!-- --------------- SEARCHBAR --------------- -->
 
 
 {% block  search %}
-{% include 'main/searchbar_explore.html' %}
 {% endblock %}
 
 
@@ -12,7 +17,6 @@
 
 {% block body %}  
     <br><br><br><br>
-    This is the body of explore
+    This is the body of sequence admin.
     <br><br><br><br>
 {% endblock %}
-
