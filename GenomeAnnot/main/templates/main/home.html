@@ -3,11 +3,26 @@
 
 
 {% block body %}  
-    <br><br><br><br>
 
-    <div id="mediumTxt"> goal of web site/roles ....</div>
+    <div id="intro" class="pad_txt mediumTxt"> 
+        
+        <span class="biggerTxt">GenomAnnot</span> is a versatile platform designed to accommodate four distinct roles: Reader, Annotator, Validator, and Administrator. <br><br>
 
-    <br><br><br><br>
+    <b>Readers</b> have the capability to explore genomes comprehensively, accessing detailed information about genes and proteins. 
+    The platform facilitates the application of Blast using sequences stored in the database. 
+    Additionally, users can contribute to the expansion of the database by adding new genomes. <br><br>
+        
+<b>Annotators</b> play a crucial role in enhancing the platform's depth. 
+They can enrich the information associated with genes or proteins, contributing to a more detailed and 
+comprehensive genomic repository. <br><br>
+        
+<b>Validators</b> are tasked with the responsibility of reviewing and approving or disapproving annotations submitted by annotators,
+ ensuring the accuracy and reliability of the information presented on the platform. <br><br>
+        
+        <b>Administrators</b> wield the authority to manage task distribution and oversee the progress of the collective efforts. 
+        Their role is pivotal in ensuring the smooth functioning of the annotation process and the overall advancement of the platform. <br><br>
+    </div>
+
 
 <!-- --------------- CARDS --------------- -->
 
@@ -16,72 +31,73 @@
     
             <!-- ------------- Explore ------------- -->
 
-            <div class="card col" style="width: 18rem;">
-                <img src="..." class="card-img-top" alt="...">
+            <div class="card col my-3 mx-3" style="width: 18rem;">
+                <img src="../static/main/images/explore.png" class="card-img-top" alt="...">
                 <div class="card-body">
                 <h5 class="card-title">Explore Genomes</h5>
-                <h6 class="card-subtitle mb-2 text-body-secondary">Readers</h6>
-                <p class="card-text"> Text of card explore ...</p>
+                <h6 class="card-subtitle mb-2 text-body-secondary">All</h6>
+                <p class="card-text"> Exploration of genomes, providing detailed insights into the information related to genes and proteins.</p>
                 <a href="{% url 'main:explore' %}" class="btn btn-primary">Go to Explore</a>
+                </div>
+            </div>
+
+
+            <!-- ------------- Blast ------------- -->
+
+            <div class="card col my-3 mx-3" style="width: 18rem;">
+                <img src="../static/main/images/blast.png" class="card-img-top" alt="...">
+                <div class="card-body">
+                <h5 class="card-title">Blast Sequences</h5>
+                <h6 class="card-subtitle mb-2 text-body-secondary">All</h6>
+                <p class="card-text"> Blast using sequences stored in the database.</p>
+                <a href="{% url 'main:blast' %}" class="btn btn-primary">Go to Blast</a>
                 </div>
             </div>
 
             <!-- ------------- AddGenome ------------- -->
 
-            <div class="card col" style="width: 18rem;">
-                <img src="..." class="card-img-top" alt="...">
+            <div class="card col my-3 mx-3" style="width: 18rem;">
+                <img src="../static/main/images/addgenome.png" class="card-img-top" alt="...">
                 <div class="card-body">
                 <h5 class="card-title">Add Genomes</h5>
-                <h6 class="card-subtitle mb-2 text-body-secondary">Readers</h6>
-                <p class="card-text"> Text of card add genome ...</p>
+                <h6 class="card-subtitle mb-2 text-body-secondary">All</h6>
+                <p class="card-text"> Expansion of the database by adding new genomes</p>
                 <a href="{% url 'main:addGenome' %}" class="btn btn-primary">Go to AddGenome</a>
-                </div>
-            </div>
-
-            <!-- ------------- Blast ------------- -->
-
-            <div class="card col" style="width: 18rem;">
-                <img src="..." class="card-img-top" alt="...">
-                <div class="card-body">
-                <h5 class="card-title">Blast Sequences</h5>
-                <h6 class="card-subtitle mb-2 text-body-secondary">Readers</h6>
-                <p class="card-text"> Text of card blast ...</p>
-                <a href="{% url 'main:blast' %}" class="btn btn-primary">Go to Blast</a>
                 </div>
             </div>
 
             <!-- ------------- Annotate ------------- -->
 
-                <div class="card col" style="width: 18rem;">
-                    <img src="..." class="card-img-top" alt="...">
+                <div class="card col my-3 mx-3" style="width: 18rem;">
+                    <img src="../static/main/images/annotate.png" class="card-img-top" alt="...">
                     <div class="card-body">
                     <h5 class="card-title">Annotate Sequences</h5>
                     <h6 class="card-subtitle mb-2 text-body-secondary">Annotators</h6>
-                    <p class="card-text"> Text of card annotate ...</p>
+                    <p class="card-text"> Add or modify annotations of genes and proteins.</p>
                     <a href="{% url 'main:annotate' %}" class="btn btn-primary">Go to Annotate</a>
                     </div>
                 </div>
             
                 <!-- ------------- Validate ------------- -->
 
-                <div class="card col" style="width: 18rem;">
-                    <img src="..." class="card-img-top" alt="...">
+                <div class="card col my-3 mx-3" style="width: 18rem;">
+                    <img src="../static/main/images/validate.png" class="card-img-top" alt="...">
                     <div class="card-body">
                     <h5 class="card-title">Validate annotation</h5>
                     <h6 class="card-subtitle mb-2 text-body-secondary">Validators</h6>
-                    <p class="card-text"> Text of card validate ...</p>
+                    <p class="card-text"> Validate annotations of genes and proteins from an annotators.</p>
                     <a href="{% url 'main:validate' %}" class="btn btn-primary">Go to Validate</a>
                     </div>
                 </div>
 
                 <!-- ------------- Admin ------------- -->
 
-                <div class="card col" style="width: 18rem;">
-                    <img src="..." class="card-img-top" alt="...">
+                <div class="card col my-3 mx-3" style="width: 18rem;">
+                    <img src="../static/main/images/admin.png" class="card-img-top" alt="...">
                     <div class="card-body">
                     <h5 class="card-title">Manage Annotations</h5>
                     <h6 class="card-subtitle mb-2 text-body-secondary">Administrator</h6>
-                    <p class="card-text"> Text of card admin ...</p>
+                    <p class="card-text">Dispatch the tasks to annotators and validators, check work progress.</p>
                     <a href="{% url 'main:genomeAdmin' %}" class="btn btn-primary">Go to Admin</a>
                     </div>
                 </div>
