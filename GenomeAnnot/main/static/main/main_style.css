@@ -11,7 +11,9 @@
   --bottomNav: 8px;
   --stripe: 7px;
 }
+/*****************************************************************/
 /*--------------------------- Header --------------------------- */
+/*****************************************************************/
 
 header {
   position: fixed;
@@ -43,7 +45,9 @@ header:hover {
   padding-right: 30px;
   font-size: 20px;
 }
+/*****************************************************************/
 /*--------------------------- Navigation --------------------------- */
+/*****************************************************************/
 
 .nav-pills {
   --bs-nav-pills-link-active-color: var(--roseebony);
@@ -93,11 +97,16 @@ header:hover {
   background-color: var(--roseebony);
   color: white;
 }
-
+/*****************************************************************/
 /*--------------------------- Body --------------------------- */
+/*****************************************************************/
 
 body {
   color: var(--feldgrau);
+}
+
+.bodycontent {
+  margin-top: 2%;
 }
 
 main {
@@ -124,6 +133,12 @@ main {
   color: var(--roseebony);
 }
 
+.search {
+  padding: 1% 0.6%;
+  border: 0.8px solid;
+  border-color: var(--roseebony);
+  border-radius: 10px;
+}
 /*-----------------Button----------------*/
 
 .btn {
@@ -187,7 +202,43 @@ h6 {
   color: var(--roseebony);
 }
 
+/*--------------- sequence/genome card ---------------- */
+
+.card-body.cardList {
+  display: flex;
+  justify-content: space-between;
+  background-color: rgb(var(--bs-light-rgb));
+}
+
+.left-card {
+  order: 1;
+}
+
+.right-card {
+  order: 2;
+}
+
+/*-----------------Status----------------*/
+
+.green {
+  color: rgb(28, 182, 28) !important;
+}
+
+.grey {
+  color: grey !important;
+}
+
+.orange {
+  color: rgb(250, 180, 49) !important;
+}
+
+.red {
+  color: red !important;
+}
+
+/*****************************************************************/
 /*--------------------------- Footer --------------------------- */
+/*****************************************************************/
 
 footer {
   position: fixed;
