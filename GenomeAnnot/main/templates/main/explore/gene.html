@@ -1,0 +1,19 @@
+{% extends 'main/base.html' %}
+
+{% block body %}
+
+<div>
+Gene {{ gene_id }} <br>
+
+genome : <a href="{% url 'main:genome' genome_id=genome_id  %}">{{ genome_id }} </a> <br>
+
+...all informations <br>
+
+<div class="btn btn-primary">Blast gene</div > <br>
+<a class="btn btn-secondary" href="{% url 'main:geneAnnot' gene_id=gene_id  %}">Annote gene</a > <br>
+<a class="btn btn-secondary" href="{% url 'main:geneValid' gene_id=gene_id  %}">Validate gene</a > 
+
+</div>
+
+
+{% endblock%}
