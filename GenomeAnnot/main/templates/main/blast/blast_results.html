@@ -1,0 +1,24 @@
+{% extends 'main/base.html' %}
+
+
+<!-- --------------- CONTENT --------------- -->
+{% block body %} 
+
+<h2>Résultats de la recherche BLAST</h2>
+{% for hit in results.hits %}
+    <div>
+        <h3>{{ hit.id }}</h3>
+        <p>{{ hit.description }}</p>
+        <ul>
+            {% for alignment in hit.alignments %}
+                <li>
+                    <p>{{ alignment.title }}</p>
+                    <p>{{ alignment.length }} bases</p>
+                    <!-- Autres informations spécifiques à l'alignement -->
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endfor %}
+
+{% endblock %}

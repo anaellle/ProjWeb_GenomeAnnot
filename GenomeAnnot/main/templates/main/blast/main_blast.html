@@ -4,8 +4,16 @@
 <!-- --------------- CONTENT --------------- -->
 
 {% block body %}  
-    <textarea> zone sequence</textarea>
-    <div class="btn btn-primary">Blast gene</div >
-
+    <form method="post" action="{% url 'main:blast' %}">
+        {% csrf_token %}
+        <label for="sequence">Query:</label>
+        <br>
+        <textarea name="sequence" required></textarea>
+        <br>
+        <label for="parameters">Parameters:</label> 
+        <br>
+        <input type="text" name="parameters">
+        <br>
+        <button type="submit">Launch Blast</button>
+    </form>
 {% endblock %}
-
