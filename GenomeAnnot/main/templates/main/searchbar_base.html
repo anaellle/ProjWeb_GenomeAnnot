@@ -2,7 +2,9 @@
 
 <!-------------- Research -------------->  
 
-<form class="d-flex" role="search">
+<form>
+
+<div class="d-flex" role="search">
 
     <!-------------- Result type -------------->
     {% block  dropdown %}
@@ -22,34 +24,29 @@
 
     <!-------------- Filter -------------->
 
-    <!-- Button trigger modal -->
-    <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#FilterModal">
+
+    <!-- Button trigger filter -->
+    <button class="btn" type="button" data-bs-toggle="collapse" data-bs-target="#filter" aria-expanded="false" >
         <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-filter" viewBox="0 0 16 16">
             <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5"/>
         </svg>
-    </button>
-    
-    <!-- Modal -->
-    <div class="modal fade" id="FilterModal" tabindex="-1" aria-labelledby="FilterModal" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">Filters</h1>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                {% block  filter %}
-                {% endblock %}
-            </div>
-            <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Apply</button>
-            </div>
-        </div>
-        </div>
-    </div>
+      </button>
+ 
 
+    <!-------------- Other button -------------->
     {% block  otherElementBar %}
     {% endblock %}
+
+</div>
+
+    <!-- filter opened -->
+    <div class="collapse" id="filter">
+        <div class="card card-body">
+            {% block  filter %}
+            {% endblock %}        
+        </div>
+    </div>
+    
+
 
 </form>

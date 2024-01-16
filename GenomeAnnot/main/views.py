@@ -43,3 +43,30 @@ def accountAdmin(request):
 
 def addGenome(request):
     return render(request, "main/addGenome/addGenome.html")
+
+
+def genome(request, genome_id):  # change to details view later
+    context = {"genome_id": genome_id}  # ex of context (no db for now)
+    return render(request, "main/explore/genome.html", context)
+
+
+def gene(request, gene_id):  # change to details view later
+    context = {
+        "gene_id": gene_id,
+        "genome_id": "56426",
+    }  # ex of context (no db for now)
+    return render(request, "main/explore/gene.html", context)
+
+
+def geneAnnot(request, gene_id):  # change to update view later
+    context = {
+        "gene_id": gene_id,
+    }  # ex of context (no db for now)
+    return render(request, "main/annotate/geneAnnot.html", context)
+
+
+def geneValid(request, gene_id):
+    context = {
+        "gene_id": gene_id,
+    }  # ex of context (no db for now)
+    return render(request, "main/validate/geneValid.html", context)

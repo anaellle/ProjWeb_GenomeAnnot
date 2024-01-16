@@ -11,8 +11,22 @@
 <!-- --------------- CONTENT --------------- -->
 
 {% block body %}  
-    <br><br><br><br>
-    This is the body of explore
-    <br><br><br><br>
+
+
+<div class="card">
+    <a class="btn card-body" href="{% url 'main:gene' gene_id=536 %}">
+        <span>IdGenome | IdSequence <span class="statut">validation en cours</span> </span>
+    </div>
+  </div>
+
+  <div class="card">
+    <a class="btn card-body" href="{% url 'main:genome' genome_id=56426 %}">
+        <span>IdGenome <span class="statut">validation en cours</span> </span>
+    </div>
+  </div>
+
+
+
+
 {% endblock %}
 
