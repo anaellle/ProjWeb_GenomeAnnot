@@ -3,16 +3,163 @@
 <!-------------- Result type -------------->
 
 {% block  dropdown %}
-<select name="res_type" id="res_type-select" class="btn">
+<select name="res_type" id="res_type-select" class="btn" onchange="changeTypeResExplore()">
     <option value="genome" class="ebony"> Genome </option>
-    <option value="sequence" class="ebony" > Sequence </option>
+    <option value="gene" class="ebony" > Gene </option>
+    <option value="prot" class="ebony" > Protein </option>
   </select>
 {% endblock %}
 
+<!-------------- Search bar text -------------->
+
+{% block placeholderSearch %}
+Search Genome
+{% endblock %}
 
 <!-------------- Filter -------------->
+
 {% block  filter %}
-    filter of explore
+
+{% with role="reader" %}
+<!-------------- Genome -------------->
+
+{% with type="genome" %}
+
+    <div id="filter_expl_genome" class="filter" >
+
+        <div class="container pt-3 pb-3">
+            <div class="row align-items-center mb-3">
+                <!-------- Species --------->
+                <div class="col">
+                    <div class="d-flex align-items-center">
+                        <label for="species" class="form-label">Species</label>
+                        <input type="text" class="form-control ms-2" id="species" name="species">
+                    </div>
+                </div>
+                <!-------- Strain --------->
+                <div class="col">
+                    <div class="d-flex align-items-center">
+                        <label for="strain" class="form-label">Strain</label>
+                        <input type="text" class="form-control ms-2" id="strain" name="strain">
+                    </div>
+                </div>
+                <!-------- Status --------->
+                <div class="col">
+                    <span  class="form-label">Status</span>
+
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id ="status0_genome" name="0" checked>
+                        <label class="form-check-label" for="status0_genome">
+                        {% with status="0"  %}
+                            {% include 'main/status.html' %}
+                        {% endwith %}
+                        </label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id ="status1_genome" name="1" checked>
+                        <label class="form-check-label" for="status1_genome">
+                        {% with status="1"  %}
+                            {% include 'main/status.html' %}
+                        {% endwith %}
+                        </label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="status2_genome" name="2" checked>
+                        <label class="form-check-label" for="status2_genome">
+                        {% with status="2"  %}
+                            {% include 'main/status.html' %}
+                        {% endwith %}
+                        </label>
+                    </div>
+                
+                </div>
+            </div>
+            
+              
+        </div>
+        
+    </div>
+
+{% endwith %}
+
+<!-------------- Gene or Protein-------------->
+{% with type="sequence" %}
+
+    <div id="filter_expl_seq" style="display: none;" class="filter">
+        <div class="container pt-3 pb-3">
+            <div class="row align-items-center mb-3">
+                <!-------- Genome --------->
+                <div class="col">
+                    <div class="d-flex align-items-center">
+                        <label for="genome" class="form-label">Genome</label>
+                        <input type="text" class="form-control ms-2" id="genome" name="genome">
+                    </div>
+                </div>
+                <!-------- Chromosome --------->
+                <div class="col">
+                    <div class="d-flex align-items-center">
+                        <label for="chrom" class="form-label">Chromosome</label>
+                        <input type="text" class="form-control ms-2" id="chrom" name="chrom">
+                    </div>
+                </div>
+                <!-------- Motif --------->
+                <div class="col">
+                    <div class="d-flex align-items-center">
+                        <label for="motif" class="form-label">Motif</label>
+                        <input type="text" class="form-control ms-2" id="motif" name="motif">
+                    </div>
+                </div>
+                
+            </div>
+
+            <div class="row align-items-center mb-3">
+                <!-------- Sequence --------->
+                <div class="col">
+                    <div class="d-flex align-items-center">
+                        <label for="seq" class="form-label">Sequence</label>
+                        <textarea class="form-control ms-2" id="seq" name="seq" rows="4"></textarea>                    
+                    </div>
+                </div>
+
+                <!-------- Status --------->
+                <div class="col">
+                    <span class="form-label">Status</span>
+
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="status0" name="0" checked>
+                        <label class="form-check-label" for="status0">
+                        {% with status="0"  %}
+                            {% include 'main/status.html' %}
+                        {% endwith %}
+                        </label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch"  id="status1" name="1" checked>
+                        <label class="form-check-label" for="status1">
+                        {% with status="1"  %}
+                            {% include 'main/status.html' %}
+                        {% endwith %}
+                        </label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch"  id="status4" name="4" checked>
+                        <label class="form-check-label" for="status4">
+                        {% with status="4"  %}
+                            {% include 'main/status.html' %}
+                        {% endwith %}
+                        </label>
+                    </div>
+                
+                </div>
+
+            </div>
+              
+        </div>
+    </div>
+
+    
+{% endwith %}
+{% endwith %}
 {% endblock %}
 
 

@@ -14,6 +14,8 @@
 
    <!-- our files (need to be added after bootstrap to override css) -->
    <link rel="stylesheet" type = "text/css" href="{% static 'main/main_style.css' %}">
+   <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+   <script src="{% static 'js_script.js' %}"></script>
 
 </head>
 
@@ -136,7 +138,6 @@
             <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4">
 
             <!-- ------------- TABS ------------- -->
-            
             {% block  tabs %}
             {% endblock %}
 
@@ -145,6 +146,7 @@
             {% block  search %}
             {% endblock %}
 
+            
 
             <!-- ------------- CONTENT --------------->
             <div class="bodycontent">
@@ -152,6 +154,7 @@
             {% endblock %} 
             </div>
 
+        
             </main>
     </div>
   </div>
