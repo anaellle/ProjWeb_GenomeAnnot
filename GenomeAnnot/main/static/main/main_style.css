@@ -45,6 +45,10 @@ header:hover {
   padding-right: 30px;
   font-size: 20px;
 }
+
+.forCreateUser {
+  display: none;
+}
 /*****************************************************************/
 /*--------------------------- Navigation --------------------------- */
 /*****************************************************************/
@@ -80,22 +84,6 @@ header:hover {
   position: absolute;
   top: calc(100% - var(--height_header) - var(--bottomNav));
   width: 85%;
-}
-
-/*---------navigation admin ----------*/
-.nav-link.nav-link-admin {
-  border-bottom: solid;
-  --bs-nav-pills-border-radius: 30% 30% 0% 0%;
-  border-bottom-color: var(--roseebony);
-}
-.nav-link.nav-link-admin:hover {
-  border: solid;
-  border-color: var(--roseebony);
-  color: var(--roseebony);
-}
-.nav-link.nav-link-admin.active {
-  background-color: var(--roseebony);
-  color: white;
 }
 
 /*--------- button to go up----------*/
@@ -234,6 +222,7 @@ h6 {
 
 /*--------------- sequence/genome card ---------------- */
 
+#login_footer,
 .card-body.cardList {
   display: flex;
   justify-content: space-between;

@@ -23,6 +23,28 @@ function scrollFunction() {
     $("#scrollTop").hide();
   }
 }
+
+//----------------- Create User / Login
+
+
+function changeToLogin(){
+    $('#formCreateUser').css("display","none");
+    $('#user_left').removeClass('d-none');
+    $('#user_right').addClass('d-none');
+    $('#login_left').addClass('d-none');
+    $('#login_right').removeClass('d-none');
+    $('#titleLogin').html("Login");
+}
+
+function changeToCreateUser(){
+    $('#formCreateUser').css("display","block");
+    $('#user_left').addClass('d-none');
+    $('#user_right').removeClass('d-none');
+    $('#login_left').removeClass('d-none');
+    $('#login_right').addClass('d-none');
+    $('#titleLogin').html("Create User");
+}
+
 // ---------------- Change filter of explore depending on the selection before search bar
 
 function changeTypeResExplore(){
