@@ -1,7 +1,116 @@
 {% extends 'main/searchbar_base.html' %}
 
+{% block placeholderSearch %}
+Search gene or protein
+{% endblock %}
 
 {% block  filter %}
-    filter of annotate
+
+{% with role="annotator" %}
+
+<!-------------- Gene or Protein-------------->
+{% with type="sequence" %}
+
+    <div class="filter">
+        <div class="container pt-3 pb-3">
+
+            <div class="row align-items-center mb-3">
+                <!-------- Genome --------->
+                <div class="col">
+                    <div class="d-flex align-items-center">
+                        <label for="genome" class="form-label">Genome</label>
+                        <input type="text" class="form-control ms-2" id="genome" name="genome">
+                    </div>
+                </div>
+                <!-------- Chromosome --------->
+                <div class="col">
+                    <div class="d-flex align-items-center">
+                        <label for="chrom" class="form-label">Chromosome</label>
+                        <input type="text" class="form-control ms-2" id="chrom" name="chrom">
+                    </div>
+                </div>
+            
+                
+                
+            </div>
+
+            <div class="row align-items-center mb-3">
+
+                <!-------- Motif gene--------->
+                <div class="col">
+                    <div class="d-flex align-items-center">
+                        <label for="motif_gene" class="form-label">DNA Motif</label>
+                        <input type="text" class="form-control ms-2" id="motif_gene" name="motif_gene">
+                    </div>
+                </div>
+
+                <!-------- Motif prot--------->
+                <div class="col">
+                    <div class="d-flex align-items-center">
+                        <label for="motif_prot" class="form-label">Peptide Motif</label>
+                        <input type="text" class="form-control ms-2" id="motif_prot" name="motif_prot">
+                    </div>
+                </div>
+                
+
+            </div>
+              
+            <!-------- Status --------->
+            <div class="row align-items-center mb-3">
+
+
+                <div class="col form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="status0" name="0" checked>
+                    <label class="form-check-label" for="status0">
+                    {% with status="0"  %}
+                        {% include 'main/status.html' %}
+                    {% endwith %}
+                    </label>
+                </div>
+
+                <div class=" col form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch"  id="status1" name="1" checked>
+                    <label class="form-check-label" for="status1">
+                    {% with status="1"  %}
+                        {% include 'main/status.html' %}
+                    {% endwith %}
+                    </label>
+                </div>
+
+
+                <div class="col form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch"  id="status2" name="2" checked>
+                    <label class="form-check-label" for="status2">
+                    {% with status="2"  %}
+                        {% include 'main/status.html' %}
+                    {% endwith %}
+                    </label>
+                </div>
+
+                <div class="col form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch"  id="status3" name="3" >
+                    <label class="form-check-label" for="status3">
+                    {% with status="3"  %}
+                        {% include 'main/status.html' %}
+                    {% endwith %}
+                    </label>
+                </div>
+
+                <div class="col form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch"  id="status3" name="4" >
+                    <label class="form-check-label" for="status4">
+                    {% with status="4"  %}
+                        {% include 'main/status.html' %}
+                    {% endwith %}
+                    </label>
+                </div>
+               
+            </div>
+        </div>
+    </div>
+
+    
+{% endwith %}
+{% endwith %}
 {% endblock %}
 
