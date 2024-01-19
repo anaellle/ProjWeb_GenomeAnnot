@@ -129,6 +129,10 @@ main {
   color: var(--roseebony);
 }
 
+.bold {
+  font-weight: bold;
+}
+
 /*-----------------Search and filter----------------*/
 
 .search {
@@ -201,6 +205,7 @@ main {
 .btn.btn-secondary:hover {
   color: white !important;
 }
+
 /*----------------Title---------------*/
 h1,
 h2,
