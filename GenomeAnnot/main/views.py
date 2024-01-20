@@ -46,7 +46,10 @@ def addGenome(request):
 
 
 def genome(request, genome_id):  # change to details view later
-    context = {"genome_id": genome_id}  # ex of context (no db for now)
+    context = {
+        "genome_id": genome_id,
+        "active_tab": "explore",
+    }  # ex of context (no db for now)
     return render(request, "main/explore/genome.html", context)
 
 
@@ -54,19 +57,27 @@ def gene(request, gene_id):  # change to details view later
     context = {
         "gene_id": gene_id,
         "genome_id": "56426",
+        "active_tab": "explore",
+        "role": "reader",
     }  # ex of context (no db for now)
-    return render(request, "main/explore/gene.html", context)
+    return render(request, "main/gene.html", context)
 
 
 def geneAnnot(request, gene_id):  # change to update view later
     context = {
         "gene_id": gene_id,
+        "genome_id": "56426",
+        "active_tab": "annotate",
+        "role": "annotator",
     }  # ex of context (no db for now)
-    return render(request, "main/annotate/geneAnnot.html", context)
+    return render(request, "main/gene.html", context)
 
 
 def geneValid(request, gene_id):
     context = {
         "gene_id": gene_id,
+        "genome_id": "56426",
+        "active_tab": "validate",
+        "role": "validator",
     }  # ex of context (no db for now)
-    return render(request, "main/validate/geneValid.html", context)
+    return render(request, "main/gene.html", context)

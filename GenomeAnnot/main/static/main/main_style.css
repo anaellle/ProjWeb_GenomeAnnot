@@ -7,6 +7,8 @@
   --roseebony_clair: rgba(210, 200, 200);
   --feldgrau: rgb(60, 73, 63);
   --shadow: rgba(51, 0, 255, 0.2);
+  --light_green: rgb(99, 211, 99);
+  --light_red: rgb(225, 99, 99);
   --height_header: 100px;
   --bottomNav: 8px;
   --stripe: 7px;
@@ -115,6 +117,7 @@ main {
 .pad_txt {
   padding: 0px 10% 2%;
 }
+
 .mediumTxt {
   font-size: 1.15rem;
   text-align: justify;
@@ -127,6 +130,23 @@ main {
 
 .ebony {
   color: var(--roseebony);
+}
+
+.radius {
+  border-radius: 10px;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.notvalid {
+  font-style: italic;
+}
+
+.borderLeft {
+  border-left: solid;
+  border-color: var(--roseebony);
 }
 
 /*-----------------Search and filter----------------*/
@@ -201,6 +221,16 @@ main {
 .btn.btn-secondary:hover {
   color: white !important;
 }
+
+.btn.validate {
+  background-color: var(--light_green);
+  border-color: var(--light_green);
+}
+.btn.reject {
+  background-color: var(--light_red);
+  border-color: var(--light_red);
+}
+
 /*----------------Title---------------*/
 h1,
 h2,
