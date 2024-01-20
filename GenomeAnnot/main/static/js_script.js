@@ -69,3 +69,20 @@ function changeTypeResExplore(){
 
 }
 
+//-------------------------- Copy Paste Sequence
+/* 
+function copyPaste(textElement) {
+    alert("test")
+    textElement.select();
+    textElement.setSelectionRange(0, 99999); 
+    navigator.clipboard.writeText(textElement.value);
+    alert("Sequence copied !");
+  } 
+
+$('#copygene').on("click", function() {
+    alert('ok');
+    var seqgene=$('#seqgene');
+    copyPaste(seqgene);
+});
+ */
+
