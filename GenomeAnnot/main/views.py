@@ -43,10 +43,9 @@ def blast(request):
             #return render(request, 'error.html', {'error_message': str(e)})
 
         # Traiter les résultats et afficher dans le template
-        return render(request, 'main/blast/blast_results.html', {'results': blast_results},context)
+        return render(request, 'main/blast/blast_results.html', {"active_tab": "blast",'results': blast_results})
 
     return render(request, "main/blast/main_blast.html",context)
-
 
 
 def genomeAdmin(request):
