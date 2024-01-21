@@ -50,6 +50,7 @@ class User (models.Model):
         READER = 0, _('Reader')
         ANNOTATOR = 1, _('Annotator')
         VALIDATOR = 2, _('Validator')
+        ADMINISTRATOR = 3, _('Administrator')
         
     email = models.CharField(max_length=200, primary_key=True)
     firstName = models.CharField(max_length=50)
