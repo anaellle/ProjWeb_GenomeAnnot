@@ -11,10 +11,17 @@
 <!-- --------------- CONTENT --------------- -->
 
 {% block body %}  
-<div class="card">
-    <a class="btn card-body" href="{% url 'main:geneValid' gene_id=536 %}">
-        <span>IdGenome | IdSequence <span class="statut">validation en cours</span> </span>
-    </div>
+{% with role="validator" type="sequence" %}
+<div class="card mb-3 ">
+    <a class="btn card-body cardList" href="{% url 'main:geneValid' gene_id=536 %}">
+        <span class="left-card">IdGenome | IdSequence </span> 
+        <span class="status right-card">
+          {% with status="3" %}
+              {% include 'main/status.html' %}
+        {% endwith %}
+        </span>
+    </a>
   </div>
+{% endwith %}
 {% endblock %}
 

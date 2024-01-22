@@ -12,21 +12,38 @@
 
 {% block body %}  
 
+{% with role="reader" %}
 
-<div class="card">
-    <a class="btn card-body" href="{% url 'main:gene' gene_id=536 %}">
-        <span>IdGenome | IdSequence <span class="statut">validation en cours</span> </span>
-    </div>
+<!--exemple card sequence-->
+
+{% with type="sequence" %}
+<div class="card mb-3 ">
+    <a class="btn card-body cardList" href="{% url 'main:gene' gene_id=536 %}">
+        <span class="left-card">IdGenome | IdSequence </span> <span class="status right-card">
+          {% with status="3" %}
+              {% include 'main/status.html' %}
+        {% endwith %}
+        </span> 
+    </a>
   </div>
+  {% endwith %}
 
-  <div class="card">
-    <a class="btn card-body" href="{% url 'main:genome' genome_id=56426 %}">
-        <span>IdGenome <span class="statut">validation en cours</span> </span>
-    </div>
+<!--exemple card genome-->
+
+{% with type="genome" %}
+  <div class="card mb-3 ">
+    <a class="btn card-body cardList" href="{% url 'main:genome' genome_id=56426 %}">
+        <span class="left-card">IdGenome</span> <span class="status right-card">
+          {% with status="1" %}
+              {% include 'main/status.html' %}
+        {% endwith %}
+        </span> 
+    </a>
   </div>
+{% endwith %}
 
 
-
+{% endwith %}
 
 {% endblock %}
 

@@ -3,7 +3,30 @@
 <!-- --------------- CONTENT --------------- -->
 
 {% block body %}  
-    <br><br><br><br>
-    This is the body of add genome.
-    <br><br><br><br>
+<div class="filter p-4">
+   
+    <div class="container pt-3 pb-3">
+        <h4 class="mb-4">Add a genome to the database</h4>
+    <form >
+        <div class="row align-items-center mb-3">
+            <label for="genomefile" class="mb-2 bold"> Choose a genome file : </label>
+            <input type="file" id="genomefile" name="genomefile" accept=".fa" />
+        </div>
+
+        <div class="row align-items-center mb-3">
+            <label for="cdsfile" class="mb-2 bold">Choose a CDS file :</label>
+            <input type="file" id="cdsfile" name="cdsfile" accept=".fa" />
+        </div>
+
+        <div class="row align-items-center mb-3">
+            <label for="peptidefile" class="mb-2 bold">Choose a peptide file :</label>
+            <input type="file" id="peptidefile" name="peptidefile" accept=".fa" />
+        </div>
+          
+    
+    <input type="submit" class="btn btn-primary mt-3 " value="Import Genome">
+
+    </form>
+    </div>
+</div>
 {% endblock %}

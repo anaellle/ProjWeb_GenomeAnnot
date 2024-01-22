@@ -4,7 +4,7 @@
 
 <form>
 
-<div class="d-flex" role="search">
+<div class="d-flex search" role="search">
 
     <!-------------- Result type -------------->
     {% block  dropdown %}
@@ -18,7 +18,7 @@
     
     <!-------------- Search bar -------------->
 
-    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+    <input class="form-control me-2" type="search" id="searchbar" placeholder="{% block placeholderSearch %}Search{% endblock %}" aria-label="Search">
     <button class="btn btn-outline-success" type="submit">Search</button>
 
 
@@ -41,7 +41,7 @@
 
     <!-- filter opened -->
     <div class="collapse" id="filter">
-        <div class="card card-body">
+        <div class=" card-body">
             {% block  filter %}
             {% endblock %}        
         </div>
