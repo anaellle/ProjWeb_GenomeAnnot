@@ -14,6 +14,8 @@
 
    <!-- our files (need to be added after bootstrap to override css) -->
    <link rel="stylesheet" type = "text/css" href="{% static 'main/main_style.css' %}">
+   <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+   <script src="{% static 'js_script.js' %}"></script>
 
 </head>
 
@@ -42,16 +44,98 @@
                 <div class="modal-dialog modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Login</h1>
+                    <h1 class="modal-title fs-5" id="titleLogin">Login</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
-                        login windows
-                    </div>
-                    <div class="modal-footer">
+
+                    <form > <!--method="post" role="form" action="/" -->
+                        {% csrf_token %}
+                          <div class="modal-body container" >
+                            <div class="row g-0">
+                              <div class="col-md-4">
+                                <img src="{% static 'main/images/password.png' %}" class="img-fluid rounded-start" alt="...">
+                              </div>
+                              <div class="col-md-8 card-body align-items-center d-flex flex-column justify-content-center">
+
+                                <!-------- First name --------->
+
+                                <div class="d-flex align-items-center ">
+                                    <label for="firstname" class="form-label">First Name</label>
+                                </div>
+                                <div class="d-flex align-items-center ">
+                                    <input type="text" class="form-control " id="firstname" name="firstname">
+                                </div>
+
+                                 <!-------- Last name --------->
+
+                                <div class="d-flex align-items-center ">
+                                    <label for="lastname" class="form-label">Last Name</label>
+                                </div>
+                                <div class="d-flex align-items-center ">
+                                    <input type="text" class="form-control " id="lastname" name="lastname">
+                                </div>
+
+                                 <!-------- Password --------->
+
+                                <div class="d-flex align-items-center ">
+                                    <label for="password" class="form-label">Password</label>
+                                </div>
+                                <div class="d-flex align-items-center ">
+                                    <input type="password" class="form-control " id="password" name="password">
+                                </div>   
+
+                                 <!--------------- Create user ------------------>
+                                
+                                <div id="formCreateUser" style="display: none;">
+                                     <!-------- Email --------->
+
+                                    <div class="d-flex align-items-center " style="text-align: center;">
+                                        <label for="email" class="form-label ">Email</label>
+                                    </div>
+                                    <div class="d-flex align-items-center ">
+                                        <input type="email" class="form-control " id="email" name="email">
+                                    </div>
+
+                                     <!-------- Phone Number --------->
+
+                                    <div class="d-flex align-items-center ">
+                                        <label for="phone" class="form-label">Phone Number</label>
+                                    </div>
+                                    <div class="d-flex align-items-center ">
+                                        <input type="tel" class="form-control " id="phone" name="phone">
+                                    </div>
+
+                                     <!-------- Role --------->
+                                     
+                                     <div class="d-flex align-items-center ">
+                                        <span class="form-label">Role</span>
+                                    
+                                    <select name="role" id="role-select" class="btn">
+                                        <option value="reader" class="ebony"> Reader </option>
+                                        <option value="annotator" class="ebony" > Annotator </option>
+                                        <option value="validator" class="ebony" > Validator </option>
+                                      </select>
+                                    </div>
+                                      
+                                </div>
+
+                              </div>
+                            </div>
+                          </div>
+
+                    <div class="modal-footer" id="login_footer">
+                    <span class="left-card">
+                    <button type="button" id="user_left" class="btn btn-primary" onclick="changeToCreateUser()">Create User</button>
+                    <button type="button" id="login_left" class="btn btn-primary d-none" onclick="changeToLogin()">Log in</button>
+                    </span>
+                    <span class="right-card">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Connection</button>
+                    <button type="submit" class="btn btn-primary" id="login_right" value="connection_submit">Connection</button>
+                    <button type="submit" class="btn btn-primary d-none" id="user_right" value="createuser_submit" >Create User</button>
+                    </span>
                     </div>
+                </form>
+
                 </div>
                 </div>
             </div>
@@ -134,9 +218,9 @@
             <!----------------------- MAIN ------------------------------>
 
             <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4">
+            
 
             <!-- ------------- TABS ------------- -->
-            
             {% block  tabs %}
             {% endblock %}
 
@@ -145,6 +229,7 @@
             {% block  search %}
             {% endblock %}
 
+            
 
             <!-- ------------- CONTENT --------------->
             <div class="bodycontent">
@@ -152,6 +237,17 @@
             {% endblock %} 
             </div>
 
+             <!-- ------------- SCROLL UP BUTTON --------------->
+
+
+            <a class="btn btn-secondary" id="scrollTop" style="display: none;" onclick="topFunction()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-arrow-up-short" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 12a.5.5 0 0 0 .5-.5V5.707l2.146 2.147a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L7.5 5.707V11.5a.5.5 0 0 0 .5.5"/>
+                </svg>
+            </a>
+
+            
+        
             </main>
     </div>
   </div>

@@ -4,9 +4,11 @@
   --celadon_clair: rgb(183, 228, 196);
   --nyanza: rgb(205, 239, 215);
   --roseebony: rgb(105, 72, 72);
-  --roseebony_transp: rgb(105, 72, 72, 0.3);
+  --roseebony_clair: rgba(210, 200, 200);
   --feldgrau: rgb(60, 73, 63);
   --shadow: rgba(51, 0, 255, 0.2);
+  --light_green: rgb(99, 211, 99);
+  --light_red: rgb(225, 99, 99);
   --height_header: 100px;
   --bottomNav: 8px;
   --stripe: 7px;
@@ -45,6 +47,10 @@ header:hover {
   padding-right: 30px;
   font-size: 20px;
 }
+
+.forCreateUser {
+  display: none;
+}
 /*****************************************************************/
 /*--------------------------- Navigation --------------------------- */
 /*****************************************************************/
@@ -69,8 +75,8 @@ header:hover {
   height: calc(100% - var(--height_header) - var(--bottomNav));
   bottom: var(--bottomNav);
   margin-left: 0.5%;
-  border-left: 0.4px var(--roseebony_transp) solid;
-  border-right: 0.4px var(--roseebony_transp) solid;
+  border-left: 0.4px var(--roseebony_clair) solid;
+  border-right: 0.4px var(--roseebony_clair) solid;
 }
 #navigLeft:hover {
   box-shadow: 0 0 20px var(--shadow);
@@ -82,20 +88,12 @@ header:hover {
   width: 85%;
 }
 
-/*---------navigation admin ----------*/
-.nav-link.nav-link-admin {
-  border-bottom: solid;
-  --bs-nav-pills-border-radius: 30% 30% 0% 0%;
-  border-bottom-color: var(--roseebony);
-}
-.nav-link.nav-link-admin:hover {
-  border: solid;
-  border-color: var(--roseebony);
-  color: var(--roseebony);
-}
-.nav-link.nav-link-admin.active {
-  background-color: var(--roseebony);
-  color: white;
+/*--------- button to go up----------*/
+
+#scrollTop {
+  position: fixed;
+  right: 1%;
+  border-radius: 40%;
 }
 /*****************************************************************/
 /*--------------------------- Body --------------------------- */
@@ -119,6 +117,7 @@ main {
 .pad_txt {
   padding: 0px 10% 2%;
 }
+
 .mediumTxt {
   font-size: 1.15rem;
   text-align: justify;
@@ -133,11 +132,48 @@ main {
   color: var(--roseebony);
 }
 
+.radius {
+  border-radius: 10px;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.notvalid {
+  font-style: italic;
+}
+
+.borderLeft {
+  border-left: solid;
+  border-color: var(--roseebony);
+}
+
+/*-----------------Search and filter----------------*/
+
 .search {
   padding: 1% 0.6%;
   border: 0.8px solid;
   border-color: var(--roseebony);
   border-radius: 10px;
+}
+
+.form-check-input:checked {
+  background-color: var(--roseebony);
+  border-color: var(--roseebony);
+}
+
+.filter {
+  background-color: var(--roseebony_clair);
+  border-radius: 10px;
+}
+.form-check-input:focus {
+  border-color: var(--roseebony);
+  box-shadow: 0 0 0 0.25rem var(--shadow);
+}
+.form-control:focus {
+  border-color: var(--roseebony);
+  box-shadow: 0 0 0 0.25rem var(--shadow);
 }
 /*-----------------Button----------------*/
 
@@ -154,8 +190,8 @@ main {
   --bs-btn-hover-border-color: var(--roseebony);
   --bs-btn-active-bg: var(--roseebony);
   --bs-btn-active-border-color: var(--roseebony);
-  --bs-btn-disabled-color: var(--roseebony_transp);
-  --bs-btn-disabled-border-color: var(--roseebony_transp);
+  --bs-btn-disabled-color: var(--roseebony_clair);
+  --bs-btn-disabled-border-color: var(--roseebony_clair);
 }
 .btn.btn-primary {
   --bs-btn-bg: var(--roseebony);
@@ -180,7 +216,19 @@ main {
   --bs-btn-disabled-border-color: var(--nyanza);
   --bs-btn-disabled-color: var(--bs-nav-link-disabled-color);
   color: var(--feldgrau) !important;
-  --bs-btn-hover-color: white;
+  /*--bs-btn-hover-color: white !important*/
+}
+.btn.btn-secondary:hover {
+  color: white !important;
+}
+
+.btn.validate {
+  background-color: var(--light_green);
+  border-color: var(--light_green);
+}
+.btn.reject {
+  background-color: var(--light_red);
+  border-color: var(--light_red);
 }
 
 /*----------------Title---------------*/
@@ -204,6 +252,7 @@ h6 {
 
 /*--------------- sequence/genome card ---------------- */
 
+#login_footer,
 .card-body.cardList {
   display: flex;
   justify-content: space-between;
