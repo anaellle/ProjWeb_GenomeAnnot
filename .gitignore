@@ -6,3 +6,4 @@ main/__pycache__/tests.cpython-39.pyc
 main/__pycache__/urls.cpython-39.pyc
 main/__pycache__/views.cpython-39.pyc
 main/migrations/__pycache__/__init__.cpython-39.pyc
+db.sqlite3
