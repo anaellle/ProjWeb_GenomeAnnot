@@ -2,7 +2,7 @@
 
 <!-------------- Research -------------->  
 
-<form>
+<form method="get" action="{% block action %}/{%endblock%}">
 
 <div class="d-flex search" role="search">
 
@@ -18,8 +18,8 @@
     
     <!-------------- Search bar -------------->
 
-    <input class="form-control me-2" type="search" id="searchbar" placeholder="{% block placeholderSearch %}Search{% endblock %}" aria-label="Search">
-    <button class="btn btn-outline-success" type="submit">Search</button>
+    <input class="form-control me-2" name="searchbar" type="search" id="searchbar"  placeholder="{% block placeholderSearch %}Search{% endblock %}" aria-label="Search">
+    <button class="btn btn-outline-success" type="submit" id="submit_search" name="submitsearch" >Search</button>
 
 
     <!-------------- Filter -------------->
@@ -40,7 +40,7 @@
 </div>
 
     <!-- filter opened -->
-    <div class="collapse" id="filter">
+    <div class="collapse {% block show %}{%endblock%}" id="filter">
         <div class=" card-body">
             {% block  filter %}
             {% endblock %}        
