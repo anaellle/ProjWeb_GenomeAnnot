@@ -60,11 +60,38 @@ def explore(request):
 
 def annotate(request):
     context = {"active_tab": "annotate"}
+    if request.method == "GET":
+        if "submitsearch" in request.GET:
+            # get parameters of search
+            searchbar = request.GET.get("searchbar")
+            genome = request.GET.get("genome")
+            chrom = request.GET.get("chrom")
+            motif_gene = request.GET.get("motif_gene")
+            motif_prot = request.GET.get("motif_prot")
+            context["searchbar"] = searchbar
+            context["genome"] = genome
+            context["chrom"] = chrom
+            context["motif_gene"] = motif_gene
+            context["motif_prot"] = motif_prot
+
     return render(request, "main/annotate/main_annotate.html", context)
 
 
 def validate(request):
     context = {"active_tab": "validate"}
+    if request.method == "GET":
+        if "submitsearch" in request.GET:
+            # get parameters of search
+            searchbar = request.GET.get("searchbar")
+            genome = request.GET.get("genome")
+            chrom = request.GET.get("chrom")
+            motif_gene = request.GET.get("motif_gene")
+            motif_prot = request.GET.get("motif_prot")
+            context["searchbar"] = searchbar
+            context["genome"] = genome
+            context["chrom"] = chrom
+            context["motif_gene"] = motif_gene
+            context["motif_prot"] = motif_prot
     return render(request, "main/validate/main_validate.html", context)
 
 
@@ -147,6 +174,22 @@ def geneAnnot(request, gene_id):  # change to update view later
         "active_tab": "annotate",
         "role": "annotator",
     }  # ex of context (no db for now)
+    if request.method == "POST":
+        if "submit_save" in request.POST or "submit_submit" in request.POST:
+            # get annotations
+            geneName = request.POST.get("geneName")
+            geneSymbol = request.POST.get("geneSymbol")
+            geneBiotype = request.POST.get("geneBiotype")
+            descriGene = request.POST.get("descriGene")
+            transcriptName = request.POST.get("transcriptName")
+            transcriptBiotype = request.POST.get("transcriptBiotype")
+            descriProt = request.POST.get("descriProt")
+            if "submit_submit" in request.POST:
+                statut = 3  # if submit : status of gene change to "submit" (3)
+            # A FAIRE : sinon pas de changement sauf si premiere soumission 0-> 1 (en fonction valeur du statut)
+
+        # A FAIRE : retour sur page de recherche avec filtre conservé
+
     return render(request, "main/gene.html", context)
 
 
@@ -157,4 +200,14 @@ def geneValid(request, gene_id):
         "active_tab": "validate",
         "role": "validator",
     }  # ex of context (no db for now)
+
+    if request.method == "POST":
+        # if comment
+        if "submit_comment" in request.POST:
+            comment = request.POST.get("comment")
+        elif "submit_reject" in request.POST:
+            ...  # change statut of gene/prot to 2
+        elif "submit_validate" in request.POST:
+            ...  # change statut to 4
+
     return render(request, "main/gene.html", context)
