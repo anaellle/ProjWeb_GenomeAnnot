@@ -94,40 +94,31 @@ def validate(request):
             context["motif_prot"] = motif_prot
     return render(request, "main/validate/main_validate.html", context)
 
-
 def blast(request):
     context = {"active_tab": "blast"}
-    # return render(request, "main/blast/main_blast.html", context)
+    #return render(request, "main/blast/main_blast.html", context)
 
-    if request.method == "POST":
-        sequence = request.POST["sequence"]
-        parameters = request.POST["parameters"]
+    if request.method == 'POST':
+        sequence = request.POST['sequence']
+        parameters = request.POST['parameters']
 
-        # Request to ncbi blast api, rajouter gestion des erreurs ensuite
-        # try:
-        result_handle = NCBIWWW.qblast(
-            program="blastn",
-            database="nt",
-            sequence=sequence,
-            alignments=5,
-            descriptions=5,
-        )  # ,format_type="Text") #Parametres de base pour le moment, rajouter un choix apres
-        blast_results = SearchIO.read(
-            result_handle, "blast-xml"
-        )  # permet recuperation dans le template pour l'affichage
-
-        # except Exception as e:
-        # Gérer les erreurs, par exemple, en renvoyant un message d'erreur à l'utilisateur
-        # return render(request, 'error.html', {'error_message': str(e)})
+        #Request to ncbi blast api, rajouter gestion des erreurs ensuite
+        #try:
+        #result_handle = NCBIWWW.qblast(program="blastn", database="nt", sequence=sequence, alignments=5, descriptions=5,format_type="HTML") #Parametres de base pour le moment, rajouter un choix apres
+        #blast_results = SearchIO.read(result_handle, "blast-xml") #permet recuperation dans le template pour l'affichage
+        #blast_result = result_handle.read()
+        #result_handle.close()
+        #except Exception as e:
+            # Gérer les erreurs, par exemple, en renvoyant un message d'erreur à l'utilisateur
+            #return render(request, 'error.html', {'error_message': str(e)})
+        
+        result_handle = NCBIWWW.qblast(program="blastn", database="nt", sequence=sequence, alignments=15, descriptions=50,hitlist_size=5)
+        blast_results = SearchIO.read(result_handle, "blast-xml")
 
         # Traiter les résultats et afficher dans le template
-        return render(
-            request,
-            "main/blast/blast_results.html",
-            {"active_tab": "blast", "results": blast_results},
-        )
+        return render(request, 'main/blast/blast_results.html', {"active_tab": "blast",'results': blast_results})
 
-    return render(request, "main/blast/main_blast.html", context)
+    return render(request, "main/blast/main_blast.html",context)
 
 
 def genomeAdmin(request):
