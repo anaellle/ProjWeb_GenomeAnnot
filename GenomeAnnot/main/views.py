@@ -100,8 +100,10 @@ def blast(request):
 
     if request.method == 'POST':
         sequence = request.POST['sequence']
-        parameters = request.POST['parameters']
+        program = request.POST['program']
 
+        db = request.POST['database']
+        alignments = request.POST['alignments']
         #Request to ncbi blast api, rajouter gestion des erreurs ensuite
         #try:
         #result_handle = NCBIWWW.qblast(program="blastn", database="nt", sequence=sequence, alignments=5, descriptions=5,format_type="HTML") #Parametres de base pour le moment, rajouter un choix apres
@@ -112,7 +114,7 @@ def blast(request):
             # Gérer les erreurs, par exemple, en renvoyant un message d'erreur à l'utilisateur
             #return render(request, 'error.html', {'error_message': str(e)})
         
-        result_handle = NCBIWWW.qblast(program="blastn", database="nt", sequence=sequence, alignments=15, descriptions=50,hitlist_size=5)
+        result_handle = NCBIWWW.qblast(program=program, database=db, sequence=sequence, alignments=alignments, descriptions=50,hitlist_size=5)
         blast_results = SearchIO.read(result_handle, "blast-xml")
 
         # Traiter les résultats et afficher dans le template
