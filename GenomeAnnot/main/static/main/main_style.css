@@ -128,6 +128,10 @@ main {
   padding-right: 0.5em;
 }
 
+.smallerTxt {
+  font-size: small;
+}
+
 .ebony {
   color: var(--roseebony);
 }
