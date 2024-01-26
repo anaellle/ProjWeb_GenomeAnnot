@@ -10,9 +10,28 @@
         <br>
         <textarea name="sequence" required></textarea>
         <br>
-        <label for="parameters">Parameters:</label> 
+
+        <label for="program">Program:</label> 
+
+        <select name="program" >
+            <option value="blastn">blastn</option>
+            <option value="blastp">blastp</option>
+            <option value="blastx">blastx</option>
+            <option value="tblastn">tblastn</option>
+            <option value="tblastx">tblastx</option>
+        </select>
         <br>
-        <input type="text" name="parameters">
+        
+        <label for="database">Database:</label> 
+        <select name="database" >
+            <option value="nr">nr</option>
+        </select>
+        <br>
+        <label for="alignments"> Max number of alignments to show: </label>
+        <br>
+        <input type="number" name="alignments" default:"10">
+        <br>
+
         <br>
         <button type="submit">Launch Blast</button>
     </form>
