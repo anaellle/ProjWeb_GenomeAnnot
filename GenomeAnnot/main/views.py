@@ -26,34 +26,36 @@ def explore(request):
             if type_res == "genome":
                 strain = request.GET.get("strain")
                 species = request.GET.get("species")
-                """ status_genome_0 = request.GET.get("0")
-                status_genome_1 = request.GET.get("1")
-                status_genome_2 = request.GET.get("2") """
                 context["strain"] = strain
                 context["species"] = species
-                """ if "0" in request.GET:
-                    context["test"] = "check"
-                else:
-                    context["test"] = "uncheck"
-                context["status_genome_0"] = status_genome_0
-                context["status_genome_1"] = status_genome_1
-                context["status_genome_2"] = status_genome_2 """
+                for status in [
+                    "status0_genome",
+                    "status1_genome",
+                    "status2_genome",
+                ]:
+                    if status in request.GET:
+                        context[status] = "checked"
+                    else:
+                        context[status] = "unchecked"
 
             elif type_res == "gene" or type_res == "prot":
                 genome = request.GET.get("genome")
                 chrom = request.GET.get("chrom")
                 motif = request.GET.get("motif")
                 seq = request.GET.get("seq")
-                """status_gene_0 = request.GET.get("status0")
-                status_gene_123 = request.GET.get("status1")
-                status_gene_4 = request.GET.get("status4") """
                 context["genome"] = genome
                 context["chrom"] = chrom
                 context["motif"] = motif
                 context["seq"] = seq
-                """ context["status_gene_0"] = status_gene_0
-                context["status_gene_123"] = status_gene_123
-                context["status_gene_4"] = status_gene_4 """
+                for status in [
+                    "status0",
+                    "status123",
+                    "status4",
+                ]:
+                    if status in request.GET:
+                        context[status] = "checked"
+                    else:
+                        context[status] = "unchecked"
 
     return render(request, "main/explore/main_explore.html", context)
 
@@ -73,6 +75,17 @@ def annotate(request):
             context["chrom"] = chrom
             context["motif_gene"] = motif_gene
             context["motif_prot"] = motif_prot
+            for status in [
+                "status0",
+                "status1",
+                "status2",
+                "status3",
+                "status4",
+            ]:
+                if status in request.GET:
+                    context[status] = "checked"
+                else:
+                    context[status] = "unchecked"
 
     return render(request, "main/annotate/main_annotate.html", context)
 
@@ -92,6 +105,15 @@ def validate(request):
             context["chrom"] = chrom
             context["motif_gene"] = motif_gene
             context["motif_prot"] = motif_prot
+            for status in [
+                "status012",
+                "status3",
+                "status4",
+            ]:
+                if status in request.GET:
+                    context[status] = "checked"
+                else:
+                    context[status] = "unchecked"
     return render(request, "main/validate/main_validate.html", context)
 
 
