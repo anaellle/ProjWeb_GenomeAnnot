@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+
 
 # Library required for lauching the Blast API
 from Bio.Blast import NCBIWWW
@@ -15,7 +16,11 @@ def explore(request):
     context = {
         "active_tab": "explore",
     }
+
     if request.method == "GET":
+        if "submit_download" in request.GET:
+            ...  # download info gene with gene_id
+
         if "submitsearch" in request.GET:
             # get parameters of search
             searchbar = request.GET.get("searchbar")
@@ -117,8 +122,8 @@ def validate(request):
     return render(request, "main/validate/main_validate.html", context)
 
 
-def blast(request):
-    context = {"active_tab": "blast"}
+def blast(request, sequence=None):
+    context = {"active_tab": "blast", "sequence": sequence}
     # return render(request, "main/blast/main_blast.html", context)
 
     if request.method == "POST":
@@ -168,6 +173,13 @@ def accountAdmin(request):
 
 
 def addGenome(request):
+    if request.method == "POST":
+        if "submit_addgenome" in request.POST:
+            # get parameters
+            genomefile = request.POST.get("genomefile")
+            cdsfile = request.POST.get("cdsfile")
+            peptidefile = request.POST.get("peptidefile")
+            # python parser to insert into BD : ...
     return render(request, "main/addGenome/addGenome.html")
 
 

@@ -11,21 +11,16 @@
     <h4 >Gene {{ gene_id }} | Protein ???? </h4> 
       
     
-    <ul class="nav nav-pills">
-      <!-- not necessary for now (maybe later)
-        <li class="nav-item">
-        <a class="nav-link px-3" href="#genepart">See Gene</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link px-3" href="#protpart"> See Protein</a>
-      </li>-->
+    <div class="nav nav-pills">
       {% if active_tab == "explore"%}
-      <li class="nav-item">
+      
         <a class="nav-link px-3" href="{% url 'main:geneAnnot' gene_id=gene_id  %}"> Annotate</a>
-      </li>
-      <li class="nav-item">
+      
         <a class="nav-link px-3" href="{% url 'main:geneValid' gene_id=gene_id  %}"> Validate</a>
-      </li>
+      
+      
+        
+      
       {% elif active_tab == "annotate"%}
       <a class="nav-link px-3" href="#save"> 
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-short" viewBox="0 0 16 16">
@@ -39,12 +34,12 @@
         </svg>
         Go to Reject or Validate </a>  
       {%endif%}
-    </ul>
+      </div>
     
   </nav>
 
 {% if active_tab == "annotate"%}
-<form method="post" action='{% url "main:annotate" %}'>
+<form method="post" >
 {% csrf_token %}
 {%endif%}
   <!--------Gene---------->
@@ -117,9 +112,8 @@
         <div class="row align-items-center mt-4 mx-2 ">
           <div class="col">
             <span class="bold">Sequence :</span> <br>
-            <textarea class="w-100 mt-2 mx-2" rows="5" id="seqgene" readonly> sequence ... </textarea><br>
-            <input class="btn btn-primary mb-3" type="submit" name="submit_button" value="Blast gene"></input > 
-            <!--<button id="copygene">Copy sequence</button>-->
+            <textarea class="w-100 mt-2 mx-2" rows="5" id="seqgene" name="seqgene" readonly> sequence gene... </textarea><br>
+            <a class="btn btn-primary mb-3" target="_blank" href="{% url 'main:blastseq' 'sequence gene' %}">Blast gene</a > 
           </div>
         </div>
       </div>  
@@ -166,8 +160,8 @@
         <div class="row align-items-center mt-4 mx-2 ">
           <div class="col">
             <span class="bold">Sequence :</span> <br>
-            <textarea class="w-100 mt-2 mx-2" rows="5" id="seqprot" readonly> sequence ... </textarea><br>
-            <input class="btn btn-primary mb-3" type="submit" name="submit_button" value="Blast protein"></input > 
+            <textarea class="w-100 mt-2 mx-2" rows="5" id="seqprot" readonly> sequence protein... </textarea><br>
+            <a class="btn btn-primary mb-3" target="_blank" href="{% url 'main:blastseq' 'sequence protein' %}">Blast protein</a > 
           </div>
         </div>
       </div>  
@@ -201,7 +195,7 @@
 
   <!---------------------Add comment--------------------------->
   {% if active_tab == "validate" %}
-  <form method="post" action='{% url "main:geneValid" gene_id %}'>
+  <form method="post" >
   {% csrf_token %}
   <div class="mb-3">
   <span class="bold">Add a comment</span>
@@ -218,7 +212,7 @@
       <input id="submit" class="btn btn-primary" type="submit" name="submit_submit" value="Submit"></input > 
     </div>
   {% elif active_tab == "validate"%}
-  <form method="post" action='{% url "main:validate" %}'>
+  <form method="post" >
     {% csrf_token %}
   <div class=" mb-5">
     <input id="reject" class="btn btn-primary reject" type="submit" name="submit_reject" value="Reject"></input > 
