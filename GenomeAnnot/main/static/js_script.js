@@ -49,7 +49,7 @@ function changeToCreateUser(){
 
 function changeTypeResExplore(){
     const selectedValue = $("#res_type-select")[0].value;
-
+    
     if(selectedValue=="genome"){
         $('#filter_expl_genome').show();
         $('#filter_expl_seq').hide();
@@ -68,6 +68,16 @@ function changeTypeResExplore(){
     }
 
 }
+
+// change filter on new page after submit (when loading)
+if (window.location.pathname.endsWith('/explore/')) {
+    
+    window.addEventListener('load', changeTypeResExplore);
+}
+
+
+
+
 
 //-------------------------- Copy Paste Sequence
 /* 

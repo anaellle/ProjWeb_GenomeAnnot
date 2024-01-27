@@ -94,10 +94,15 @@ class NucleotidicSeq (models.Model):
     idGene = models.ForeignKey(Gene, on_delete=models.CASCADE)
     
 class Message(models.Model):
-    
+
+    class TypeOfMessage(models.IntegerChoices):
+        AUTO = 0, _('Automatic')
+        USER = 1, _('User')
+        
     # id auto-généré par django
     text = models.CharField(max_length=500)
     date = models.DateField(auto_now_add=True) # Automatically set the field to now when the object is first created
+    type = models.IntegerField(choices=TypeOfMessage.choices, default=TypeOfMessage.AUTO)
     
     emailAuthor = models.ForeignKey(User, on_delete=models.CASCADE)
     idGene = models.ForeignKey(Gene, on_delete=models.CASCADE)

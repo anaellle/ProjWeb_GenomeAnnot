@@ -1,11 +1,31 @@
 {% extends 'main/searchbar_base.html' %}
 
+
+<!-------------- Form action -------------->
+
+{%block action%}
+{% url 'main:annotate' %}
+{% endblock %}
+
+<!-------------- Searchbar -------------->
+
 {% block placeholderSearch %}
 Search gene or protein
 {% endblock %}
 
-{% block  filter %}
 
+<!-------------- Show filter -------------->
+
+{% block show %}
+{% if genome or chrom or motif_gene or motif_prot %} 
+show 
+{% endif %}
+{%endblock%}
+
+
+
+<!-------------- Filter -------------->
+{% block  filter %}
 {% with role="annotator" %}
 
 <!-------------- Gene or Protein-------------->
@@ -19,14 +39,14 @@ Search gene or protein
                 <div class="col">
                     <div class="d-flex align-items-center">
                         <label for="genome" class="form-label">Genome</label>
-                        <input type="text" class="form-control ms-2" id="genome" name="genome">
+                        <input type="text" class="form-control ms-2" id="genome" name="genome" value="{% if genome %}{{genome}}{% endif %}">
                     </div>
                 </div>
                 <!-------- Chromosome --------->
                 <div class="col">
                     <div class="d-flex align-items-center">
                         <label for="chrom" class="form-label">Chromosome</label>
-                        <input type="text" class="form-control ms-2" id="chrom" name="chrom">
+                        <input type="text" class="form-control ms-2" id="chrom" name="chrom" value="{% if chrom %}{{chrom}}{% endif %}">
                     </div>
                 </div>
             
@@ -40,7 +60,7 @@ Search gene or protein
                 <div class="col">
                     <div class="d-flex align-items-center">
                         <label for="motif_gene" class="form-label">DNA Motif</label>
-                        <input type="text" class="form-control ms-2" id="motif_gene" name="motif_gene">
+                        <input type="text" class="form-control ms-2" id="motif_gene" name="motif_gene" value="{% if motif_gene %}{{motif_gene}}{% endif %}">
                     </div>
                 </div>
 
@@ -48,7 +68,7 @@ Search gene or protein
                 <div class="col">
                     <div class="d-flex align-items-center">
                         <label for="motif_prot" class="form-label">Peptide Motif</label>
-                        <input type="text" class="form-control ms-2" id="motif_prot" name="motif_prot">
+                        <input type="text" class="form-control ms-2" id="motif_prot" name="motif_prot" value="{% if motif_prot %}{{motif_prot}}{% endif %}">
                     </div>
                 </div>
                 
@@ -60,7 +80,7 @@ Search gene or protein
 
 
                 <div class="col form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch" id="status0" name="0" checked>
+                    <input class="form-check-input" type="checkbox" role="switch" id="status0" name="status0" {% if not status0 or status0 == 'checked' %}checked{% endif %}>
                     <label class="form-check-label" for="status0">
                     {% with status="0"  %}
                         {% include 'main/status.html' %}
@@ -69,7 +89,7 @@ Search gene or protein
                 </div>
 
                 <div class=" col form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch"  id="status1" name="1" checked>
+                    <input class="form-check-input" type="checkbox" role="switch" id="status1" name="status1" {% if not status1 or status1 == 'checked' %}checked{% endif %}>
                     <label class="form-check-label" for="status1">
                     {% with status="1"  %}
                         {% include 'main/status.html' %}
@@ -79,7 +99,7 @@ Search gene or protein
 
 
                 <div class="col form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch"  id="status2" name="2" checked>
+                    <input class="form-check-input" type="checkbox" role="switch" id="status2" name="status2" {% if not status2 or status2 == 'checked' %}checked{% endif %}>
                     <label class="form-check-label" for="status2">
                     {% with status="2"  %}
                         {% include 'main/status.html' %}
@@ -88,7 +108,7 @@ Search gene or protein
                 </div>
 
                 <div class="col form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch"  id="status3" name="3" >
+                    <input class="form-check-input" type="checkbox" role="switch" id="status3"  name="status3" {% if status3 == 'checked' %}checked{% endif %}>
                     <label class="form-check-label" for="status3">
                     {% with status="3"  %}
                         {% include 'main/status.html' %}
@@ -97,7 +117,7 @@ Search gene or protein
                 </div>
 
                 <div class="col form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch"  id="status3" name="4" >
+                    <input class="form-check-input" type="checkbox" role="switch"  id="status4" name="status4" {% if status4 == 'checked' %}checked{% endif %}>
                     <label class="form-check-label" for="status4">
                     {% with status="4"  %}
                         {% include 'main/status.html' %}
