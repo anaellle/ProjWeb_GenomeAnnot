@@ -1,12 +1,28 @@
 {% extends 'main/base.html' %}
 
-
 <!-- --------------- CONTENT --------------- -->
-{% block body %} 
 
+{% block body %}
 
-<h2>Blast Results</h1>
+<h2>Résultats de la recherche BLAST</h2>
+{% for hit in results.hits %}
+<br>
+    <div>
+        <h5>{{ hit.description }}</h5>
+        <br>
+        {{ hit.id }}<br>
+        accession number : <a href="https://www.ncbi.nlm.nih.gov/nuccore/{{ hit.accession }}" target="_blank">{{ hit.accession }}</a><br>
+        hit length : {{ hit.seq_len }}<br>
+        {% for hsp in hit.hsps %}
+            bit score : {{ hsp.bitscore }}<br>
+            evalue : {{ hsp.evalue }}<br>
+            <p align="justify">{{ hsp.query.seq }}<br>
+            {{ hsp.aln_annotation.similarity }}<br>
+            {{ hsp.hit.seq }}</p>
 
-<pre>{{ results }}</pre>
+        {% endfor %}
+        
+    </div>
+{% endfor %}
 
 {% endblock %}

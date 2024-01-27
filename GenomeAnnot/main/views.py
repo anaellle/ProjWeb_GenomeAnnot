@@ -125,27 +125,31 @@ def validate(request):
 def blast(request, sequence=None):
     context = {"active_tab": "blast", "sequence": sequence}
     # return render(request, "main/blast/main_blast.html", context)
-
     if request.method == "POST":
         sequence = request.POST["sequence"]
-        parameters = request.POST["parameters"]
+        program = request.POST["program"]
 
+        db = request.POST["database"]
+        alignments = request.POST["alignments"]
         # Request to ncbi blast api, rajouter gestion des erreurs ensuite
         # try:
-        result_handle = NCBIWWW.qblast(
-            program="blastn",
-            database="nt",
-            sequence=sequence,
-            alignments=5,
-            descriptions=5,
-        )  # ,format_type="Text") #Parametres de base pour le moment, rajouter un choix apres
-        blast_results = SearchIO.read(
-            result_handle, "blast-xml"
-        )  # permet recuperation dans le template pour l'affichage
-
+        # result_handle = NCBIWWW.qblast(program="blastn", database="nt", sequence=sequence, alignments=5, descriptions=5,format_type="HTML") #Parametres de base pour le moment, rajouter un choix apres
+        # blast_results = SearchIO.read(result_handle, "blast-xml") #permet recuperation dans le template pour l'affichage
+        # blast_result = result_handle.read()
+        # result_handle.close()
         # except Exception as e:
         # Gérer les erreurs, par exemple, en renvoyant un message d'erreur à l'utilisateur
         # return render(request, 'error.html', {'error_message': str(e)})
+
+        result_handle = NCBIWWW.qblast(
+            program=program,
+            database=db,
+            sequence=sequence,
+            alignments=alignments,
+            descriptions=50,
+            hitlist_size=5,
+        )
+        blast_results = SearchIO.read(result_handle, "blast-xml")
 
         # Traiter les résultats et afficher dans le template
         return render(
