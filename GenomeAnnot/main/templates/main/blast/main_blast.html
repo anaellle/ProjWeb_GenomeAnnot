@@ -8,7 +8,7 @@
         {% csrf_token %}
         <label for="sequence">Query:</label>
         <br>
-        <textarea name="sequence" required></textarea>
+        <textarea name="sequence" required>{% if sequence %}{{sequence}}{%endif%}</textarea>
         <br>
 
         <label for="program">Program:</label> 
