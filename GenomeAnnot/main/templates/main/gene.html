@@ -13,10 +13,10 @@
     
     <div class="nav nav-pills">
       {% if active_tab == "explore"%}
+        <!--TO DISABLED DEPENDING ON ASSIGNATION !!! (OR DELETE LINKS)-->
+        <a class="nav-link px-3 {% if role_user != 'annotator' and role_user != 'admin' %}disabled{% endif %}" href="{% url 'main:geneAnnot' gene_id=gene_id  %}"> Annotate</a>
       
-        <a class="nav-link px-3" href="{% url 'main:geneAnnot' gene_id=gene_id  %}"> Annotate</a>
-      
-        <a class="nav-link px-3" href="{% url 'main:geneValid' gene_id=gene_id  %}"> Validate</a>
+        <a class="nav-link px-3 {% if role_user != 'validator' and role_user != 'admin' %}disabled{% endif %}" href="{% url 'main:geneValid' gene_id=gene_id  %}"> Validate</a>
       
       
         

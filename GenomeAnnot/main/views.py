@@ -6,16 +6,16 @@ from Bio.Blast import NCBIWWW
 from Bio import SeqIO
 from Bio import SearchIO
 
+role_user = "reader"
+
 
 def home(request):
-    context = {"active_tab": "home"}
+    context = {"active_tab": "home", "role_user": role_user}
     return render(request, "main/home.html", context)
 
 
 def explore(request):
-    context = {
-        "active_tab": "explore",
-    }
+    context = {"active_tab": "explore", "role_user": role_user}
 
     if request.method == "GET":
         if "submit_download" in request.GET:
@@ -66,7 +66,7 @@ def explore(request):
 
 
 def annotate(request):
-    context = {"active_tab": "annotate"}
+    context = {"active_tab": "annotate", "role_user": role_user}
     if request.method == "GET":
         if "submitsearch" in request.GET:
             # get parameters of search
@@ -96,7 +96,7 @@ def annotate(request):
 
 
 def validate(request):
-    context = {"active_tab": "validate"}
+    context = {"active_tab": "validate", "role_user": role_user}
     if request.method == "GET":
         if "submitsearch" in request.GET:
             # get parameters of search
@@ -123,7 +123,11 @@ def validate(request):
 
 
 def blast(request, sequence=None):
-    context = {"active_tab": "blast", "sequence": sequence}
+    context = {
+        "active_tab": "blast",
+        "role_user": role_user,
+        "sequence": sequence,
+    }
     # return render(request, "main/blast/main_blast.html", context)
     if request.method == "POST":
         sequence = request.POST["sequence"]
@@ -162,21 +166,34 @@ def blast(request, sequence=None):
 
 
 def genomeAdmin(request):
-    context = {"active_tab": "admin", "active_tab_admin": "genome"}
+    context = {
+        "active_tab": "admin",
+        "active_tab_admin": "genome",
+        "role_user": role_user,
+    }
     return render(request, "main/admin/admin_genome.html", context)
 
 
 def sequenceAdmin(request):
-    context = {"active_tab": "admin", "active_tab_admin": "sequence"}
+    context = {
+        "active_tab": "admin",
+        "active_tab_admin": "sequence",
+        "role_user": role_user,
+    }
     return render(request, "main/admin/admin_sequence.html", context)
 
 
 def accountAdmin(request):
-    context = {"active_tab": "admin", "active_tab_admin": "account"}
+    context = {
+        "active_tab": "admin",
+        "active_tab_admin": "account",
+        "role_user": role_user,
+    }
     return render(request, "main/admin/admin_account.html", context)
 
 
 def addGenome(request):
+    context = {"role_user": role_user}
     if request.method == "POST":
         if "submit_addgenome" in request.POST:
             # get parameters
@@ -184,13 +201,14 @@ def addGenome(request):
             cdsfile = request.POST.get("cdsfile")
             peptidefile = request.POST.get("peptidefile")
             # python parser to insert into BD : ...
-    return render(request, "main/addGenome/addGenome.html")
+    return render(request, "main/addGenome/addGenome.html", context)
 
 
 def genome(request, genome_id):  # change to details view later
     context = {
         "genome_id": genome_id,
         "active_tab": "explore",
+        "role_user": role_user,
     }  # ex of context (no db for now)
     return render(request, "main/explore/genome.html", context)
 
@@ -201,6 +219,7 @@ def gene(request, gene_id):  # change to details view later
         "genome_id": "56426",
         "active_tab": "explore",
         "role": "reader",
+        "role_user": role_user,
     }  # ex of context (no db for now)
     return render(request, "main/gene.html", context)
 
@@ -211,6 +230,7 @@ def geneAnnot(request, gene_id):  # change to update view later
         "genome_id": "56426",
         "active_tab": "annotate",
         "role": "annotator",
+        "role_user": role_user,
     }  # ex of context (no db for now)
     if request.method == "POST":
         if "submit_save" in request.POST or "submit_submit" in request.POST:
@@ -237,6 +257,7 @@ def geneValid(request, gene_id):
         "genome_id": "56426",
         "active_tab": "validate",
         "role": "validator",
+        "role_user": role_user,
     }  # ex of context (no db for now)
 
     if request.method == "POST":
