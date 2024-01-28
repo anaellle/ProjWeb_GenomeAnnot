@@ -67,7 +67,7 @@ class User (models.Model):
     firstName = models.CharField(max_length=50)
     lastName = models.CharField(max_length=50)
     password = models.CharField(max_length=15)
-    phoneNumber = models.IntegerField()
+    phoneNumber = models.CharField(max_length=12)
     role = models.IntegerField(choices=Role.choices, default=Role.READER)
     lastConnexion = models.DateField()
     
@@ -94,7 +94,7 @@ class Gene (models.Model):
     strand = models.IntegerField(choices=Strand.choices, default=Strand.SENSE)
     startPos = models.IntegerField()
     endPos = models.IntegerField()
-    description = models.CharField(max_length=700, blank=True)
+    description = models.CharField(max_length=1000, blank=True)
     status = models.IntegerField(choices=Status.choices, default=Status.ASSIGNABLE)
     
     idChrom = models.ForeignKey(Chromosome, on_delete=models.CASCADE)
@@ -131,6 +131,7 @@ class Peptide(models.Model):
     id = models.CharField(max_length=200, primary_key=True)
     transcriptName = models.CharField(max_length=200)
     transcriptBiotype = models.CharField(max_length=200, blank=True)
+    description = models.CharField(max_length=1000, blank=True)
     
     idGene = models.ForeignKey(Gene, on_delete=models.CASCADE)
     
