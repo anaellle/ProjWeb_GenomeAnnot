@@ -26,9 +26,9 @@ SECRET_KEY = (
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True  # change ALLOWED_HOSTS too !
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = []  # mettre liste vide si debug true, sinon ["*"]
 
 
 # Application definition
@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "main.apps.MainConfig", # <-- notre app
+    "main.apps.MainConfig",  # <-- notre app
 ]
 
 MIDDLEWARE = [

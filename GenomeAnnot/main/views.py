@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.views.generic import DetailView
+from django.http import HttpResponseRedirect, Http404
+from django.urls import reverse
 
-from .forms import GenePeptideForm
-from .models import Gene, Peptide
+from .models import Gene, Message
 
 
 # Library required for lauching the Blast API
@@ -15,6 +17,15 @@ role_user = "admin"
 def home(request):
     context = {"active_tab": "home", "role_user": role_user}
     return render(request, "main/home.html", context)
+
+
+def custom_404(request, exception):  # only visible if debug set to false
+    return render(
+        request,
+        "main/pageNotFound.html",
+        status=404,
+        context={"role_user": role_user},
+    )
 
 
 def explore(request):
@@ -216,28 +227,31 @@ def genome(request, genome_id):  # change to details view later
     return render(request, "main/explore/genome.html", context)
 
 
-def gene(request, gene_id):  # change to details view later
-    gene = get_object_or_404(Gene, pk=gene_id)
-    chrom = gene.idChrom
-    genome = chrom.idGenome
-    peptide = gene.peptide_set.first()
-    geneseq = gene.nucleotidicseq_set.first()
-    if peptide:
-        peptseq = peptide.peptideseq_set.first()
-    else:
-        peptseq = ""
-    context = {
-        "genome": genome,
-        "chrom": chrom,
-        "gene": gene,
-        "geneseq": geneseq,
-        "peptide": peptide,
-        "peptseq": peptseq,
-        "active_tab": "explore",
-        "role": "reader",
-        "role_user": role_user,
-    }
-    return render(request, "main/gene.html", context)
+class GeneDetailView(DetailView):
+    model = Gene
+    template_name = "main/gene.html"
+    pk_url_kwarg = "gene_id"
+
+    # context to extract from DB
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        gene = self.object
+        chrom = gene.idChrom
+        genome = chrom.idGenome
+        peptide = gene.peptide_set.first()
+        geneseq = gene.nucleotidicseq_set.first()
+        peptseq = peptide.peptideseq_set.first() if peptide else None
+
+        context["genome"] = genome
+        context["chrom"] = chrom
+        context["gene"] = gene
+        context["geneseq"] = geneseq
+        context["peptide"] = peptide
+        context["peptseq"] = peptseq
+        context["active_tab"] = "explore"
+        context["role"] = "reader"
+        context["role_user"] = role_user
+        return context
 
 
 def geneAnnot(request, gene_id):  # change to update view later
@@ -280,34 +294,52 @@ def geneAnnot(request, gene_id):  # change to update view later
     return render(request, "main/gene.html", context)
 
 
-def geneValid(request, gene_id):
-    gene = get_object_or_404(Gene, pk=gene_id)
-    chrom = gene.idChrom
-    genome = chrom.idGenome
-    peptide = gene.peptide_set.first()
-    geneseq = gene.nucleotidicseq_set.first()
-    if peptide:
-        peptseq = peptide.peptideseq_set.first()
-    else:
-        peptseq = ""
-    context = {
-        "genome": genome,
-        "chrom": chrom,
-        "gene": gene,
-        "geneseq": geneseq,
-        "peptide": peptide,
-        "peptseq": peptseq,
-        "active_tab": "validate",
-        "role": "validator",
-        "role_user": role_user,
-    }
-    if request.method == "POST":
-        # if comment
-        if "submit_comment" in request.POST:
-            comment = request.POST.get("comment")
-        elif "submit_reject" in request.POST:
-            ...  # change statut of gene/prot to 2
-        elif "submit_validate" in request.POST:
-            ...  # change statut to 4
+class GeneValidDetailView(DetailView):
+    model = Gene
+    template_name = "main/gene.html"
+    pk_url_kwarg = "gene_id"
 
-    return render(request, "main/gene.html", context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        gene = self.object
+        chrom = gene.idChrom
+        genome = chrom.idGenome
+        peptide = gene.peptide_set.first()
+        geneseq = gene.nucleotidicseq_set.first()
+        peptseq = peptide.peptideseq_set.first() if peptide else None
+        messages = Message.objects.filter(idGene=gene)
+
+        context["genome"] = genome
+        context["chrom"] = chrom
+        context["gene"] = gene
+        context["geneseq"] = geneseq
+        context["peptide"] = peptide
+        context["peptseq"] = peptseq
+        context["messages"] = messages
+        context["active_tab"] = "validate"
+        context["role"] = "validator"
+        context["role_user"] = role_user
+        return context
+
+    def post(self, request, *args, **kwargs):
+        gene = self.get_object()
+
+        if "submit_reject" in request.POST:
+            gene.status = 2
+            gene.save()
+            return HttpResponseRedirect(reverse("validate"))
+
+        elif "submit_validate" in request.POST:
+            gene.status = 4
+            gene.save()
+            return HttpResponseRedirect(reverse("validate"))
+
+        elif "submit_comment" in request.POST:
+            comment = request.POST.get("comment")
+            # Ajoutez le commentaire à l'objet Gene
+            # gene.comment = comment
+            # gene.save()  # Assurez-vous de sauvegarder l'objet après avoir ajouté le commentaire
+            return HttpResponseRedirect(reverse("validate"))
+
+        else:
+            return HttpResponseRedirect(reverse("validate"))
