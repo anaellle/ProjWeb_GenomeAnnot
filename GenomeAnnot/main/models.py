@@ -67,7 +67,7 @@ class User (models.Model):
     firstName = models.CharField(max_length=50)
     lastName = models.CharField(max_length=50)
     password = models.CharField(max_length=15)
-    phoneNumber = models.IntegerField()
+    phoneNumber = models.CharField(max_length=12)
     role = models.IntegerField(choices=Role.choices, default=Role.READER)
     lastConnexion = models.DateField()
     
