@@ -20,7 +20,7 @@
 <div class="card mb-3 ">
     <a class="btn card-body cardList" href="{% url 'main:gene' gene_id=536 %}">
         <span class="left-card">IdGenome | IdSequence </span> <span class="status right-card">
-          {% with status="3" %}
+          {% with status=3 %}
               {% include 'main/status.html' %}
         {% endwith %}
         </span> 
@@ -34,7 +34,7 @@
   <div class="card mb-3 ">
     <a class="btn card-body cardList" href="{% url 'main:genome' genome_id=56426 %}">
         <span class="left-card">IdGenome</span> <span class="status right-card">
-          {% with status="1" %}
+          {% with status=1 %}
               {% include 'main/status.html' %}
         {% endwith %}
         </span> 

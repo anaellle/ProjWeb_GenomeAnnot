@@ -3,20 +3,20 @@
 {% block body %}
 
 
-    
-{% with status="2" type="sequence" role=role %}
+
+{% with status=gene.status type="sequence" role=role %}
 
  <nav id="navbar-gene" class="navbar filter px-3 py-3 mb-5">
     
-    <h4 >Gene {{ gene_id }} | Protein ???? </h4> 
+    <h4 >Gene {{ gene.id}} | Protein {{peptide.id}} </h4> 
       
     
     <div class="nav nav-pills">
       {% if active_tab == "explore"%}
         <!--TO DISABLED DEPENDING ON ASSIGNATION !!! (OR DELETE LINKS)-->
-        <a class="nav-link px-3 {% if role_user != 'annotator' and role_user != 'admin' %}disabled{% endif %}" href="{% url 'main:geneAnnot' gene_id=gene_id  %}"> Annotate</a>
+        <a class="nav-link px-3 {% if role_user != 'annotator' and role_user != 'admin' %}disabled{% endif %}" href="{% url 'main:geneAnnot' gene_id=gene.id  %}"> Annotate</a>
       
-        <a class="nav-link px-3 {% if role_user != 'validator' and role_user != 'admin' %}disabled{% endif %}" href="{% url 'main:geneValid' gene_id=gene_id  %}"> Validate</a>
+        <a class="nav-link px-3 {% if role_user != 'validator' and role_user != 'admin' %}disabled{% endif %}" href="{% url 'main:geneValid' gene_id=gene.id  %}"> Validate</a>
       
       
         
@@ -45,37 +45,37 @@
   <!--------Gene---------->
   <div class="bg-body-secondary radius p-3 px-2 mb-5">
 
-    <span><h4 id="genepart" class="ps-3">Gene {{ gene_id }} {% include 'main/status.html' %} </h4>
+    <span><h4 id="genepart" class="ps-3">Gene {{ gene.id}} {% include 'main/status.html' %} </h4>
     </span>
     
       <div class="container pt-3 pb-3">
         <div class="row align-items-center my-4 mx-2">
           <div class="col">
             <span class="bold">Genome : </span>
-            <a  class="ebony" href="{% url 'main:genome' genome_id=genome_id  %}">{{ genome_id }} </a> 
+            <a  class="ebony" href="{% url 'main:genome' genome_id=genome.id  %}"> {{genome.id}} </a> 
           </div>
         </div>
         <div class="row align-items-center my-4 mx-2">
             <div class="col">
-              <span class="bold">Gene name : </span>
-              {% if active_tab == "explore" or active_tab == "validator" %}
-                <span class="{% if status != '4' %} notvalid {% endif %}">...</span>
+              <span class="bold">Gene name :  </span>
+              {% if active_tab == "explore" or active_tab == "validate" %}
+                <span class="{% if status != 4 %} notvalid {% endif %}">{{gene.geneName}}</span>
               {% elif active_tab == "annotate"%}
                 <textarea name="geneName" rows="1" col="20"></textarea>
               {% endif %}   
             </div>
             <div class="col">
-              <span class="bold">Gene symbol : </span>
-              {% if active_tab == "explore" or active_tab == "validator" %}
-                <span class="{% if status != '4' %} notvalid {% endif %}">...</span>
+              <span class="bold">Gene symbol :  </span>
+              {% if active_tab == "explore" or active_tab == "validate" %}
+                <span class="{% if status != 4 %} notvalid {% endif %}">{{gene.geneSymbol}}</span>
               {% elif active_tab == "annotate"%}
                 <textarea name="geneSymbol" rows="1" col="20"></textarea>
               {% endif %} 
             </div>
             <div class="col">
-              <span class="bold">Gene biotype : </span>
-              {% if active_tab == "explore" or active_tab == "validator" %}
-                <span class="{% if status != '4' %} notvalid {% endif %}">...</span>
+              <span class="bold">Gene biotype :  </span>
+              {% if active_tab == "explore" or active_tab == "validate" %}
+                <span class="{% if status != 4 %} notvalid {% endif %}">{{gene.geneBiotype}}</span>
               {% elif active_tab == "annotate"%}
                 <textarea name="geneBiotype" rows="1" col="20"></textarea>
               {% endif %} 
@@ -84,26 +84,26 @@
         <div class="row align-items-center my-4 mx-2 ">
           <div class="col">
             <span class="bold">Chromosome : </span>
-            <span>...</span>
+            <span>{{chrom.chromName}} </span>
           </div>
           <div class="col">
-            <span class="bold">Strand : </span>
-            <span>...</span>
+            <span class="bold">Strand :  </span>
+            <span>{{gene.strand}}</span>
           </div>
           <div class="col">
-            <span class="bold">Start position : </span>
-            <span>...</span>
+            <span class="bold">Start position :  </span>
+            <span>{{gene.startPos}}</span>
           </div>
           <div class="col">
             <span class="bold">End position : </span>
-            <span>...</span>
+            <span>{{gene.endPos}}</span>
           </div>
         </div>
         <div class="row align-items-center my-4 mx-2 ">
           <div class="col">
             <span class="bold" >Description : </span>
-            {% if active_tab == "explore" or active_tab == "validator" %}
-                <p class="{% if status != '4' %} notvalid {% endif %}">...</p>
+            {% if active_tab == "explore" or active_tab == "validate" %}
+                <p class="{% if status != 4 %} notvalid {% endif %}">{{gene.description}}</p>
               {% elif active_tab == "annotate"%}
                 <textarea name="descriGene" rows="7" class="w-100"></textarea>
               {% endif %} 
@@ -112,8 +112,8 @@
         <div class="row align-items-center mt-4 mx-2 ">
           <div class="col">
             <span class="bold">Sequence :</span> <br>
-            <textarea class="w-100 mt-2 mx-2" rows="5" id="seqgene" name="seqgene" readonly> sequence gene... </textarea><br>
-            <a class="btn btn-primary mb-3" target="_blank" href="{% url 'main:blastseq' 'sequence gene' %}">Blast gene</a > 
+            <textarea class="w-100 mt-2 mx-2" rows="5" id="seqgene" name="seqgene" readonly> {{geneseq.sequence}} </textarea><br>
+            <a class="btn btn-primary mb-3" target="_blank" href="{% url 'main:blastseq' geneseq.sequence %}">Blast gene</a > 
           </div>
         </div>
       </div>  
@@ -123,7 +123,7 @@
 
   <div class="bg-body-secondary radius p-3 px-2 mb-3">
 
-      <h4 id="protpart" class="ps-3">Protein ??? {% include 'main/status.html' %}</h4>
+      <h4 id="protpart" class="ps-3">Protein {{peptide.id}} {% include 'main/status.html' %}</h4>
 
     
       <div class="container pt-3 pb-3">
@@ -131,16 +131,16 @@
         <div class="row align-items-center my-4 mx-2">
             <div class="col">
               <span class="bold">Transcript name : </span>
-              {% if active_tab == "explore" or active_tab == "validator" %}
-                <span class="{% if status != '4' %} notvalid {% endif %}">...</span>
+              {% if active_tab == "explore" or active_tab == "validate" %}
+                <span class="{% if status != 4 %} notvalid {% endif %}">{{peptide.transcriptName}}</span>
               {% elif active_tab == "annotate"%}
                 <textarea name="transcriptName" rows="1" col="20"></textarea>
               {% endif %} 
             </div>
             <div class="col">
               <span class="bold">Transcript biotype : </span>
-              {% if active_tab == "explore" or active_tab == "validator" %}
-                <span class="{% if status != '4' %} notvalid {% endif %}">...</span>
+              {% if active_tab == "explore" or active_tab == "validate" %}
+                <span class="{% if status != 4 %} notvalid {% endif %}">{{peptide.transcriptBiotype}}</span>
               {% elif active_tab == "annotate"%}
                 <textarea name="transcriptBiotype" rows="1" col="20"></textarea>
               {% endif %} 
@@ -150,8 +150,8 @@
         <div class="row align-items-center my-4 mx-2 ">
           <div class="col">
             <span class="bold" >Description : </span>
-            {% if active_tab == "explore" or active_tab == "validator" %}
-                <p class="{% if status != '4' %} notvalid {% endif %}">...</p>
+            {% if active_tab == "explore" or active_tab == "validate" %}
+                <p class="{% if status != 4 %} notvalid {% endif %}">...a mettre ds bd...</p>
               {% elif active_tab == "annotate"%}
                 <textarea name="descriProt" rows="7" class="w-100"></textarea>
               {% endif %} 
@@ -160,8 +160,8 @@
         <div class="row align-items-center mt-4 mx-2 ">
           <div class="col">
             <span class="bold">Sequence :</span> <br>
-            <textarea class="w-100 mt-2 mx-2" rows="5" id="seqprot" readonly> sequence protein... </textarea><br>
-            <a class="btn btn-primary mb-3" target="_blank" href="{% url 'main:blastseq' 'sequence protein' %}">Blast protein</a > 
+            <textarea class="w-100 mt-2 mx-2" rows="5" id="seqprot" readonly> {{peptseq.sequence}} </textarea><br>
+            <a class="btn btn-primary mb-3" target="_blank" href="{% url 'main:blastseq' peptseq.sequence %}">Blast protein</a > 
           </div>
         </div>
       </div>  

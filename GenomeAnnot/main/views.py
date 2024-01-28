@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import GenePeptideForm
 from .models import Gene, Peptide
@@ -9,7 +9,7 @@ from Bio.Blast import NCBIWWW
 from Bio import SeqIO
 from Bio import SearchIO
 
-role_user = "reader"
+role_user = "admin"
 
 
 def home(request):
@@ -217,25 +217,50 @@ def genome(request, genome_id):  # change to details view later
 
 
 def gene(request, gene_id):  # change to details view later
+    gene = get_object_or_404(Gene, pk=gene_id)
+    chrom = gene.idChrom
+    genome = chrom.idGenome
+    peptide = gene.peptide_set.first()
+    geneseq = gene.nucleotidicseq_set.first()
+    if peptide:
+        peptseq = peptide.peptideseq_set.first()
+    else:
+        peptseq = ""
     context = {
-        "gene_id": gene_id,
-        "genome_id": "56426",
+        "genome": genome,
+        "chrom": chrom,
+        "gene": gene,
+        "geneseq": geneseq,
+        "peptide": peptide,
+        "peptseq": peptseq,
         "active_tab": "explore",
         "role": "reader",
         "role_user": role_user,
-    }  # ex of context (no db for now)
-    gene_instance = Gene.objects.get(id=gene_id)
+    }
     return render(request, "main/gene.html", context)
 
 
 def geneAnnot(request, gene_id):  # change to update view later
+    gene = get_object_or_404(Gene, pk=gene_id)
+    chrom = gene.idChrom
+    genome = chrom.idGenome
+    peptide = gene.peptide_set.first()
+    geneseq = gene.nucleotidicseq_set.first()
+    if peptide:
+        peptseq = peptide.peptideseq_set.first()
+    else:
+        peptseq = ""
     context = {
-        "gene_id": gene_id,
-        "genome_id": "56426",
+        "genome": genome,
+        "chrom": chrom,
+        "gene": gene,
+        "geneseq": geneseq,
+        "peptide": peptide,
+        "peptseq": peptseq,
         "active_tab": "annotate",
         "role": "annotator",
         "role_user": role_user,
-    }  # ex of context (no db for now)
+    }
     if request.method == "POST":
         if "submit_save" in request.POST or "submit_submit" in request.POST:
             # get annotations
@@ -256,14 +281,26 @@ def geneAnnot(request, gene_id):  # change to update view later
 
 
 def geneValid(request, gene_id):
+    gene = get_object_or_404(Gene, pk=gene_id)
+    chrom = gene.idChrom
+    genome = chrom.idGenome
+    peptide = gene.peptide_set.first()
+    geneseq = gene.nucleotidicseq_set.first()
+    if peptide:
+        peptseq = peptide.peptideseq_set.first()
+    else:
+        peptseq = ""
     context = {
-        "gene_id": gene_id,
-        "genome_id": "56426",
+        "genome": genome,
+        "chrom": chrom,
+        "gene": gene,
+        "geneseq": geneseq,
+        "peptide": peptide,
+        "peptseq": peptseq,
         "active_tab": "validate",
         "role": "validator",
         "role_user": role_user,
-    }  # ex of context (no db for now)
-
+    }
     if request.method == "POST":
         # if comment
         if "submit_comment" in request.POST:
