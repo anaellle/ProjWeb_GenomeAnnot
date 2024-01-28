@@ -5,6 +5,8 @@ from django.utils import timezone
 from django.urls import reverse
 from django.contrib import admin
 
+# Create your models here.
+
 class Genome (models.Model):
     
     class Status(models.IntegerChoices):
@@ -14,8 +16,8 @@ class Genome (models.Model):
 
     id = models.CharField(max_length=200, primary_key=True)
     species = models.CharField(max_length=200)
-    strain = models.CharField(max_length=200)
-    substrain = models.CharField(max_length=200)
+    strain = models.CharField(max_length=200, blank=True)
+    substrain = models.CharField(max_length=200, blank=True)
     status = models.IntegerField(choices=Status.choices, default=Status.BLANK)
     
     def __str__(self):
@@ -39,6 +41,9 @@ class Chromosome (models.Model):
         constraints = [
             models.UniqueConstraint("idGenome", "chromName", name="unique_name_of_chromosome_in_genome")
         ]
+    
+    def __str__(self):
+        return self.id
 
 class ChromosomeSeq (models.Model):
     
@@ -46,6 +51,9 @@ class ChromosomeSeq (models.Model):
     sequence = models.CharField(max_length=int(1e10))
     
     idChrom = models.ForeignKey(Chromosome, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return "SEQ_"+self.id
 
 class User (models.Model):
     
@@ -62,6 +70,9 @@ class User (models.Model):
     phoneNumber = models.IntegerField()
     role = models.IntegerField(choices=Role.choices, default=Role.READER)
     lastConnexion = models.DateField()
+    
+    def __str__(self):
+        return self.email
 
 class Gene (models.Model):
     
@@ -78,23 +89,29 @@ class Gene (models.Model):
     
     id = models.CharField(max_length=200, primary_key=True)
     geneName = models.CharField(max_length=200)
-    geneSymbol = models.CharField(max_length=100)
-    geneBiotype = models.CharField(max_length=200)
+    geneSymbol = models.CharField(max_length=100, blank=True)
+    geneBiotype = models.CharField(max_length=200, blank=True)
     strand = models.IntegerField(choices=Strand.choices, default=Strand.SENSE)
     startPos = models.IntegerField()
     endPos = models.IntegerField()
-    description = models.CharField(max_length=700)
+    description = models.CharField(max_length=700, blank=True)
     status = models.IntegerField(choices=Status.choices, default=Status.ASSIGNABLE)
     
     idChrom = models.ForeignKey(Chromosome, on_delete=models.CASCADE)
-    emailAnnotator = models.ForeignKey(User, related_name="email_annotator", on_delete=models.CASCADE)
-    emailValidator = models.ForeignKey(User, related_name="email_validator", on_delete=models.CASCADE)
+    emailAnnotator = models.ForeignKey(User, related_name="email_annotator", on_delete=models.CASCADE, blank=True, null=True)
+    emailValidator = models.ForeignKey(User, related_name="email_validator", on_delete=models.CASCADE, blank=True, null=True)
+    
+    def __str__(self):
+        return self.id
     
 class NucleotidicSeq (models.Model):
     id = models.CharField(max_length=200, primary_key=True)
     sequence = models.CharField(max_length=int(1e8)) # au max : 99 999 999 pb
     
     idGene = models.ForeignKey(Gene, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return "SEQ_"+self.id
     
 class Message(models.Model):
 
@@ -107,21 +124,27 @@ class Message(models.Model):
     date = models.DateField(auto_now_add=True) # Automatically set the field to now when the object is first created
     type = models.IntegerField(choices=TypeOfMessage.choices, default=TypeOfMessage.AUTO)
     
-    emailAuthor = models.ForeignKey(User, on_delete=models.CASCADE)
+    emailAuthor = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     idGene = models.ForeignKey(Gene, on_delete=models.CASCADE)
 
 class Peptide(models.Model):
     id = models.CharField(max_length=200, primary_key=True)
     transcriptName = models.CharField(max_length=200)
-    transcriptBiotype = models.CharField(max_length=200)
+    transcriptBiotype = models.CharField(max_length=200, blank=True)
     
     idGene = models.ForeignKey(Gene, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return self.id
 
 class PeptideSeq(models.Model):
     id = models.CharField(max_length=200, primary_key=True)
     sequence = models.CharField(max_length=int(1e6)) # au max : 999 999 acides aminés
     
     idPeptide = models.ForeignKey(Peptide, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return "SEQ_"+self.id
 
 # https://docs.djangoproject.com/en/5.0/ref/models/fields/
 # https://docs.djangoproject.com/en/5.0/topics/db/models/
