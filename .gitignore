@@ -1,2 +1,6 @@
 __pycache__/
 *.pyc
+db.sqlite3
+main/__pycache__/
+main/migrations/*
+GenomeAnnot/__pycache__/
