@@ -307,7 +307,9 @@ class GeneValidDetailView(DetailView):
         peptide = gene.peptide_set.first()
         geneseq = gene.nucleotidicseq_set.first()
         peptseq = peptide.peptideseq_set.first() if peptide else None
-        messages = Message.objects.filter(idGene=gene)
+        messages = Message.objects.filter(
+            idGene=gene
+        )  # TO DO : be sure to order by date !!!
 
         context["genome"] = genome
         context["chrom"] = chrom
@@ -324,22 +326,40 @@ class GeneValidDetailView(DetailView):
     def post(self, request, *args, **kwargs):
         gene = self.get_object()
 
-        if "submit_reject" in request.POST:
-            gene.status = 2
-            gene.save()
-            return HttpResponseRedirect(reverse("validate"))
+        if gene.status == 3:
+            # TO DO : verification user can validate/reject/comment
 
-        elif "submit_validate" in request.POST:
-            gene.status = 4
-            gene.save()
-            return HttpResponseRedirect(reverse("validate"))
+            if "submit_reject" in request.POST:
+                gene.status = 2
+                gene.save()
+                message = Message.objects.create(
+                    text="Rejected",
+                    idGene=gene,
+                    emailAuthor=None,  # to change !!!!
+                )
+                message.save()
+                return HttpResponseRedirect(reverse("validate"))
 
-        elif "submit_comment" in request.POST:
-            comment = request.POST.get("comment")
-            # Ajoutez le commentaire à l'objet Gene
-            # gene.comment = comment
-            # gene.save()  # Assurez-vous de sauvegarder l'objet après avoir ajouté le commentaire
-            return HttpResponseRedirect(reverse("validate"))
+            elif "submit_validate" in request.POST:
+                gene.status = 4
+                gene.save()
+                message = Message.objects.create(
+                    text="Validated",
+                    idGene=gene,
+                    emailAuthor=None,  # to change !!!!
+                )
+                message.save()
+                return HttpResponseRedirect(reverse("validate"))
 
-        else:
-            return HttpResponseRedirect(reverse("validate"))
+            elif "submit_comment" in request.POST:
+                comment = request.POST.get("comment")
+                message = Message.objects.create(
+                    text=comment,
+                    idGene=gene,
+                    type=1,
+                    emailAuthor=None,  # to change !!!!
+                )
+                message.save()
+                return HttpResponseRedirect(reverse("validate"))
+
+        return HttpResponseRedirect(reverse("validate"))

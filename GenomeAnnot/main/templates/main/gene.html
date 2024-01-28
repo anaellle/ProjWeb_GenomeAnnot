@@ -183,7 +183,7 @@
       <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8"/>
     </svg>
 
-    {{comment.text}} {% if comment.emailAuthor %} by {{comment.emailAuthor}}{% endif %} {% if comment.emailAuthor %} the {{comment.date}} {% endif %} 
+    {{comment.text}} {% if comment.emailAuthor %} by {{comment.emailAuthor}}{% endif %} {% if comment.date %} the {{comment.date}} {% endif %} 
 
   </div>
   <!---------------Comments by validator/annotator------------>
@@ -192,7 +192,7 @@
   <div class=" p-2 mb-3  borderLeft" >
     <div class="toast-header bg-body-secondary  p-2">
       <strong class="me-auto  ">{% if comment.emailAuthor %}{{comment.emailAuthor}}{% endif %}</strong>
-      <small> {% if comment.emailAuthor %} {{comment.date}} {% endif %} </small>
+      <small> {% if comment.date %} {{comment.date}} {% endif %} </small>
     </div>
     <div class="toast-body">
       {{comment.text}}
