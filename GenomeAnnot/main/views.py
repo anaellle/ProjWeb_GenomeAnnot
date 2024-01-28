@@ -1,4 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.generic import DetailView
+from django.http import HttpResponseRedirect, Http404
+from django.urls import reverse
+
+from .models import Gene, Message
 
 
 # Library required for lauching the Blast API
@@ -6,12 +11,21 @@ from Bio.Blast import NCBIWWW
 from Bio import SeqIO
 from Bio import SearchIO
 
-role_user = "reader"
+role_user = "admin"
 
 
 def home(request):
     context = {"active_tab": "home", "role_user": role_user}
     return render(request, "main/home.html", context)
+
+
+def custom_404(request, exception):  # only visible if debug set to false
+    return render(
+        request,
+        "main/pageNotFound.html",
+        status=404,
+        context={"role_user": role_user},
+    )
 
 
 def explore(request):
@@ -213,25 +227,54 @@ def genome(request, genome_id):  # change to details view later
     return render(request, "main/explore/genome.html", context)
 
 
-def gene(request, gene_id):  # change to details view later
-    context = {
-        "gene_id": gene_id,
-        "genome_id": "56426",
-        "active_tab": "explore",
-        "role": "reader",
-        "role_user": role_user,
-    }  # ex of context (no db for now)
-    return render(request, "main/gene.html", context)
+class GeneDetailView(DetailView):
+    model = Gene
+    template_name = "main/gene.html"
+    pk_url_kwarg = "gene_id"
+
+    # context to extract from DB
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        gene = self.object
+        chrom = gene.idChrom
+        genome = chrom.idGenome
+        peptide = gene.peptide_set.first()
+        geneseq = gene.nucleotidicseq_set.first()
+        peptseq = peptide.peptideseq_set.first() if peptide else None
+
+        context["genome"] = genome
+        context["chrom"] = chrom
+        context["gene"] = gene
+        context["geneseq"] = geneseq
+        context["peptide"] = peptide
+        context["peptseq"] = peptseq
+        context["active_tab"] = "explore"
+        context["role"] = "reader"
+        context["role_user"] = role_user
+        return context
 
 
 def geneAnnot(request, gene_id):  # change to update view later
+    gene = get_object_or_404(Gene, pk=gene_id)
+    chrom = gene.idChrom
+    genome = chrom.idGenome
+    peptide = gene.peptide_set.first()
+    geneseq = gene.nucleotidicseq_set.first()
+    if peptide:
+        peptseq = peptide.peptideseq_set.first()
+    else:
+        peptseq = ""
     context = {
-        "gene_id": gene_id,
-        "genome_id": "56426",
+        "genome": genome,
+        "chrom": chrom,
+        "gene": gene,
+        "geneseq": geneseq,
+        "peptide": peptide,
+        "peptseq": peptseq,
         "active_tab": "annotate",
         "role": "annotator",
         "role_user": role_user,
-    }  # ex of context (no db for now)
+    }
     if request.method == "POST":
         if "submit_save" in request.POST or "submit_submit" in request.POST:
             # get annotations
@@ -251,22 +294,72 @@ def geneAnnot(request, gene_id):  # change to update view later
     return render(request, "main/gene.html", context)
 
 
-def geneValid(request, gene_id):
-    context = {
-        "gene_id": gene_id,
-        "genome_id": "56426",
-        "active_tab": "validate",
-        "role": "validator",
-        "role_user": role_user,
-    }  # ex of context (no db for now)
+class GeneValidDetailView(DetailView):
+    model = Gene
+    template_name = "main/gene.html"
+    pk_url_kwarg = "gene_id"
 
-    if request.method == "POST":
-        # if comment
-        if "submit_comment" in request.POST:
-            comment = request.POST.get("comment")
-        elif "submit_reject" in request.POST:
-            ...  # change statut of gene/prot to 2
-        elif "submit_validate" in request.POST:
-            ...  # change statut to 4
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        gene = self.object
+        chrom = gene.idChrom
+        genome = chrom.idGenome
+        peptide = gene.peptide_set.first()
+        geneseq = gene.nucleotidicseq_set.first()
+        peptseq = peptide.peptideseq_set.first() if peptide else None
+        messages = Message.objects.filter(
+            idGene=gene
+        )  # TO DO : be sure to order by date !!!
 
-    return render(request, "main/gene.html", context)
+        context["genome"] = genome
+        context["chrom"] = chrom
+        context["gene"] = gene
+        context["geneseq"] = geneseq
+        context["peptide"] = peptide
+        context["peptseq"] = peptseq
+        context["messages"] = messages
+        context["active_tab"] = "validate"
+        context["role"] = "validator"
+        context["role_user"] = role_user
+        return context
+
+    def post(self, request, *args, **kwargs):
+        gene = self.get_object()
+
+        if gene.status == 3:
+            # TO DO : verification user can validate/reject/comment
+
+            if "submit_reject" in request.POST:
+                gene.status = 2
+                gene.save()
+                message = Message.objects.create(
+                    text="Rejected",
+                    idGene=gene,
+                    emailAuthor=None,  # to change !!!!
+                )
+                message.save()
+                return HttpResponseRedirect(reverse("validate"))
+
+            elif "submit_validate" in request.POST:
+                gene.status = 4
+                gene.save()
+                message = Message.objects.create(
+                    text="Validated",
+                    idGene=gene,
+                    emailAuthor=None,  # to change !!!!
+                )
+                message.save()
+                return HttpResponseRedirect(reverse("validate"))
+
+            elif "submit_comment" in request.POST:
+                comment = request.POST.get("comment")
+                message = Message.objects.create(
+                    text=comment,
+                    idGene=gene,
+                    type=1,
+                    emailAuthor=None,  # to change !!!!
+                )
+                message.save()
+                return HttpResponseRedirect(reverse("validate"))
+
+        return HttpResponseRedirect(reverse("validate"))

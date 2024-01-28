@@ -17,7 +17,7 @@
   <a class="btn card-body cardList" href="{% url 'main:geneAnnot' gene_id=536 %}">
       <span class="left-card">IdGenome | IdSequence </span>
       <span class="status right-card">
-        {% with status="3" %}
+        {% with status=3 %}
               {% include 'main/status.html' %}
       {% endwith %}
       </span> 

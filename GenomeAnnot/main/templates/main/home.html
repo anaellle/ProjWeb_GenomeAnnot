@@ -78,12 +78,13 @@ comprehensive genomic repository. <br><br>
                     <h5 class="card-title">Annotate Sequences</h5>
                     <h6 class="card-subtitle mb-2 text-body-secondary">Annotators</h6>
                     <p class="card-text"> Add or modify annotations of genes and proteins.</p>
-                    <div {% if role != "annotator" or role != "admin" %} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Not an annotator or not connected"{% endif %}>
+                    <div  {% if role_user != 'annotator' and role_user != 'admin' %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Not an annotator or not connected"{% endif %}>
                     <a href="{% url 'main:annotate' %}" class="btn btn-primary {% if role_user != 'annotator' and role_user != 'admin' %}disabled{% endif %}" >Go to Annotate</a>
                     </div>
                     </div>
                 </div>
                 <!-- ------------- Validate ------------- -->
+                
 
                 <div class="card col my-3 mx-3" style="width: 18rem;">
                     <img src="../static/main/images/validate.png" class="card-img-top" alt="...">
@@ -91,7 +92,7 @@ comprehensive genomic repository. <br><br>
                     <h5 class="card-title">Validate annotation</h5>
                     <h6 class="card-subtitle mb-2 text-body-secondary">Validators</h6>
                     <p class="card-text"> Validate annotations of genes and proteins from an annotators.</p>
-                    <div {% if role != "annotator" or role != "admin" %} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Not a validator or not connected"{% endif %}>
+                    <div {% if role_user != "validator" and role_user != "admin" %} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Not a validator or not connected"{% endif %}>
                     <a href="{% url 'main:validate' %}" class="btn btn-primary {% if role_user != 'validator' and role_user != 'admin' %}disabled{% endif %}">Go to Validate</a>
                     </div>
                     </div>
@@ -105,7 +106,7 @@ comprehensive genomic repository. <br><br>
                     <h5 class="card-title">Manage Annotations</h5>
                     <h6 class="card-subtitle mb-2 text-body-secondary">Administrator</h6>
                     <p class="card-text">Dispatch the tasks to annotators and validators, check work progress.</p>
-                    <div {% if role != "annotator" or role != "admin" %} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Not an admin or not connected"{% endif %}>
+                    <div {% if  role_user != "admin" %} data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Not an admin or not connected"{% endif %}>
                     <a href="{% url 'main:genomeAdmin' %}" class="btn btn-primary {% if role_user != 'admin' %}disabled{% endif %}">Go to Admin</a>
                     </div>
                 </div>
