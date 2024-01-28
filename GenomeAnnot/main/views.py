@@ -1,5 +1,8 @@
 from django.shortcuts import render, redirect
 
+from .forms import GenePeptideForm
+from .models import Gene, Peptide
+
 
 # Library required for lauching the Blast API
 from Bio.Blast import NCBIWWW
@@ -221,6 +224,7 @@ def gene(request, gene_id):  # change to details view later
         "role": "reader",
         "role_user": role_user,
     }  # ex of context (no db for now)
+    gene_instance = Gene.objects.get(id=gene_id)
     return render(request, "main/gene.html", context)
 
 
