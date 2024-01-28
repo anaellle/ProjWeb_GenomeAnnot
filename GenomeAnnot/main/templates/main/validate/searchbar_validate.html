@@ -82,7 +82,7 @@ show
 
 
                 <div class="col form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch" id="status0" name="0" >
+                    <input class="form-check-input" type="checkbox" role="switch"  id="status0" name="status012" {% if  status012 == 'checked' %}checked{% endif %}>
                     <label class="form-check-label" for="status0">
                     {% with status="0"  %}
                         {% include 'main/status.html' %}
@@ -91,7 +91,7 @@ show
                 </div>
 
                 <div class=" col form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch"  id="status3" name="3" checked>
+                    <input class="form-check-input" type="checkbox" role="switch" id="status3"  name="status3" {% if not status3 or status3 == 'checked' %}checked{% endif %}>
                     <label class="form-check-label" for="status3">
                     {% with status="3"  %}
                         {% include 'main/status.html' %}
@@ -100,7 +100,7 @@ show
                 </div>
 
                 <div class="col form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch" id="status4" name="4" >
+                    <input class="form-check-input" type="checkbox" role="switch" id="status4" name="status4" {% if status4 == 'checked' %}checked{% endif %}>
                     <label class="form-check-label" for="status4">
                     {% with status="4"  %}
                         {% include 'main/status.html' %}

@@ -1,21 +1,26 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+
 
 # Library required for lauching the Blast API
 from Bio.Blast import NCBIWWW
 from Bio import SeqIO
 from Bio import SearchIO
 
+role_user = "reader"
+
 
 def home(request):
-    context = {"active_tab": "home"}
+    context = {"active_tab": "home", "role_user": role_user}
     return render(request, "main/home.html", context)
 
 
 def explore(request):
-    context = {
-        "active_tab": "explore",
-    }
+    context = {"active_tab": "explore", "role_user": role_user}
+
     if request.method == "GET":
+        if "submit_download" in request.GET:
+            ...  # download info gene with gene_id
+
         if "submitsearch" in request.GET:
             # get parameters of search
             searchbar = request.GET.get("searchbar")
@@ -26,40 +31,42 @@ def explore(request):
             if type_res == "genome":
                 strain = request.GET.get("strain")
                 species = request.GET.get("species")
-                """ status_genome_0 = request.GET.get("0")
-                status_genome_1 = request.GET.get("1")
-                status_genome_2 = request.GET.get("2") """
                 context["strain"] = strain
                 context["species"] = species
-                """ if "0" in request.GET:
-                    context["test"] = "check"
-                else:
-                    context["test"] = "uncheck"
-                context["status_genome_0"] = status_genome_0
-                context["status_genome_1"] = status_genome_1
-                context["status_genome_2"] = status_genome_2 """
+                for status in [
+                    "status0_genome",
+                    "status1_genome",
+                    "status2_genome",
+                ]:
+                    if status in request.GET:
+                        context[status] = "checked"
+                    else:
+                        context[status] = "unchecked"
 
             elif type_res == "gene" or type_res == "prot":
                 genome = request.GET.get("genome")
                 chrom = request.GET.get("chrom")
                 motif = request.GET.get("motif")
                 seq = request.GET.get("seq")
-                """status_gene_0 = request.GET.get("status0")
-                status_gene_123 = request.GET.get("status1")
-                status_gene_4 = request.GET.get("status4") """
                 context["genome"] = genome
                 context["chrom"] = chrom
                 context["motif"] = motif
                 context["seq"] = seq
-                """ context["status_gene_0"] = status_gene_0
-                context["status_gene_123"] = status_gene_123
-                context["status_gene_4"] = status_gene_4 """
+                for status in [
+                    "status0",
+                    "status123",
+                    "status4",
+                ]:
+                    if status in request.GET:
+                        context[status] = "checked"
+                    else:
+                        context[status] = "unchecked"
 
     return render(request, "main/explore/main_explore.html", context)
 
 
 def annotate(request):
-    context = {"active_tab": "annotate"}
+    context = {"active_tab": "annotate", "role_user": role_user}
     if request.method == "GET":
         if "submitsearch" in request.GET:
             # get parameters of search
@@ -73,12 +80,23 @@ def annotate(request):
             context["chrom"] = chrom
             context["motif_gene"] = motif_gene
             context["motif_prot"] = motif_prot
+            for status in [
+                "status0",
+                "status1",
+                "status2",
+                "status3",
+                "status4",
+            ]:
+                if status in request.GET:
+                    context[status] = "checked"
+                else:
+                    context[status] = "unchecked"
 
     return render(request, "main/annotate/main_annotate.html", context)
 
 
 def validate(request):
-    context = {"active_tab": "validate"}
+    context = {"active_tab": "validate", "role_user": role_user}
     if request.method == "GET":
         if "submitsearch" in request.GET:
             # get parameters of search
@@ -92,33 +110,50 @@ def validate(request):
             context["chrom"] = chrom
             context["motif_gene"] = motif_gene
             context["motif_prot"] = motif_prot
+            for status in [
+                "status012",
+                "status3",
+                "status4",
+            ]:
+                if status in request.GET:
+                    context[status] = "checked"
+                else:
+                    context[status] = "unchecked"
     return render(request, "main/validate/main_validate.html", context)
 
 
-def blast(request):
-    context = {"active_tab": "blast"}
+def blast(request, sequence=None):
+    context = {
+        "active_tab": "blast",
+        "role_user": role_user,
+        "sequence": sequence,
+    }
     # return render(request, "main/blast/main_blast.html", context)
-
     if request.method == "POST":
         sequence = request.POST["sequence"]
-        parameters = request.POST["parameters"]
+        program = request.POST["program"]
 
+        db = request.POST["database"]
+        alignments = request.POST["alignments"]
         # Request to ncbi blast api, rajouter gestion des erreurs ensuite
         # try:
-        result_handle = NCBIWWW.qblast(
-            program="blastn",
-            database="nt",
-            sequence=sequence,
-            alignments=5,
-            descriptions=5,
-        )  # ,format_type="Text") #Parametres de base pour le moment, rajouter un choix apres
-        blast_results = SearchIO.read(
-            result_handle, "blast-xml"
-        )  # permet recuperation dans le template pour l'affichage
-
+        # result_handle = NCBIWWW.qblast(program="blastn", database="nt", sequence=sequence, alignments=5, descriptions=5,format_type="HTML") #Parametres de base pour le moment, rajouter un choix apres
+        # blast_results = SearchIO.read(result_handle, "blast-xml") #permet recuperation dans le template pour l'affichage
+        # blast_result = result_handle.read()
+        # result_handle.close()
         # except Exception as e:
         # Gérer les erreurs, par exemple, en renvoyant un message d'erreur à l'utilisateur
         # return render(request, 'error.html', {'error_message': str(e)})
+
+        result_handle = NCBIWWW.qblast(
+            program=program,
+            database=db,
+            sequence=sequence,
+            alignments=alignments,
+            descriptions=50,
+            hitlist_size=5,
+        )
+        blast_results = SearchIO.read(result_handle, "blast-xml")
 
         # Traiter les résultats et afficher dans le template
         return render(
@@ -131,28 +166,49 @@ def blast(request):
 
 
 def genomeAdmin(request):
-    context = {"active_tab": "admin", "active_tab_admin": "genome"}
+    context = {
+        "active_tab": "admin",
+        "active_tab_admin": "genome",
+        "role_user": role_user,
+    }
     return render(request, "main/admin/admin_genome.html", context)
 
 
 def sequenceAdmin(request):
-    context = {"active_tab": "admin", "active_tab_admin": "sequence"}
+    context = {
+        "active_tab": "admin",
+        "active_tab_admin": "sequence",
+        "role_user": role_user,
+    }
     return render(request, "main/admin/admin_sequence.html", context)
 
 
 def accountAdmin(request):
-    context = {"active_tab": "admin", "active_tab_admin": "account"}
+    context = {
+        "active_tab": "admin",
+        "active_tab_admin": "account",
+        "role_user": role_user,
+    }
     return render(request, "main/admin/admin_account.html", context)
 
 
 def addGenome(request):
-    return render(request, "main/addGenome/addGenome.html")
+    context = {"role_user": role_user}
+    if request.method == "POST":
+        if "submit_addgenome" in request.POST:
+            # get parameters
+            genomefile = request.POST.get("genomefile")
+            cdsfile = request.POST.get("cdsfile")
+            peptidefile = request.POST.get("peptidefile")
+            # python parser to insert into BD : ...
+    return render(request, "main/addGenome/addGenome.html", context)
 
 
 def genome(request, genome_id):  # change to details view later
     context = {
         "genome_id": genome_id,
         "active_tab": "explore",
+        "role_user": role_user,
     }  # ex of context (no db for now)
     return render(request, "main/explore/genome.html", context)
 
@@ -163,6 +219,7 @@ def gene(request, gene_id):  # change to details view later
         "genome_id": "56426",
         "active_tab": "explore",
         "role": "reader",
+        "role_user": role_user,
     }  # ex of context (no db for now)
     return render(request, "main/gene.html", context)
 
@@ -173,6 +230,7 @@ def geneAnnot(request, gene_id):  # change to update view later
         "genome_id": "56426",
         "active_tab": "annotate",
         "role": "annotator",
+        "role_user": role_user,
     }  # ex of context (no db for now)
     if request.method == "POST":
         if "submit_save" in request.POST or "submit_submit" in request.POST:
@@ -199,6 +257,7 @@ def geneValid(request, gene_id):
         "genome_id": "56426",
         "active_tab": "validate",
         "role": "validator",
+        "role_user": role_user,
     }  # ex of context (no db for now)
 
     if request.method == "POST":

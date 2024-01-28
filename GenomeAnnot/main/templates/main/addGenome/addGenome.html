@@ -7,7 +7,8 @@
    
     <div class="container pt-3 pb-3">
         <h4 class="mb-4">Add a genome to the database</h4>
-    <form >
+    <form method="post" action='{% url "main:explore" %}'>
+        {% csrf_token %}
         <div class="row align-items-center mb-3">
             <label for="genomefile" class="mb-2 bold"> Choose a genome file : </label>
             <input type="file" id="genomefile" name="genomefile" accept=".fa" />
@@ -24,7 +25,7 @@
         </div>
           
     
-    <input type="submit" class="btn btn-primary mt-3 " value="Import Genome">
+    <input type="submit" class="btn btn-primary mt-3 " name="submit_addgenome" value="Import Genome">
 
     </form>
     </div>

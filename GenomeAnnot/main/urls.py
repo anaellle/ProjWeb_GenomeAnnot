@@ -12,8 +12,9 @@ urlpatterns = [
     path("validate/", views.validate, name="validate"),
     path("validate/gene<int:gene_id>", views.geneValid, name="geneValid"),
     path("blast/", views.blast, name="blast"),
-    path("admin/genome/", views.genomeAdmin, name="genomeAdmin"),
-    path("admin/sequence/", views.sequenceAdmin, name="sequenceAdmin"),
-    path("admin/account/", views.accountAdmin, name="accountAdmin"),
+    path("blast/<str:sequence>", views.blast, name="blastseq"),
+    path("administrator/genome/", views.genomeAdmin, name="genomeAdmin"),
+    path("administrator/sequence/", views.sequenceAdmin, name="sequenceAdmin"),
+    path("administrator/account/", views.accountAdmin, name="accountAdmin"),
     path("addGenome", views.addGenome, name="addGenome"),
 ]
