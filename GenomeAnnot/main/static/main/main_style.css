@@ -128,6 +128,10 @@ main {
   padding-right: 0.5em;
 }
 
+.smallerTxt {
+  font-size: small;
+}
+
 .ebony {
   color: var(--roseebony);
 }
@@ -200,8 +204,8 @@ main {
   --bs-btn-hover-border-color: var(--feldgrau);
   --bs-btn-active-color: #fff;
   --bs-btn-active-bg: var(--roseebony);
-  --bs-btn-disabled-bg: var(--nyanza);
-  --bs-btn-disabled-border-color: var(--nyanza);
+  --bs-btn-disabled-bg: var(--celadon);
+  --bs-btn-disabled-border-color: var(--celadon);
   --bs-btn-disabled-color: var(--bs-nav-link-disabled-color);
   color: #fff !important;
   --bs-btn-hover-color: #fff;
