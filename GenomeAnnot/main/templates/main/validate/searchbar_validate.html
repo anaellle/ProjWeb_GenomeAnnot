@@ -1,11 +1,33 @@
 {% extends 'main/searchbar_base.html' %}
 
+<!-------------- Form action -------------->
+
+{%block action%}
+{% url 'main:validate' %}
+{% endblock %}
+
+
+<!-------------- Searchbar -------------->
+
 {% block placeholderSearch %}
 Search gene or protein
 {% endblock %}
 
-{% block  filter %}
 
+<!-------------- Show filter -------------->
+
+{% block show %}
+{% if genome or chrom or motif_gene or motif_prot %} 
+show 
+{% endif %}
+{%endblock%}
+
+
+
+
+
+<!-------------- Filter -------------->
+{% block  filter %}
 {% with role="validator" %}
 
 <!-------------- Gene or Protein-------------->
@@ -19,14 +41,14 @@ Search gene or protein
                 <div class="col">
                     <div class="d-flex align-items-center">
                         <label for="genome" class="form-label">Genome</label>
-                        <input type="text" class="form-control ms-2" id="genome" name="genome">
+                        <input type="text" class="form-control ms-2" id="genome" name="genome" value="{% if genome %}{{genome}}{% endif %}">
                     </div>
                 </div>
                 <!-------- Chromosome --------->
                 <div class="col">
                     <div class="d-flex align-items-center">
                         <label for="chrom" class="form-label">Chromosome</label>
-                        <input type="text" class="form-control ms-2" id="chrom" name="chrom">
+                        <input type="text" class="form-control ms-2" id="chrom" name="chrom" value="{% if chrom %}{{chrom}}{% endif %}">
                     </div>
                 </div>
             
@@ -40,7 +62,7 @@ Search gene or protein
                 <div class="col">
                     <div class="d-flex align-items-center">
                         <label for="motif_gene" class="form-label">DNA Motif</label>
-                        <input type="text" class="form-control ms-2" id="motif_gene" name="motif_gene">
+                        <input type="text" class="form-control ms-2" id="motif_gene" name="motif_gene" value="{% if motif_gene %}{{motif_gene}}{% endif %}">
                     </div>
                 </div>
 
@@ -48,7 +70,7 @@ Search gene or protein
                 <div class="col">
                     <div class="d-flex align-items-center">
                         <label for="motif_prot" class="form-label">Peptide Motif</label>
-                        <input type="text" class="form-control ms-2" id="motif_prot" name="motif_prot">
+                        <input type="text" class="form-control ms-2" id="motif_prot" name="motif_prot" value="{% if motif_prot %}{{motif_prot}}{% endif %}">
                     </div>
                 </div>
                 

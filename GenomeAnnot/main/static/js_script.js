@@ -69,6 +69,15 @@ function changeTypeResExplore(){
 
 }
 
+// change filter on new page after submit (when loading)
+if (window.location.pathname.startsWith('/genomeannot/explore/')) {
+    window.addEventListener('load', changeTypeResExplore);
+}
+
+
+
+
+
 //-------------------------- Copy Paste Sequence
 /* 
 function copyPaste(textElement) {

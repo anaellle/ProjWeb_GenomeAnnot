@@ -6,7 +6,6 @@
     
 {% with status="2" type="sequence" role=role %}
 
-
  <nav id="navbar-gene" class="navbar filter px-3 py-3 mb-5">
     
     <h4 >Gene {{ gene_id }} | Protein ???? </h4> 
@@ -44,10 +43,10 @@
     
   </nav>
 
-
-<form>
-
-
+{% if active_tab == "annotate"%}
+<form method="post" action='{% url "main:annotate" %}'>
+{% csrf_token %}
+{%endif%}
   <!--------Gene---------->
   <div class="bg-body-secondary radius p-3 px-2 mb-5">
 
@@ -202,23 +201,28 @@
 
   <!---------------------Add comment--------------------------->
   {% if active_tab == "validate" %}
+  <form method="post" action='{% url "main:geneValid" gene_id %}'>
+  {% csrf_token %}
   <div class="mb-3">
   <span class="bold">Add a comment</span>
-  <textarea  class="w-100 mb-1 px-3 py-2" rows="4" placeholder="comment ..."></textarea>
-  <input class="btn btn-secondary" type="submit" name="submit_button" value="Comment"></input > 
+  <textarea  class="w-100 mb-1 px-3 py-2" rows="4" placeholder="comment ..." name="comment"></textarea>
+  <input class="btn btn-secondary" type="submit" name="submit_comment" value="Comment"></input > 
   </div>
+  </form>
   {% endif %} 
 
   <!--------------------------Buttons----------------------------------->
   {% if active_tab == "annotate" %}
     <div class=" mb-5">
-      <input id="save" class="btn btn-secondary " type="submit" name="submit_button" value="Save"></input > 
-      <input id="submit" class="btn btn-primary" type="submit" name="submit_button" value="Submit"></input > 
+      <input id="save" class="btn btn-secondary " type="submit" name="submit_save" value="Save"></input > 
+      <input id="submit" class="btn btn-primary" type="submit" name="submit_submit" value="Submit"></input > 
     </div>
   {% elif active_tab == "validate"%}
+  <form method="post" action='{% url "main:validate" %}'>
+    {% csrf_token %}
   <div class=" mb-5">
-    <input id="reject" class="btn btn-primary reject" type="submit" name="submit_button" value="Reject"></input > 
-    <input id="validate" class="btn btn-primary validate" type="submit" name="submit_button" value="Validate"></input > 
+    <input id="reject" class="btn btn-primary reject" type="submit" name="submit_reject" value="Reject"></input > 
+    <input id="validate" class="btn btn-primary validate" type="submit" name="submit_validate" value="Validate"></input > 
   </div>
   {% endif %} 
 
