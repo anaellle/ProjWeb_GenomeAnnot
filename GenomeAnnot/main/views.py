@@ -3,7 +3,7 @@ from django.views.generic import DetailView
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 
-from .models import Gene, Message
+from .models import Gene, Message, Genome
 
 
 # Library required for lauching the Blast API
@@ -37,16 +37,12 @@ def explore(request):
 
         if "submitsearch" in request.GET:
             # get parameters of search
-            searchbar = request.GET.get("searchbar")
-            type_res = request.GET.get("res_type")
-            context["searchbar"] = searchbar
-            context["type_res"] = type_res
+            context["searchbar"] = request.GET.get("searchbar")
+            context["type_res"] = request.GET.get("res_type")
 
-            if type_res == "genome":
-                strain = request.GET.get("strain")
-                species = request.GET.get("species")
-                context["strain"] = strain
-                context["species"] = species
+            if context["type_res"] == "genome":
+                context["strain"] = request.GET.get("strain")
+                context["species"] = request.GET.get("species")
                 for status in [
                     "status0_genome",
                     "status1_genome",
@@ -56,16 +52,17 @@ def explore(request):
                         context[status] = "checked"
                     else:
                         context[status] = "unchecked"
+                # get info about genome
+                context[
+                    "genomes_info"
+                ] = Genome.objects.all()  # TO DO : filter
 
-            elif type_res == "gene" or type_res == "prot":
-                genome = request.GET.get("genome")
-                chrom = request.GET.get("chrom")
-                motif = request.GET.get("motif")
-                seq = request.GET.get("seq")
-                context["genome"] = genome
-                context["chrom"] = chrom
-                context["motif"] = motif
-                context["seq"] = seq
+            elif (
+                context["type_res"] == "gene" or context["type_res"] == "prot"
+            ):
+                # get info filter/search
+                for info in ["genome", "chrom", "motif", "seq"]:
+                    context[info] = request.GET.get(info)
                 for status in [
                     "status0",
                     "status123",
@@ -76,24 +73,63 @@ def explore(request):
                     else:
                         context[status] = "unchecked"
 
+                # get info about gene/prot
+                genes = Gene.objects.all()  # TO DO : filter
+                genes_info = []
+                for gene in genes:
+                    genome = gene.idChrom.idGenome
+                    peptide = gene.peptide_set.first()
+                    gene_info = {
+                        "gene_id": gene.id,
+                        "gene_name": gene.geneName,
+                        "status": gene.status,
+                        "peptide_id": peptide.id if peptide else None,
+                        "peptide_name": peptide.transcriptName
+                        if peptide
+                        else None,
+                        "genome_id": genome.id,
+                        "genome_species": genome.species,
+                    }
+                    genes_info.append(gene_info)
+                    context["genes_info"] = genes_info
+
     return render(request, "main/explore/main_explore.html", context)
 
 
 def annotate(request):
     context = {"active_tab": "annotate", "role_user": role_user}
+
+    # get info about gene/prot
+    genes = (
+        Gene.objects.all()
+    )  # TO DO : filter (dont celui pr user, avoir seulement seq assignée)
+    genes_info = []
+    for gene in genes:
+        genome = gene.idChrom.idGenome
+        peptide = gene.peptide_set.first()
+        gene_info = {
+            "gene_id": gene.id,
+            "gene_name": gene.geneName,
+            "status": gene.status,
+            "peptide_id": peptide.id if peptide else None,
+            "peptide_name": peptide.transcriptName if peptide else None,
+            "genome_id": genome.id,
+            "genome_species": genome.species,
+        }
+        genes_info.append(gene_info)
+        context["genes_info"] = genes_info
+
     if request.method == "GET":
         if "submitsearch" in request.GET:
             # get parameters of search
-            searchbar = request.GET.get("searchbar")
-            genome = request.GET.get("genome")
-            chrom = request.GET.get("chrom")
-            motif_gene = request.GET.get("motif_gene")
-            motif_prot = request.GET.get("motif_prot")
-            context["searchbar"] = searchbar
-            context["genome"] = genome
-            context["chrom"] = chrom
-            context["motif_gene"] = motif_gene
-            context["motif_prot"] = motif_prot
+            for info in [
+                "searchbar",
+                "genome",
+                "chrom",
+                "motif_gene",
+                "motif_prot",
+            ]:
+                context[info] = request.GET.get(info)
             for status in [
                 "status0",
                 "status1",
@@ -111,19 +147,39 @@ def annotate(request):
 
 def validate(request):
     context = {"active_tab": "validate", "role_user": role_user}
+
+    # get info about gene/prot
+    genes = (
+        Gene.objects.all()
+    )  # TO DO : filter (dont celui pr user, avoir seulement seq assignée)
+    genes_info = []
+    for gene in genes:
+        genome = gene.idChrom.idGenome
+        peptide = gene.peptide_set.first()
+        gene_info = {
+            "gene_id": gene.id,
+            "gene_name": gene.geneName,
+            "status": gene.status,
+            "peptide_id": peptide.id if peptide else None,
+            "peptide_name": peptide.transcriptName if peptide else None,
+            "genome_id": genome.id,
+            "genome_species": genome.species,
+        }
+        genes_info.append(gene_info)
+        context["genes_info"] = genes_info
+
     if request.method == "GET":
         if "submitsearch" in request.GET:
             # get parameters of search
-            searchbar = request.GET.get("searchbar")
-            genome = request.GET.get("genome")
-            chrom = request.GET.get("chrom")
-            motif_gene = request.GET.get("motif_gene")
-            motif_prot = request.GET.get("motif_prot")
-            context["searchbar"] = searchbar
-            context["genome"] = genome
-            context["chrom"] = chrom
-            context["motif_gene"] = motif_gene
-            context["motif_prot"] = motif_prot
+            for info in [
+                "searchbar",
+                "genome",
+                "chrom",
+                "motif_gene",
+                "motif_prot",
+            ]:
+                context[info] = request.GET.get(info)
+
             for status in [
                 "status012",
                 "status3",
@@ -242,6 +298,12 @@ class GeneDetailView(DetailView):
         geneseq = gene.nucleotidicseq_set.first()
         peptseq = peptide.peptideseq_set.first() if peptide else None
 
+        if role_user == "admin":
+            messages = Message.objects.filter(
+                idGene=gene
+            )  # TO DO : be sure to order by date !!!
+            context["messages"] = messages
+
         context["genome"] = genome
         context["chrom"] = chrom
         context["gene"] = gene
@@ -256,21 +318,18 @@ class GeneDetailView(DetailView):
 
 def geneAnnot(request, gene_id):  # change to update view later
     gene = get_object_or_404(Gene, pk=gene_id)
-    chrom = gene.idChrom
-    genome = chrom.idGenome
     peptide = gene.peptide_set.first()
-    geneseq = gene.nucleotidicseq_set.first()
-    if peptide:
-        peptseq = peptide.peptideseq_set.first()
-    else:
-        peptseq = ""
+
     context = {
-        "genome": genome,
-        "chrom": chrom,
+        "genome": gene.idChrom.idGenome,
+        "chrom": gene.idChrom,
         "gene": gene,
-        "geneseq": geneseq,
+        "geneseq": gene.nucleotidicseq_set.first(),
         "peptide": peptide,
-        "peptseq": peptseq,
+        "peptseq": peptide.peptideseq_set.first() if peptide else None,
+        "messages": Message.objects.filter(
+            idGene=gene
+        ),  # TO DO : be sure to order by date !!!,
         "active_tab": "annotate",
         "role": "annotator",
         "role_user": role_user,
@@ -302,22 +361,19 @@ class GeneValidDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         gene = self.object
-        chrom = gene.idChrom
-        genome = chrom.idGenome
         peptide = gene.peptide_set.first()
-        geneseq = gene.nucleotidicseq_set.first()
-        peptseq = peptide.peptideseq_set.first() if peptide else None
-        messages = Message.objects.filter(
+
+        context["gene"] = gene
+        context["chrom"] = gene.idChrom
+        context["genome"] = gene.idChrom.idGenome
+        context["geneseq"] = gene.nucleotidicseq_set.first()
+        context["peptide"] = peptide
+        context["peptseq"] = (
+            peptide.peptideseq_set.first() if peptide else None
+        )
+        context["messages"] = Message.objects.filter(
             idGene=gene
         )  # TO DO : be sure to order by date !!!
-
-        context["genome"] = genome
-        context["chrom"] = chrom
-        context["gene"] = gene
-        context["geneseq"] = geneseq
-        context["peptide"] = peptide
-        context["peptseq"] = peptseq
-        context["messages"] = messages
         context["active_tab"] = "validate"
         context["role"] = "validator"
         context["role_user"] = role_user

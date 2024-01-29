@@ -3,7 +3,6 @@
 {% block body %}
 
 
-
 {% with status=gene.status type="sequence" role=role %}
 
  <nav id="navbar-gene" class="navbar filter px-3 py-3 mb-5">
@@ -172,7 +171,7 @@
   </div>
 
   <!--------------------------Comments----------------------------------->
-  {% if active_tab == "annotate" or active_tab == "validate" %}
+  {% if active_tab == "annotate" or active_tab == "validate" or role_user == "admin" %}
 
   {% for comment in messages %}
   {% if comment.type == 0 %}
