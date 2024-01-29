@@ -130,3 +130,9 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Default user model
+# https://docs.djangoproject.com/fr/4.2/topics/auth/customizing/
+# https://testdriven.io/blog/django-custom-user-model/
+
+AUTH_USER_MODEL = "main.CustomUser"
