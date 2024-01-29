@@ -12,16 +12,25 @@
 
 {% block body %}  
 {% with role="validator" type="sequence" %}
+{% for gene in genes_info%}
+
+{% with type="sequence" %}
 <div class="card mb-3 ">
-    <a class="btn card-body cardList" href="{% url 'main:geneValid' gene_id=536 %}">
-        <span class="left-card">IdGenome | IdSequence </span> 
-        <span class="status right-card">
-          {% with status=3 %}
+    <a class="btn card-body cardList" href="{% url 'main:geneValid' gene_id=gene.gene_id%}">
+        <span class="left-card">
+          <span class="mx-2">Genome {{gene.genome_species}} {{gene.genome_id}} </span>  | 
+          <span class="mx-2"> Gene {{gene.gene_id}} {{gene.gene_name}} </span>{% if gene.peptide_id %} 
+           | <span class="mx-2">Protein {{gene.peptide_id}} {{gene.peptide_name}} </span>{% endif%}
+        </span> <span class="status right-card">
+          {% with status=gene.status %}
               {% include 'main/status.html' %}
         {% endwith %}
-        </span>
+        </span> 
     </a>
   </div>
+  {% endwith %}
+
+{%endfor%}
 {% endwith %}
 {% endblock %}
 
