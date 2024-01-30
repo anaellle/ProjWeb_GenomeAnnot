@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import DetailView
+from django.views.generic import DetailView, UpdateView
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
+from .forms import GeneUpdateForm, PeptideUpdateForm
 
 from .models import Gene, Message, Genome
 
@@ -351,6 +352,50 @@ def geneAnnot(request, gene_id):  # change to update view later
         # A FAIRE : retour sur page de recherche avec filtre conservé
 
     return render(request, "main/gene.html", context)
+
+
+class GeneUpdateView(UpdateView):
+    model = Gene
+    pk_url_kwarg = "gene_id"
+    template_name = "main/gene.html"
+    form_class = GeneUpdateForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        gene = self.object
+        peptide = gene.peptide_set.first()
+        context["genome"] = gene.idChrom.idGenome
+        context["chrom"] = gene.idChrom
+        context["gene"] = gene
+        context["geneseq"] = gene.nucleotidicseq_set.first()
+        context["peptide"] = peptide
+        context["peptseq"] = (
+            peptide.peptideseq_set.first() if peptide else None
+        )
+        context["messages"] = Message.objects.filter(
+            idGene=gene  # TO DO : be sure to order by date !!!
+        )
+        context["active_tab"] = "annotate"
+        context["role"] = "annotator"
+        context["role_user"] = role_user
+
+        peptide_form = PeptideUpdateForm(instance=peptide) if peptide else None
+        context["peptide_form"] = peptide_form
+        return context
+
+    def form_valid(self, form):
+        gene = form.save(commit=False)
+        peptide_instance = gene.peptide_set.first()
+        if peptide_instance:
+            peptide_form = PeptideUpdateForm(
+                self.request.POST, instance=peptide_instance
+            )
+            if peptide_form.is_valid():
+                peptide_form.save()
+        if "submit_submit" in self.request.POST:
+            gene.status = 3
+            gene.save()
+        return super().form_valid(form)
 
 
 class GeneValidDetailView(DetailView):

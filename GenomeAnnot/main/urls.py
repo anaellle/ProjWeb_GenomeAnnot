@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import GeneDetailView, GeneValidDetailView
+from .views import GeneDetailView, GeneValidDetailView, GeneUpdateView
 
 app_name = "main"
 
@@ -14,7 +14,9 @@ urlpatterns = [
     path("explore/gene<int:gene_id>", GeneDetailView.as_view(), name="gene"),
     path("annotate/", views.annotate, name="annotate"),  # change to list view
     path(
-        "annotate/gene<int:gene_id>", views.geneAnnot, name="geneAnnot"
+        "annotate/gene<int:gene_id>",
+        GeneUpdateView.as_view(),
+        name="geneAnnot",
     ),  # change to update view
     path("validate/", views.validate, name="validate"),  # change to list view
     path(

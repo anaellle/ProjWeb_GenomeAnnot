@@ -38,9 +38,11 @@
   </nav>
 
 {% if active_tab == "annotate"%}
+
 <form method="post" >
 {% csrf_token %}
 {%endif%}
+
   <!--------Gene---------->
   <div class="bg-body-secondary radius p-3 px-2 mb-5">
 
@@ -58,7 +60,7 @@
             <div class="col">
               <span class="bold">Gene name :  </span>
                 {% if active_tab == "annotate" and gene.status != 3 and gene.status != 4%}
-                <textarea name="geneName" rows="1" col="20"></textarea>
+                {{ form.geneName }}
                 {% else %}
                 <span class="{% if status != 4 %} notvalid {% endif %}">{{gene.geneName}}</span>
               {% endif %}   
@@ -66,7 +68,7 @@
             <div class="col">
               <span class="bold">Gene symbol :  </span>
                 {% if active_tab == "annotate" and gene.status != 3 and gene.status != 4%}
-                <textarea name="geneSymbol" rows="1" col="20"></textarea>
+                {{ form.geneSymbol }}
                 {% else %}
                 <span class="{% if status != 4 %} notvalid {% endif %}">{{gene.geneSymbol}}</span>
               {% endif %} 
@@ -74,7 +76,7 @@
             <div class="col">
               <span class="bold">Gene biotype :  </span>
                 {% if active_tab == "annotate" and gene.status != 3 and gene.status != 4%}
-                <textarea name="geneBiotype" rows="1" col="20"></textarea>
+                {{ form.geneBiotype }}
                 {% else %} 
                 <span class="{% if status != 4 %} notvalid {% endif %}">{{gene.geneBiotype}}</span>
               {% endif %} 
@@ -102,7 +104,7 @@
           <div class="col">
             <span class="bold" >Description : </span>
                 {% if active_tab == "annotate" and gene.status != 3 and gene.status != 4%}
-                <textarea name="descriGene" rows="7" class="w-100"></textarea>
+                {{ form.description }}
                 {% else %}
                 <p class="{% if status != 4 %} notvalid {% endif %}">{{gene.description}}</p>
               {% endif %} 
@@ -133,7 +135,7 @@
             <div class="col">
               <span class="bold">Transcript name : </span>                
                 {% if active_tab == "annotate" and gene.status != 3 and gene.status != 4%}
-                <textarea name="transcriptName" rows="1" col="20"></textarea>
+                {{peptide_form.transcriptName}}
                 {% else %}
                 <span class="{% if status != 4 %} notvalid {% endif %}">{{peptide.transcriptName}}</span>
               {% endif %} 
@@ -141,13 +143,13 @@
             <div class="col">
               <span class="bold">Transcript biotype : </span>
                 {% if active_tab == "annotate" and gene.status != 3 and gene.status != 4%}
-                <textarea name="transcriptBiotype" rows="1" col="20"></textarea>
+                {{peptide_form.transcriptBiotype}}
                 {% else %}
                 <span class="{% if status != 4 %} notvalid {% endif %}">{{peptide.transcriptBiotype}}</span>
               {% endif %} 
             </div>
         </div>
-        
+        <!--
         <div class="row align-items-center my-4 mx-2 ">
           <div class="col">
             <span class="bold" >Description : </span>
@@ -157,6 +159,7 @@
               <p class="{% if status != 4 %} notvalid {% endif %}">...a mettre ds bd...</p>
               {% endif %} 
           </div>
+          -->
         </div>
         <div class="row align-items-center mt-4 mx-2 ">
           <div class="col">
