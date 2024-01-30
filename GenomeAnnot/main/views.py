@@ -222,11 +222,11 @@ def blast(request):
             case "nuc":
                 db="nt"
                 if not(program == "blastn" or program == "blastx" or program =="tblastx"):
-                    return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please choose a programm who works with yout type of query (nuc)"})
+                    return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please choose a programm who works with your type of query (nuc)"})
             case "prot":
                 db="nr"
                 if not(program == "blastp" or program == "tblastn"):
-                    return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please choose a programm who works with yout type of query (prot)"})
+                    return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please choose a programm who works with your type of query (prot)"})
 
 
         try:
