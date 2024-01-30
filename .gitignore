@@ -1,19 +1,7 @@
 __pycache__/
 *.pyc
 
-db.sqlite3
-main/__pycache__/
-main/migrations/*
-GenomeAnnot/__pycache__/
-
-
-main/__pycache__/__init__.cpython-39.pyc
-main/__pycache__/tests.cpython-39.pyc
-main/__pycache__/urls.cpython-39.pyc
-main/__pycache__/views.cpython-39.pyc
-main/migrations/__pycache__/__init__.cpython-39.pyc
-
-GenomeAnnot/main/__pycache__/urls.cpython-39.pyc
-GenomeAnnot/main/__pycache__/views.cpython-39.pyc
-db.sqlite3
-
+GenomeAnnot/db.sqlite3
+GenomeAnnot/GenomeAnnot/__pycache__/
+GenomeAnnot/main/__pycache__/
+GenomeAnnot/main/migrations/*
