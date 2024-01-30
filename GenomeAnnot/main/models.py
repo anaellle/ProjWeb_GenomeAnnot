@@ -1,9 +1,14 @@
 from django.db import models
 
-from django.db import models
 from django.utils import timezone
-from django.urls import reverse
-from django.contrib import admin
+# from django.urls import reverse
+# from django.contrib import admin
+
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from .managers import CustomUserManager
+from django.contrib.auth.models import Permission
+
+from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
 
@@ -55,22 +60,50 @@ class ChromosomeSeq (models.Model):
     def __str__(self):
         return "SEQ_"+self.id
 
-class User (models.Model):
+# class User (models.Model):
+    
+#     class Role(models.IntegerChoices):
+#         READER = (0, 'Reader')
+#         ANNOTATOR = (1, 'Annotator')
+#         VALIDATOR = (2, 'Validator')
+#         ADMIN = (3, 'Admin')
+        
+#     email = models.CharField(max_length=200, primary_key=True)
+#     firstName = models.CharField(max_length=50)
+#     lastName = models.CharField(max_length=50)
+#     password = models.CharField(max_length=15)
+#     phoneNumber = models.CharField(max_length=12)
+#     role = models.IntegerField(choices=Role.choices, default=Role.READER)
+#     lastConnexion = models.DateField()
+    
+#     def __str__(self):
+#         return self.email
+
+class CustomUser(AbstractBaseUser, PermissionsMixin):
     
     class Role(models.IntegerChoices):
         READER = (0, 'Reader')
         ANNOTATOR = (1, 'Annotator')
         VALIDATOR = (2, 'Validator')
         ADMIN = (3, 'Admin')
-        
-    email = models.CharField(max_length=200, primary_key=True)
+
+    email = models.EmailField(_("email address"), unique=True)
+    
+    role = models.IntegerField(choices=Role.choices, default=Role.READER)
+    researchCentre = models.CharField(max_length=50, blank=True)
     firstName = models.CharField(max_length=50)
     lastName = models.CharField(max_length=50)
-    password = models.CharField(max_length=15)
-    phoneNumber = models.IntegerField()
-    role = models.IntegerField(choices=Role.choices, default=Role.READER)
-    lastConnexion = models.DateField()
+    phoneNumber = models.CharField(max_length=12, blank=True)
     
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    date_joined = models.DateTimeField(default=timezone.now)
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["firstName","lastName", "role"]
+
+    objects = CustomUserManager()
+
     def __str__(self):
         return self.email
 
@@ -94,12 +127,12 @@ class Gene (models.Model):
     strand = models.IntegerField(choices=Strand.choices, default=Strand.SENSE)
     startPos = models.IntegerField()
     endPos = models.IntegerField()
-    description = models.CharField(max_length=700, blank=True)
+    description = models.CharField(max_length=1000, blank=True)
     status = models.IntegerField(choices=Status.choices, default=Status.ASSIGNABLE)
     
     idChrom = models.ForeignKey(Chromosome, on_delete=models.CASCADE)
-    emailAnnotator = models.ForeignKey(User, related_name="email_annotator", on_delete=models.CASCADE, blank=True, null=True)
-    emailValidator = models.ForeignKey(User, related_name="email_validator", on_delete=models.CASCADE, blank=True, null=True)
+    emailAnnotator = models.ForeignKey(CustomUser, related_name="email_annotator", on_delete=models.CASCADE, blank=True, null=True)
+    emailValidator = models.ForeignKey(CustomUser, related_name="email_validator", on_delete=models.CASCADE, blank=True, null=True)
     
     def __str__(self):
         return self.id
@@ -121,16 +154,17 @@ class Message(models.Model):
         
     # id auto-généré par django
     text = models.CharField(max_length=500)
-    date = models.DateField(auto_now_add=True) # Automatically set the field to now when the object is first created
+    date = models.DateTimeField(auto_now_add=True) # Automatically set the field to now when the object is first created
     type = models.IntegerField(choices=TypeOfMessage.choices, default=TypeOfMessage.AUTO)
     
-    emailAuthor = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    emailAuthor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, blank=True, null=True)
     idGene = models.ForeignKey(Gene, on_delete=models.CASCADE)
 
 class Peptide(models.Model):
     id = models.CharField(max_length=200, primary_key=True)
     transcriptName = models.CharField(max_length=200)
     transcriptBiotype = models.CharField(max_length=200, blank=True)
+    description = models.CharField(max_length=1000, blank=True)
     
     idGene = models.ForeignKey(Gene, on_delete=models.CASCADE)
     
