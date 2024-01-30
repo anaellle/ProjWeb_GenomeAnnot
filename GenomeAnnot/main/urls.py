@@ -16,20 +16,20 @@ urlpatterns = [
     # Explore and read gene/genome info :
     path("explore/", views.explore, name="explore"),  # change to listview !!!
     path(
-        "explore/genome<int:genome_id>", views.genome, name="genome"
+        "explore/genome<str:genome_id>", views.genome, name="genome"
     ),  # change to detailsview !!!
-    path("explore/gene<int:gene_id>", GeneDetailView.as_view(), name="gene"),
+    path("explore/gene<str:gene_id>", GeneDetailView.as_view(), name="gene"),
     # Annotate gene info :
     path("annotate/", views.annotate, name="annotate"),  # change to list view !!!
     path(
-        "annotate/gene<int:gene_id>",
+        "annotate/gene<str:gene_id>",
         GeneUpdateView.as_view(),
         name="geneAnnot",
     ),
     # Validate gene info :
     path("validate/", views.validate, name="validate"),  # change to list view !!!
     path(
-        "validate/gene<int:gene_id>",
+        "validate/gene<str:gene_id>",
         GeneValidDetailView.as_view(),
         name="geneValid",
     ),

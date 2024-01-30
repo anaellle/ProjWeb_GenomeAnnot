@@ -201,57 +201,102 @@ def validate(request):
 ##############################################################################################
 
 
-import re  #regular expression library
+import re  # regular expression library
+
 
 def kind_of_sequence(sequence):
     # Vérifier si la séquence est une séquence d'ADN ou de protéine
-    if re.match(r'^[ACGTURYKMSWBDHVNacgturykmswbdhvn]*$', sequence):
+    if re.match(r"^[ACGTURYKMSWBDHVNacgturykmswbdhvn]*$", sequence):
         return "nuc"
-    elif re.match(r'^[ABCDEFGHIKLMNPQRSTUVWXYZabcdefghiklmnpqrstuvwxyz]*$', sequence):
+    elif re.match(
+        r"^[ABCDEFGHIKLMNPQRSTUVWXYZabcdefghiklmnpqrstuvwxyz]*$", sequence
+    ):
         return "prot"
     else:
         return "pb_seq"
 
 
-def blast(request,sequence=None):
+def blast(request, sequence=None):
     context = {
         "active_tab": "blast",
         "role_user": role_user,
         "sequence": sequence,
     }
-    #return render(request, "main/blast/main_blast.html", context)
+    # return render(request, "main/blast/main_blast.html", context)
 
-    if request.method == 'POST':
-        sequence = request.POST['sequence']
-        program = request.POST['program']
+    if request.method == "POST":
+        sequence = request.POST["sequence"]
+        program = request.POST["program"]
 
-        #db = request.POST['database']
-        alignments = request.POST['alignments']
-        #Request to ncbi blast api, rajouter gestion des erreurs ensuite
-        
+        # db = request.POST['database']
+        alignments = request.POST["alignments"]
+        # Request to ncbi blast api, rajouter gestion des erreurs ensuite
+
         match kind_of_sequence(sequence):
             case "pb_seq":
-                return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please verify that your query is a protein or a nuc sequence"})
+                return render(
+                    request,
+                    "main/blast/error_blast.html",
+                    {
+                        "active_tab": "blast",
+                        "error_message": "Please verify that your query is a protein or a nuc sequence",
+                    },
+                )
             case "nuc":
-                db="nt"
-                if not(program == "blastn" or program == "blastx" or program =="tblastx"):
-                    return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please choose a programm who works with your type of query (nuc)"})
+                db = "nt"
+                if not (
+                    program == "blastn"
+                    or program == "blastx"
+                    or program == "tblastx"
+                ):
+                    return render(
+                        request,
+                        "main/blast/error_blast.html",
+                        {
+                            "active_tab": "blast",
+                            "error_message": "Please choose a programm who works with your type of query (nuc)",
+                        },
+                    )
             case "prot":
-                db="nr"
-                if not(program == "blastp" or program == "tblastn"):
-                    return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please choose a programm who works with your type of query (prot)"})
-
+                db = "nr"
+                if not (program == "blastp" or program == "tblastn"):
+                    return render(
+                        request,
+                        "main/blast/error_blast.html",
+                        {
+                            "active_tab": "blast",
+                            "error_message": "Please choose a programm who works with your type of query (prot)",
+                        },
+                    )
 
         try:
-            result_handle = NCBIWWW.qblast(program=program, database=db, sequence=sequence, alignments=alignments, descriptions=50,hitlist_size=5)
+            result_handle = NCBIWWW.qblast(
+                program=program,
+                database=db,
+                sequence=sequence,
+                alignments=alignments,
+                descriptions=50,
+                hitlist_size=5,
+            )
             blast_results = SearchIO.read(result_handle, "blast-xml")
         except Exception as e:
             # Gérer les erreurs, par exemple, en renvoyant un message d'erreur à l'utilisateur
-            return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "No API access, please verify your internet connection"})
+            return render(
+                request,
+                "main/blast/error_blast.html",
+                {
+                    "active_tab": "blast",
+                    "error_message": "No API access, please verify your internet connection",
+                },
+            )
         if not blast_results:
-            return render(request, 'main/blast/error_blast.html', {'error_message': 'No results found'})
+            return render(
+                request,
+                "main/blast/error_blast.html",
+                {"error_message": "No results found"},
+            )
 
-          
+
 ##############################################################################################
 ######### Add Genome
 ##############################################################################################
@@ -288,7 +333,10 @@ def genome(request, genome_id):  # change to details view later
 ##############################################################################################
 
 
-#### Not for view, but get all related information of a gene :
+#### Not  view, function used in view :
+
+
+# get all related information of a gene
 def get_gene_related_info(gene):
     chrom = gene.idChrom
     genome = chrom.idGenome
@@ -310,6 +358,14 @@ def get_gene_related_info(gene):
         "peptseq": peptseq,
         "messages": messages,
     }
+
+
+# all filed fill ?
+def are_all_fields_filled(form):
+    for field_name, field in form.fields.items():
+        if form[field_name].value() in [None, "", []]:
+            return False
+    return True
 
 
 #### 3 views of gene
@@ -344,7 +400,7 @@ class GeneUpdateView(UpdateView):
     def get_success_url(self):
         return self.request.POST.get(
             "previousAnnot", self.get_context_data()["previous_url"]
-        )
+        )  # TO DO : revient sur page gene si tous les fied pas rempli à un moment!
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -372,11 +428,9 @@ class GeneUpdateView(UpdateView):
     def form_valid(self, form):
         # TO DO : check user can annotate
         gene = form.save(commit=False)
-        peptide_instance = gene.peptide_set.first()
-        if peptide_instance:
-            peptide_form = PeptideUpdateForm(
-                self.request.POST, instance=peptide_instance
-            )
+        peptide = gene.peptide_set.first()
+        if peptide:
+            peptide_form = PeptideUpdateForm(self.request.POST, instance=peptide)
             if peptide_form.is_valid():
                 peptide_form.save()
         # if save and not annotated, status become 1 (in work) :
@@ -386,8 +440,15 @@ class GeneUpdateView(UpdateView):
                 gene.save()
         # if submited and not just save, status become 3 (submited) :
         if "submit_submit" in self.request.POST:
+            """# check all field gene filled
+            if are_all_fields_filled(form) == True:
+                # check all field peptide filled (if peptide)
+                if (
+                    peptide and are_all_fields_filled(peptide_form) == True
+                ) or not peptide:"""
             gene.status = 3
             gene.save()
+
             # automatic message of submission :
             message = Message.objects.create(
                 text="Annotation submitted",
@@ -395,6 +456,7 @@ class GeneUpdateView(UpdateView):
                 emailAuthor=None,  # to change !!!!
             )
             message.save()
+
         return super().form_valid(form)
 
 
