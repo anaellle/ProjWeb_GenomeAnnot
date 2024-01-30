@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import DetailView, UpdateView, CreateView
 from django.http import HttpResponseRedirect, Http404
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from .forms import GeneUpdateForm, PeptideUpdateForm, CommentForm
 
 from .models import Gene, Message, Genome
@@ -333,6 +333,11 @@ class GeneUpdateView(UpdateView):
     template_name = "main/gene.html"
     form_class = GeneUpdateForm
 
+    def get_success_url(self):
+        return self.request.POST.get(
+            "previousAnnot", self.get_context_data()["previous_url"]
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # get gene info
@@ -351,9 +356,13 @@ class GeneUpdateView(UpdateView):
         context_all["active_tab"] = "annotate"
         context_all["role"] = "annotator"
         context_all["role_user"] = role_user
+        context_all["previous_url"] = self.request.META.get(
+            "HTTP_REFERER", reverse("main:annotate")
+        )
         return context_all
 
     def form_valid(self, form):
+        # TO DO : check user can annotate
         gene = form.save(commit=False)
         peptide_instance = gene.peptide_set.first()
         if peptide_instance:
@@ -362,6 +371,11 @@ class GeneUpdateView(UpdateView):
             )
             if peptide_form.is_valid():
                 peptide_form.save()
+        # if save and not annotated, status become 1 (in work) :
+        if "submit_save" in self.request.POST:
+            if gene.status == 0:
+                gene.status = 1
+                gene.save()
         # if submited and not just save, status become 3 (submited) :
         if "submit_submit" in self.request.POST:
             gene.status = 3
@@ -376,32 +390,46 @@ class GeneUpdateView(UpdateView):
         return super().form_valid(form)
 
 
-class GeneValidDetailView(DetailView, CreateView):
+class GeneValidDetailView(DetailView):
     model = Gene
     template_name = "main/gene.html"
     pk_url_kwarg = "gene_id"
     form_class = CommentForm
 
+    def get_success_url(self):
+        if "submit_comment" not in self.request.POST:
+            previous_url = self.request.session.get(
+                "previous_url", reverse("main:validate")
+            )
+            return previous_url
+        else:
+            return self.request.path
+
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super(GeneValidDetailView, self).get_context_data(**kwargs)
         # get gene info
-        gene = self.object
+        gene = self.get_object()
         gene_info = get_gene_related_info(gene)
         # merge all info
         context_all = {**context, **gene_info}
+        # add form comment
+        context_all["comment_form"] = self.form_class()
         # add info for tabs and role
         context_all["active_tab"] = "validate"
         context_all["role"] = "validator"
         context_all["role_user"] = role_user
+        self.request.session["previous_url"] = self.request.META.get(
+            "HTTP_REFERER", reverse("main:validate")
+        )
         return context_all
 
     def post(self, request, *args, **kwargs):
         gene = self.get_object()
-        form = self.get_form()
         if gene.status == 3:  # if gene can be validated/rejected :
             # TO DO : verification user can validate/reject/comment
 
             if "submit_comment" in request.POST:
+                form = CommentForm(request.POST)
                 if form.is_valid():
                     # add comment to DB :
                     comment = form.save(commit=False)
@@ -432,6 +460,7 @@ class GeneValidDetailView(DetailView, CreateView):
                     emailAuthor=None,  # to change !!!!
                 )
                 message.save()
+        return HttpResponseRedirect(self.get_success_url())
 
 
 ##############################################################################################
