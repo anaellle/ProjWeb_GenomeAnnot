@@ -104,6 +104,7 @@
           <div class="col">
             <span class="bold" >Description : </span>
                 {% if active_tab == "annotate" and gene.status != 3 and gene.status != 4%}
+                <br>
                 {{ form.description }}
                 {% else %}
                 <p class="{% if status != 4 %} notvalid {% endif %}">{{gene.description}}</p>
@@ -211,8 +212,10 @@
   <form method="post" >
   {% csrf_token %}
   <div class="mb-3">
-  <span class="bold">Add a comment</span>
-  <textarea  class="w-100 mb-1 px-3 py-2" rows="4" placeholder="comment ..." name="comment"></textarea>
+  <span class="bold">Add a comment</span><br>
+  <!--<textarea  class="w-100 mb-1 px-3 py-2" rows="4" placeholder="comment ..." name="comment"></textarea>-->
+  {{form.text}}
+  <br>
   <input class="btn btn-secondary" type="submit" name="submit_comment" value="Comment"></input > 
   </div>
   </form>

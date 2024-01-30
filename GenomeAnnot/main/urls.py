@@ -6,28 +6,35 @@ app_name = "main"
 
 
 urlpatterns = [
+    # Home :
     path("", views.home, name="home"),
-    path("explore/", views.explore, name="explore"),  # change to listview
+    # Blast and blast with sequence:
+    path("blast/", views.blast, name="blast"),
+    path("blast/<str:sequence>", views.blast, name="blastseq"),
+    # Add genome :
+    path("addGenome", views.addGenome, name="addGenome"),
+    # Explore and read gene/genome info :
+    path("explore/", views.explore, name="explore"),  # change to listview !!!
     path(
         "explore/genome<int:genome_id>", views.genome, name="genome"
-    ),  # change to detailsview
+    ),  # change to detailsview !!!
     path("explore/gene<int:gene_id>", GeneDetailView.as_view(), name="gene"),
-    path("annotate/", views.annotate, name="annotate"),  # change to list view
+    # Annotate gene info :
+    path("annotate/", views.annotate, name="annotate"),  # change to list view !!!
     path(
         "annotate/gene<int:gene_id>",
         GeneUpdateView.as_view(),
         name="geneAnnot",
-    ),  # change to update view
-    path("validate/", views.validate, name="validate"),  # change to list view
+    ),
+    # Validate gene info :
+    path("validate/", views.validate, name="validate"),  # change to list view !!!
     path(
         "validate/gene<int:gene_id>",
         GeneValidDetailView.as_view(),
         name="geneValid",
     ),
-    path("blast/", views.blast, name="blast"),
-    path("blast/<str:sequence>", views.blast, name="blastseq"),
+    # Admin
     path("administrator/genome/", views.genomeAdmin, name="genomeAdmin"),
     path("administrator/sequence/", views.sequenceAdmin, name="sequenceAdmin"),
     path("administrator/account/", views.accountAdmin, name="accountAdmin"),
-    path("addGenome", views.addGenome, name="addGenome"),
 ]
