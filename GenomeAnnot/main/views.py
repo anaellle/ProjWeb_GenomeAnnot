@@ -192,47 +192,57 @@ def validate(request):
     return render(request, "main/validate/main_validate.html", context)
 
 
-def blast(request, sequence=None):
-    context = {
-        "active_tab": "blast",
-        "role_user": role_user,
-        "sequence": sequence,
-    }
-    # return render(request, "main/blast/main_blast.html", context)
-    if request.method == "POST":
-        sequence = request.POST["sequence"]
-        program = request.POST["program"]
+import re  #regular expression library
 
-        db = request.POST["database"]
-        alignments = request.POST["alignments"]
-        # Request to ncbi blast api, rajouter gestion des erreurs ensuite
-        # try:
-        # result_handle = NCBIWWW.qblast(program="blastn", database="nt", sequence=sequence, alignments=5, descriptions=5,format_type="HTML") #Parametres de base pour le moment, rajouter un choix apres
-        # blast_results = SearchIO.read(result_handle, "blast-xml") #permet recuperation dans le template pour l'affichage
-        # blast_result = result_handle.read()
-        # result_handle.close()
-        # except Exception as e:
-        # Gérer les erreurs, par exemple, en renvoyant un message d'erreur à l'utilisateur
-        # return render(request, 'error.html', {'error_message': str(e)})
+def kind_of_sequence(sequence):
+    # Vérifier si la séquence est une séquence d'ADN ou de protéine
+    if re.match(r'^[ACGTURYKMSWBDHVNacgturykmswbdhvn]*$', sequence):
+        return "nuc"
+    elif re.match(r'^[ABCDEFGHIKLMNPQRSTUVWXYZabcdefghiklmnpqrstuvwxyz]*$', sequence):
+        return "prot"
+    else:
+        return "pb_seq"
 
-        result_handle = NCBIWWW.qblast(
-            program=program,
-            database=db,
-            sequence=sequence,
-            alignments=alignments,
-            descriptions=50,
-            hitlist_size=5,
-        )
-        blast_results = SearchIO.read(result_handle, "blast-xml")
 
+def blast(request):
+    context = {"active_tab": "blast"}
+    #return render(request, "main/blast/main_blast.html", context)
+
+    if request.method == 'POST':
+        sequence = request.POST['sequence']
+        program = request.POST['program']
+
+        #db = request.POST['database']
+        alignments = request.POST['alignments']
+        #Request to ncbi blast api, rajouter gestion des erreurs ensuite
+        
+        match kind_of_sequence(sequence):
+            case "pb_seq":
+                return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please verify that your query is a protein or a nuc sequence"})
+            case "nuc":
+                db="nt"
+                if not(program == "blastn" or program == "blastx" or program =="tblastx"):
+                    return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please choose a programm who works with yout type of query (nuc)"})
+            case "prot":
+                db="nr"
+                if not(program == "blastp" or program == "tblastn"):
+                    return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please choose a programm who works with yout type of query (prot)"})
+
+
+        try:
+            result_handle = NCBIWWW.qblast(program=program, database=db, sequence=sequence, alignments=alignments, descriptions=50,hitlist_size=5)
+            blast_results = SearchIO.read(result_handle, "blast-xml")
+        except Exception as e:
+            # Gérer les erreurs, par exemple, en renvoyant un message d'erreur à l'utilisateur
+            return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "No API access, please verify your internet connection"})
+        if not blast_results:
+            return render(request, 'main/blast/error_blast.html', {'error_message': 'No results found'})
+        
         # Traiter les résultats et afficher dans le template
-        return render(
-            request,
-            "main/blast/blast_results.html",
-            {"active_tab": "blast", "results": blast_results},
-        )
+        return render(request, 'main/blast/blast_results.html', {"active_tab": "blast",'results': blast_results})
 
-    return render(request, "main/blast/main_blast.html", context)
+    return render(request, "main/blast/main_blast.html",context)
+
 
 
 def genomeAdmin(request):
