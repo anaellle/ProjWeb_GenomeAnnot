@@ -40,7 +40,7 @@ class GenePeptideForm(forms.ModelForm):
         self.fields["geneName"].required = False
         self.fields["geneSymbol"].required = False
         self.fields["geneBiotype"].required = False
-        self.fields["description"].required = False
+        self.fields["descriptionGene"].required = False
 
     def save(self, commit=True):
         gene = super().save(commit=False)
