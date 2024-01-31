@@ -156,7 +156,7 @@ def GenomeParser(filename):
     return gendict
 
 
-def main(file):
+def file_to_dico(file):
     if(file.endswith('cds.fa')):
         res = CDSParser(file)
     elif(file.endswith('pep.fa')):
@@ -166,5 +166,4 @@ def main(file):
     else: 
         print("file is not a .fa file")
         res = -1
-    
     return res
