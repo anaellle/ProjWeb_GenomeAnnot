@@ -5,6 +5,9 @@ from django.urls import reverse
 
 from .models import Gene, Message
 
+from geneParser_v2 import file_to_dico
+from insertion import addData
+
 
 # Library required for lauching the Blast API
 from Bio.Blast import NCBIWWW
@@ -215,6 +218,14 @@ def addGenome(request):
             cdsfile = request.POST.get("cdsfile")
             peptidefile = request.POST.get("peptidefile")
             # python parser to insert into BD : ...
+            print(genomefile)
+            genomeDict = file_to_dico(genomefile)
+            cdsDict = file_to_dico(cdsfile)
+            pepDict = file_to_dico(peptidefile)
+            if genomeDict==-1 or cdsDict==-1 or pepDict==-1 :
+                print("File is not a .fa file")
+            else :
+                addData(genomeDict, cdsDict, pepDict)
     return render(request, "main/addGenome/addGenome.html", context)
 
 
