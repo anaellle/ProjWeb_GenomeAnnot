@@ -26,7 +26,7 @@ class CustomUserChangeForm(UserChangeForm):
 class GenePeptideForm(forms.ModelForm):
     class Meta:
         model = Gene
-        fields = ["geneName", "geneSymbol", "geneBiotype", "description"]
+        fields = ["geneName", "geneSymbol", "geneBiotype", "descriptionGene"]
 
     peptide_transcriptName = forms.CharField(
         max_length=200, required=False, label="Transcript Name"
