@@ -229,17 +229,17 @@ def blast(request,sequence=None):
         alignments = request.POST['alignments']
         #Request to ncbi blast api, rajouter gestion des erreurs ensuite
         
-        match kind_of_sequence(sequence):
-            case "pb_seq":
-                return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please verify that your query is a protein or a nuc sequence"})
-            case "nuc":
-                db="nt"
-                if not(program == "blastn" or program == "blastx" or program =="tblastx"):
-                    return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please choose a programm who works with your type of query (nuc)"})
-            case "prot":
-                db="nr"
-                if not(program == "blastp" or program == "tblastn"):
-                    return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please choose a programm who works with your type of query (prot)"})
+        seq = kind_of_sequence(sequence)
+        if (seq == "pb_seq"):
+            return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please verify that your query is a protein or a nuc sequence"})
+        elif(seq == "nuc"):
+            db="nt"
+            if not(program == "blastn" or program == "blastx" or program =="tblastx"):
+                return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please choose a programm who works with your type of query (nuc)"})
+        elif(seq== "prot"):
+            db="nr"
+            if not(program == "blastp" or program == "tblastn"):
+                return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please choose a programm who works with your type of query (prot)"})
 
 
         try:
@@ -250,7 +250,8 @@ def blast(request,sequence=None):
             return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "No API access, please verify your internet connection"})
         if not blast_results:
             return render(request, 'main/blast/error_blast.html', {'error_message': 'No results found'})
-
+            
+    return render(request, "main/blast/main_blast.html",context)
           
 ##############################################################################################
 ######### Add Genome
