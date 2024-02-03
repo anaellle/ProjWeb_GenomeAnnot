@@ -1,6 +1,12 @@
 from django.urls import path
 from . import views
-from .views import GeneDetailView, GeneValidDetailView, GeneUpdateView
+from .views import (
+    GeneDetailView,
+    GeneValidDetailView,
+    GeneUpdateView,
+    genomeAdmin,
+    sequenceAdmin,
+)
 
 app_name = "main"
 
@@ -34,7 +40,7 @@ urlpatterns = [
         name="geneValid",
     ),
     # Admin
-    path("administrator/genome/", views.genomeAdmin, name="genomeAdmin"),
-    path("administrator/sequence/", views.sequenceAdmin, name="sequenceAdmin"),
+    path("administrator/genome/", genomeAdmin.as_view(), name="genomeAdmin"),
+    path("administrator/sequence/", sequenceAdmin.as_view(), name="sequenceAdmin"),
     path("administrator/account/", views.accountAdmin, name="accountAdmin"),
 ]

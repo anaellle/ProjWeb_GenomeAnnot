@@ -1,10 +1,13 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import DetailView, UpdateView, CreateView
-from django.http import HttpResponseRedirect, Http404
-from django.urls import reverse, reverse_lazy
-from .forms import GeneUpdateForm, PeptideUpdateForm, CommentForm
+from django.shortcuts import render, redirect
+from django.views.generic import DetailView, UpdateView
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
-from .models import Gene, Message, Genome
+from django_tables2 import SingleTableView
+from django_tables2.paginators import LazyPaginator
+from .forms import GeneUpdateForm, PeptideUpdateForm, CommentForm
+from .tables import TableGenome, TableGene
+from .models import Gene, Message, Genome, Chromosome
 
 
 # Library required for lauching the Blast API
@@ -13,6 +16,7 @@ from Bio import SeqIO
 from Bio import SearchIO
 
 role_user = "admin"
+
 
 ##############################################################################################
 ######### Home, error 404
@@ -231,7 +235,7 @@ def blast(request, sequence=None):
         # db = request.POST['database']
         alignments = request.POST["alignments"]
         # Request to ncbi blast api, rajouter gestion des erreurs ensuite
-
+        """
         match kind_of_sequence(sequence):
             case "pb_seq":
                 return render(
@@ -267,7 +271,7 @@ def blast(request, sequence=None):
                             "active_tab": "blast",
                             "error_message": "Please choose a programm who works with your type of query (prot)",
                         },
-                    )
+                    )"""
 
         try:
             result_handle = NCBIWWW.qblast(
@@ -400,7 +404,7 @@ class GeneUpdateView(UpdateView):
     def get_success_url(self):
         return self.request.POST.get(
             "previousAnnot", self.get_context_data()["previous_url"]
-        )  # TO DO : revient sur page gene si tous les fied pas rempli à un moment!
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -438,17 +442,19 @@ class GeneUpdateView(UpdateView):
             if gene.status == 0:
                 gene.status = 1
                 gene.save()
+            genome = self.object.idChrom.idGenome
+            if genome.status == 0:
+                genome.status = 1
+                genome.save()
         # if submited and not just save, status become 3 (submited) :
         if "submit_submit" in self.request.POST:
-            """# check all field gene filled
-            if are_all_fields_filled(form) == True:
-                # check all field peptide filled (if peptide)
-                if (
-                    peptide and are_all_fields_filled(peptide_form) == True
-                ) or not peptide:"""
             gene.status = 3
             gene.save()
-
+            # the status of the genome become "in work"
+            genome = self.object.idChrom.idGenome
+            if genome.status == 0:
+                genome.status = 1
+                genome.save()
             # automatic message of submission :
             message = Message.objects.create(
                 text="Annotation submitted",
@@ -491,6 +497,7 @@ class GeneValidDetailView(DetailView):
         self.request.session["previous_url"] = self.request.META.get(
             "HTTP_REFERER", reverse("main:validate")
         )
+        self.request.session["genome_id"] = context_all["genome"].id
         return context_all
 
     def post(self, request, *args, **kwargs):
@@ -498,7 +505,7 @@ class GeneValidDetailView(DetailView):
         if gene.status == 3:  # if gene can be validated/rejected :
             # TO DO : verification user can validate/reject/comment
 
-            if "submit_comment" in request.POST:
+            if "submit_comment_reject" in request.POST:
                 form = CommentForm(request.POST)
                 if form.is_valid():
                     # add comment to DB :
@@ -508,8 +515,6 @@ class GeneValidDetailView(DetailView):
                     comment.emailAuthor = None  ## change !!
                     comment.save()
 
-            elif "submit_reject" in request.POST:
-                ## TO DO : check a comment has been sent before rejection
                 gene.status = 2  # gene in review
                 gene.save()
                 # automatic message of rejection :
@@ -530,6 +535,23 @@ class GeneValidDetailView(DetailView):
                     emailAuthor=None,  # to change !!!!
                 )
                 message.save()
+
+                # status of genome is validated if all of gene from genome are validated
+                # if gene added after validation of genome : it is not taken into account
+                # (genome stay validated), but usually all the genome is added at the same time
+
+                genome_id = self.request.session.get("genome_id", None)
+                genome = Genome.objects.get(id=genome_id)
+                chromosomes = Chromosome.objects.filter(idGenome=genome)
+                all_genes_status_five = all(
+                    gene.status == 4
+                    for gene in Gene.objects.filter(idChrom__in=chromosomes)
+                )
+
+                if all_genes_status_five:
+                    genome.status = 2
+                    genome.save()
+
         return HttpResponseRedirect(self.get_success_url())
 
 
@@ -538,22 +560,56 @@ class GeneValidDetailView(DetailView):
 ##############################################################################################
 
 
-def genomeAdmin(request):
-    context = {
-        "active_tab": "admin",
-        "active_tab_admin": "genome",
-        "role_user": role_user,
-    }
-    return render(request, "main/admin/admin_genome.html", context)
+class genomeAdmin(SingleTableView):
+    model = Genome
+    table_class = TableGenome
+    template_name = "main/admin/admin_genome.html"
+    paginate_by = 14
+    paginator_class = LazyPaginator
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["active_tab"] = "admin"
+        context["active_tab_admin"] = "genome"
+        context["role_user"] = role_user
+
+        return context
 
 
-def sequenceAdmin(request):
-    context = {
-        "active_tab": "admin",
-        "active_tab_admin": "sequence",
-        "role_user": role_user,
-    }
-    return render(request, "main/admin/admin_sequence.html", context)
+class sequenceAdmin(SingleTableView):
+    model = Gene
+    table_class = TableGene
+    template_name = "main/admin/admin_genome.html"
+    paginate_by = 14
+    paginator_class = LazyPaginator
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["active_tab"] = "admin"
+        context["active_tab_admin"] = "sequence"
+        context["role_user"] = role_user
+
+        return context
+
+    def get_queryset(self):
+        return Gene.objects.order_by("id")
+
+    def get(self, request, *args, **kwargs):
+
+        for key, value in request.GET.items():
+            if key.startswith("idgene"):
+                idgene = value
+                break
+
+        if "submit_chooseAnnot" in request.GET:
+            # TO DO : filter on role and store idgene (to change email for this gene)
+            return redirect(reverse("main:accountAdmin"))
+        if "submit_chooseValid" in request.GET:
+            # TO DO : filter on role and store idgene (to change email for this gene)
+            return redirect(reverse("main:accountAdmin"))
+
+        else:
+            return super().get(request, *args, **kwargs)
 
 
 def accountAdmin(request):

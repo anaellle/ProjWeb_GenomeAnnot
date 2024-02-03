@@ -31,10 +31,10 @@ class GeneUpdateForm(forms.ModelForm):
             "geneName",
             "geneSymbol",
             "geneBiotype",
-            "description",
+            "descriptionGene",
         ]
         widgets = {
-            "description": forms.Textarea(attrs={"cols": 100, "rows": 5}),
+            "descriptionGene": forms.Textarea(attrs={"cols": 100, "rows": 5}),
         }
 
 
@@ -44,10 +44,10 @@ class PeptideUpdateForm(forms.ModelForm):
         fields = [
             "transcriptName",
             "transcriptBiotype",
-            "description",
+            "descriptionPep",
         ]
         widgets = {
-            "description": forms.Textarea(attrs={"cols": 100, "rows": 5}),
+            "descriptionPep": forms.Textarea(attrs={"cols": 100, "rows": 5}),
         }
 
 
