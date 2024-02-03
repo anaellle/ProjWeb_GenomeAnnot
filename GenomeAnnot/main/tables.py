@@ -28,7 +28,6 @@ class TableGenome(tables.Table):
             reverse("main:sequenceAdmin")
             + f"?idChrom__idGenome__id__icontains={value}"
         )
-        ## TO DO : filter on genome on the other page
         return format_html(
             '<a href="{}" target="_blank" class="nav-link">{}</a>', url, value
         )
@@ -122,28 +121,31 @@ class TableGene(tables.Table):
     def render_id(self, record):
         url = reverse("main:gene", kwargs={"gene_id": record.id})
         return format_html(
-            '<a href="{}" target="_blank" name="idgene" class="nav-link">{}</a>',
+            '<a href="{}" target="_blank" class="nav-link">{}</a>',
             url,
             record.id,
         )
 
     def render_choose_user(self, record):
+        urlannot = reverse(
+            "main:assignAdmin", kwargs={"gene_id": record.id, "role": "1"}
+        )
+        urlvalid = reverse(
+            "main:assignAdmin", kwargs={"gene_id": record.id, "role": "2"}
+        )
         return format_html(
-            '<form method="get" >\
-                <input name="idgene-{}" value="{}" style="display:none;"></input>\
-                <input class="btn " type="submit" name="submit_chooseAnnot" value="Annotator"></input > \
-                <input class="btn " type="submit" name="submit_chooseValid" value="Validator"></input >\
-                </form>',
-            record.id,
-            record.id,
+            '<a href="{}"  class="nav-link">Annotator</a>\
+                <a href="{}"  class="nav-link">Validator</a>',
+            urlannot,
+            urlvalid,
         )
 
-    """     def render_genome_id(self, record):
-        genome_id = record.get_genome_id()
-        genome_url = reverse("main:genome", kwargs={"genome_id": genome_id})
+    def render_genome_id(self, value):
+
+        genome_url = reverse("main:genome", kwargs={"genome_id": value})
         return format_html(
-            '<a href="{}" class="nav-link">{}</a>', genome_url, genome_id
-        ) """
+            '<a href="{}" target="_blank" class="nav-link">{}</a>', genome_url, value
+        )
 
     def render_status(self, value):
         # include status.html not possible :bug
@@ -170,7 +172,59 @@ class TableGene(tables.Table):
                  Validated  </span>'
         return format_html(string)
 
-    def render_emailAnnotator(self, record):
-        value = record.emailAnnotator
-        user_url = reverse("main:accountAdmin")  ## TO DO : filter on email user
+    def render_emailAnnotator(self, value):
+        user_url = reverse("main:accountAdmin") + f"?email__contains={value}"
         return format_html('<a href="{}" class="nav-link">{}</a>', user_url, value)
+
+    def render_emailValidator(self, value):
+        user_url = reverse("main:accountAdmin") + f"?email__contains={value}"
+        return format_html('<a href="{}" class="nav-link">{}</a>', user_url, value)
+
+
+###################################################################
+
+
+class TableAccount(tables.Table):
+
+    phoneNumber = tables.Column(verbose_name="Phone", orderable=False)
+
+    class Meta:
+        template_name = "django_tables2/table.html"
+        model = CustomUser
+        fields = (
+            "firstName",
+            "lastName",
+            "email",
+            "researchCentre",
+            "phoneNumber",
+            "role",
+            "last_login",
+        )
+
+
+###################################################################
+
+
+class TableAssignAccount(tables.Table):
+
+    assign = tables.Column(
+        verbose_name="Assign Gene", empty_values=(), orderable=False
+    )
+
+    class Meta:
+        template_name = "django_tables2/table.html"
+        model = CustomUser
+        fields = (
+            "firstName",
+            "lastName",
+            "email",
+            "last_login",
+        )
+
+    def render_assign(self, record):
+        return format_html(
+            '<form method="get">\
+                        <input class="btn" type="submit" name="{}" value="Choose"></input > \
+                            </form>',
+            record.email,
+        )

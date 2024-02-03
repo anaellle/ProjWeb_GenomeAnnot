@@ -6,6 +6,8 @@ from .views import (
     GeneUpdateView,
     genomeAdmin,
     sequenceAdmin,
+    accountAdmin,
+    accountAssignAdmin,
 )
 
 app_name = "main"
@@ -42,5 +44,10 @@ urlpatterns = [
     # Admin
     path("administrator/genome/", genomeAdmin.as_view(), name="genomeAdmin"),
     path("administrator/sequence/", sequenceAdmin.as_view(), name="sequenceAdmin"),
-    path("administrator/account/", views.accountAdmin, name="accountAdmin"),
+    path("administrator/account/", accountAdmin.as_view(), name="accountAdmin"),
+    path(
+        "administrator/assign<str:gene_id>/<str:role>",
+        accountAssignAdmin.as_view(),
+        name="assignAdmin",
+    ),
 ]

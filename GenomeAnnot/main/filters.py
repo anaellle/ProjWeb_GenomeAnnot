@@ -1,6 +1,6 @@
 import django_filters
 from django import forms
-from .models import Genome, Gene
+from .models import Genome, Gene, CustomUser
 
 
 ####################################################################################
@@ -102,4 +102,80 @@ class AdminGeneFilter(django_filters.FilterSet):
             "status": ["exact"],
             "emailAnnotator__email": ["icontains"],
             "emailValidator__email": ["icontains"],
+        }
+
+
+####################################################################################
+
+
+class AdminAccountFilter(django_filters.FilterSet):
+    firstName__contains = django_filters.CharFilter(
+        field_name="firstName",
+        lookup_expr="icontains",
+        label="First Name",
+        widget=forms.TextInput(attrs={"placeholder": ""}),
+    )
+    lastName__contains = django_filters.CharFilter(
+        field_name="lastName",
+        lookup_expr="icontains",
+        label="Last Name",
+        widget=forms.TextInput(attrs={"placeholder": ""}),
+    )
+    email__contains = django_filters.CharFilter(
+        field_name="email",
+        lookup_expr="icontains",
+        label="Email",
+        widget=forms.TextInput(attrs={"placeholder": ""}),
+    )
+    researchCentre__contains = django_filters.CharFilter(
+        field_name="researchCentre",
+        lookup_expr="icontains",
+        label="ResearchCenter",
+        widget=forms.TextInput(attrs={"placeholder": ""}),
+    )
+    phoneNumber__contains = django_filters.CharFilter(
+        field_name="phoneNumber",
+        lookup_expr="icontains",
+        label="Phone Number",
+        widget=forms.TextInput(attrs={"placeholder": ""}),
+    )
+
+    class Meta:
+        model = CustomUser
+        fields = {
+            "firstName": ["contains"],
+            "lastName": ["contains"],
+            "email": ["contains"],
+            "researchCentre": ["contains"],
+            "phoneNumber": ["contains"],
+            "role": ["exact"],
+        }
+
+
+class AdminAssignFilter(django_filters.FilterSet):
+    firstName__contains = django_filters.CharFilter(
+        field_name="firstName",
+        lookup_expr="icontains",
+        label="First Name",
+        widget=forms.TextInput(attrs={"placeholder": ""}),
+    )
+    lastName__contains = django_filters.CharFilter(
+        field_name="lastName",
+        lookup_expr="icontains",
+        label="Last Name",
+        widget=forms.TextInput(attrs={"placeholder": ""}),
+    )
+    email__contains = django_filters.CharFilter(
+        field_name="email",
+        lookup_expr="icontains",
+        label="Email",
+        widget=forms.TextInput(attrs={"placeholder": ""}),
+    )
+
+    class Meta:
+        model = CustomUser
+        fields = {
+            "firstName": ["contains"],
+            "lastName": ["contains"],
+            "email": ["contains"],
         }

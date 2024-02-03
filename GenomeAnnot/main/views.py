@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from django.views.generic import DetailView, UpdateView
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.urls import resolve
+from django.urls.exceptions import Resolver404
 
 from django_tables2 import SingleTableView
 from django_tables2.views import SingleTableMixin
@@ -9,9 +11,14 @@ from django_tables2.paginators import LazyPaginator
 from django_filters.views import FilterView
 
 from .forms import GeneUpdateForm, PeptideUpdateForm, CommentForm
-from .tables import TableGenome, TableGene
-from .models import Gene, Message, Genome, Chromosome
-from .filters import AdminGenomeFilter, AdminGeneFilter
+from .tables import TableGenome, TableGene, TableAccount, TableAssignAccount
+from .models import Gene, Message, Genome, Chromosome, CustomUser
+from .filters import (
+    AdminGenomeFilter,
+    AdminGeneFilter,
+    AdminAccountFilter,
+    AdminAssignFilter,
+)
 
 # Library required for lauching the Blast API
 from Bio.Blast import NCBIWWW
@@ -566,7 +573,7 @@ class GeneValidDetailView(DetailView):
 class genomeAdmin(SingleTableMixin, FilterView):
     model = Genome
     table_class = TableGenome
-    template_name = "main/admin/admin_genome.html"
+    template_name = "main/admin/admin.html"
     paginate_by = 10
     paginator_class = LazyPaginator
     filterset_class = AdminGenomeFilter
@@ -583,7 +590,7 @@ class genomeAdmin(SingleTableMixin, FilterView):
 class sequenceAdmin(SingleTableMixin, FilterView):
     model = Gene
     table_class = TableGene
-    template_name = "main/admin/admin_sequence.html"
+    template_name = "main/admin/admin.html"
     paginate_by = 10
     paginator_class = LazyPaginator
     filterset_class = AdminGeneFilter
@@ -599,33 +606,92 @@ class sequenceAdmin(SingleTableMixin, FilterView):
     def get_queryset(self):
         queryset = super().get_queryset()
         genome_id = self.request.GET.get("idChrom__idGenome__id__icontains")
-        print(genome_id)
-        # if genome_id:
-        # queryset = queryset.filter(idChrom__idGenome__id=genome_id)
+        if genome_id:
+            queryset = queryset.filter(idChrom__idGenome__id=genome_id)
         return queryset
 
-    def get(self, request, *args, **kwargs):
 
-        for key, value in request.GET.items():
-            if key.startswith("idgene"):
-                idgene = value
+class accountAdmin(SingleTableMixin, FilterView):
+    model = CustomUser
+    table_class = TableAccount
+    template_name = "main/admin/admin.html"
+    paginate_by = 10
+    paginator_class = LazyPaginator
+    filterset_class = AdminAccountFilter
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["active_tab"] = "admin"
+        context["active_tab_admin"] = "account"
+        context["role_user"] = role_user
+        return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        email = self.request.GET.get("email__contains")
+        if email:
+            queryset = queryset.filter(email=email)
+        return queryset
+
+
+class accountAssignAdmin(SingleTableMixin, FilterView):
+    model = CustomUser
+    table_class = TableAssignAccount
+    template_name = "main/admin/admin.html"
+    paginate_by = 10
+    paginator_class = LazyPaginator
+    filterset_class = AdminAssignFilter
+
+    def get_success_url(self):
+        previous_url = self.request.session.get("previous_url")
+        if previous_url:
+            return previous_url
+        return reverse("main:sequenceAdmin")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["active_tab"] = "admin"
+        context["active_tab_admin"] = "account"
+        context["role_user"] = role_user
+        previous_url = self.request.META.get(
+            "HTTP_REFERER", reverse("main:sequenceAdmin")
+        )
+        try:
+            match = resolve(previous_url)
+            view_name = match.view_name
+            if view_name == "sequenceAdmin":
+                # store url only if page sequence
+                self.request.session["previous_url"] = previous_url
+        except Resolver404:
+            previous_url = reverse("main:sequenceAdmin")
+        return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        role = self.kwargs.get("role")
+        if role:
+            queryset = queryset.filter(role=role)
+        return queryset.order_by("id")
+
+    def get(self, request, *args, **kwargs):
+        user = None
+        for key in request.GET:
+            if "@" in key:
+                try:
+                    user = CustomUser.objects.get(email=key)
+                except CustomUser.DoesNotExist:
+                    pass
                 break
 
-        if "submit_chooseAnnot" in request.GET:
-            # TO DO : filter on role and store idgene (to change email for this gene)
-            return redirect(reverse("main:accountAdmin"))
-        if "submit_chooseValid" in request.GET:
-            # TO DO : filter on role and store idgene (to change email for this gene)
-            return redirect(reverse("main:accountAdmin"))
+        gene_id = self.kwargs.get("gene_id")
+        role = int(self.kwargs.get("role"))
+        if gene_id and role and user:
+            gene = Gene.objects.get(id=gene_id)
+            if role == 1:
+                gene.emailAnnotator = user
+            elif role == 2:
+                gene.emailValidator = user
+            gene.save()
+            return HttpResponseRedirect(self.get_success_url())
 
-        else:
-            return super().get(request, *args, **kwargs)
-
-
-def accountAdmin(request):
-    context = {
-        "active_tab": "admin",
-        "active_tab_admin": "account",
-        "role_user": role_user,
-    }
-    return render(request, "main/admin/admin_account.html", context)
+        return super().get(request, *args, **kwargs)
