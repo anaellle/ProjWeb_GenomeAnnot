@@ -1,8 +1,16 @@
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.contrib.auth.forms import AuthenticationForm
 from django import forms
-from .models import Gene, Peptide, Message,CustomUser
+from .models import Gene, Peptide, Message, CustomUser
 
 
+# class CustomUserLoginForm(AuthenticationForm):
+    # class Meta:
+    #     model = CustomUser
+    #     fields = [
+    #         "email",
+    #         "password",
+    #     ]
 
 class CustomUserCreationForm(UserCreationForm):
     """A form for creating new users. Includes all the required
@@ -30,10 +38,10 @@ class GeneUpdateForm(forms.ModelForm):
             "geneName",
             "geneSymbol",
             "geneBiotype",
-            "description",
+            "descriptionGene",
         ]
         widgets = {
-            "description": forms.Textarea(attrs={"cols": 100, "rows": 5}),
+            "descriptionGene": forms.Textarea(attrs={"cols": 100, "rows": 5}),
         }
 
 
@@ -43,10 +51,10 @@ class PeptideUpdateForm(forms.ModelForm):
         fields = [
             "transcriptName",
             "transcriptBiotype",
-            # "description",
+            # "descriptionPep",
         ]
         # widgets = {
-        #    "description": forms.Textarea(attrs={"cols": 100, "rows": 5}),
+        #    "descriptionPep": forms.Textarea(attrs={"cols": 100, "rows": 5}),
         # }
 
 

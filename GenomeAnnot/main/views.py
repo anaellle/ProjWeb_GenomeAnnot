@@ -1,11 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import DetailView, UpdateView, CreateView
 from django.http import HttpResponseRedirect, Http404
-from django.urls import reverse, reverse_lazy
-from .forms import GeneUpdateForm, PeptideUpdateForm, CommentForm
-
+from django.urls import reverse
+from .forms import GeneUpdateForm, PeptideUpdateForm, CommentForm 
 from .models import Gene, Message, Genome
 
+# Library required for login
+from django.contrib.auth.views import LoginView
+from django.contrib import messages
+from django.urls import reverse_lazy
+# from django.contrib.auth.forms import AuthenticationForm
+# from .forms import CustomUserLoginForm
 
 # Library required for lauching the Blast API
 from Bio.Blast import NCBIWWW
@@ -13,6 +18,8 @@ from Bio import SeqIO
 from Bio import SearchIO
 
 role_user = "admin"
+
+
 
 ##############################################################################################
 ######### Home, error 404
@@ -32,6 +39,26 @@ def custom_404(request, exception):  # only visible if debug set to false
         context={"role_user": role_user},
     )
 
+##############################################################################################
+######### Login
+##############################################################################################
+
+# Pas utilisé #
+# class CustomUserLoginView(LoginView):
+#     form_class = AuthenticationForm
+#     template_name = 'main/login.html'
+# Pas utilisé #
+
+class CustomUserLoginView(LoginView):
+    template_name = "main/login.html"
+    redirect_authenticated_user = True
+    
+    def get_success_url(self):
+        return reverse_lazy('main:home') 
+    
+    def form_invalid(self, form):
+        messages.error(self.request,'Invalid email or password')
+        return self.render_to_response(self.get_context_data(form=form))
 
 ##############################################################################################
 ######### Search views (explore, annotate and validate)
