@@ -671,7 +671,7 @@ class accountAssignAdmin(SingleTableMixin, FilterView):
         role = self.kwargs.get("role")
         if role:
             queryset = queryset.filter(role=role)
-        return queryset.order_by("id")
+        return queryset.order_by("email")
 
     def get(self, request, *args, **kwargs):
         user = None

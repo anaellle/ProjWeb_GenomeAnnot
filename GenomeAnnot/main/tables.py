@@ -206,6 +206,13 @@ class TableAccount(tables.Table):
 
 
 class TableAssignAccount(tables.Table):
+    assigned_gene_count = tables.Column(
+        verbose_name="Number of Assigned Gene", empty_values=(), orderable=False
+    )
+
+    finish_gene_count = tables.Column(
+        verbose_name="Work Done (%)", empty_values=(), orderable=False
+    )
 
     assign = tables.Column(
         verbose_name="Assign Gene", empty_values=(), orderable=False
@@ -228,3 +235,39 @@ class TableAssignAccount(tables.Table):
                             </form>',
             record.email,
         )
+
+    def render_assigned_gene_count(self, record):
+        user = CustomUser.objects.get(email=record.email)
+        if user.role == 1:
+            return Gene.objects.filter(emailAnnotator=user).count()
+        elif user.role == 2:
+            return Gene.objects.filter(emailValidator=user).count()
+        else:
+            return None
+
+    def render_finish_gene_count(self, record):
+        user = CustomUser.objects.get(email=record.email)
+        if user.role == 1:
+            gene_count = Gene.objects.filter(emailAnnotator=user).count()
+            if gene_count != 0:
+                pourcentage = (
+                    Gene.objects.filter(
+                        emailAnnotator=user, status=Gene.Status.SUBMITTED
+                    ).count()
+                    / gene_count
+                    * 100
+                )
+                return round(pourcentage, 2)
+        elif user.role == 2:
+            gene_count = Gene.objects.filter(emailValidator=user).count()
+            if gene_count != 0:
+                pourcentage = (
+                    Gene.objects.filter(
+                        emailValidator=user, status=Gene.Status.VALIDATED
+                    ).count()
+                    / gene_count
+                    * 100
+                )
+                return round(pourcentage, 2)
+        else:
+            return None
