@@ -4,11 +4,14 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 from django_tables2 import SingleTableView
+from django_tables2.views import SingleTableMixin
 from django_tables2.paginators import LazyPaginator
+from django_filters.views import FilterView
+
 from .forms import GeneUpdateForm, PeptideUpdateForm, CommentForm
 from .tables import TableGenome, TableGene
 from .models import Gene, Message, Genome, Chromosome
-
+from .filters import AdminGenomeFilter, AdminGeneFilter
 
 # Library required for lauching the Blast API
 from Bio.Blast import NCBIWWW
@@ -560,12 +563,13 @@ class GeneValidDetailView(DetailView):
 ##############################################################################################
 
 
-class genomeAdmin(SingleTableView):
+class genomeAdmin(SingleTableMixin, FilterView):
     model = Genome
     table_class = TableGenome
     template_name = "main/admin/admin_genome.html"
-    paginate_by = 14
+    paginate_by = 10
     paginator_class = LazyPaginator
+    filterset_class = AdminGenomeFilter
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -576,12 +580,13 @@ class genomeAdmin(SingleTableView):
         return context
 
 
-class sequenceAdmin(SingleTableView):
+class sequenceAdmin(SingleTableMixin, FilterView):
     model = Gene
     table_class = TableGene
-    template_name = "main/admin/admin_genome.html"
-    paginate_by = 14
+    template_name = "main/admin/admin_sequence.html"
+    paginate_by = 10
     paginator_class = LazyPaginator
+    filterset_class = AdminGeneFilter
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

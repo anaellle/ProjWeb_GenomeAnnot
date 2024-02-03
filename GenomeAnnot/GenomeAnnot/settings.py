@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django_tables2",
+    "django_filters",
+    "bootstrap3",
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "main.apps.MainConfig",  # <-- notre app

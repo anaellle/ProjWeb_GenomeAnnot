@@ -197,6 +197,7 @@ main {
   --bs-btn-disabled-color: var(--roseebony_clair);
   --bs-btn-disabled-border-color: var(--roseebony_clair);
 }
+.btn.btn-default,
 .btn.btn-primary {
   --bs-btn-bg: var(--roseebony);
   --bs-btn-border-color: var(--roseebony);
@@ -303,7 +304,9 @@ table.table thead th a {
 .page-link:hover {
   color: var(--roseebony);
 }
-
+.form.form-flex {
+  display: flex;
+}
 .pagination {
   display: none;
 }

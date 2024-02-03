@@ -22,14 +22,15 @@ class TableGenome(tables.Table):
         template_name = "django_tables2/table.html"
         model = Genome
         fields = ("id", "species", "strain", "substrain", "status")
-        # sequence = ("genome", "...", "inwork_percentage", "valid_percentage")
 
     def render_id(self, value):
         # url = reverse("main:genome", kwargs={"genome_id": record.id})
         # return format_html('<a href="{}" class="nav-link">{}</a>', url, record.id)
         url = reverse("main:sequenceAdmin")
         ## TO DO : filter on genome on the other page
-        return format_html('<a href="{}" class="nav-link">{}</a>', url, value)
+        return format_html(
+            '<a href="{}" target="_blank" class="nav-link">{}</a>', url, value
+        )
 
     def render_nbgene(self, record):
         total_genes_count = 0
@@ -108,6 +109,8 @@ class TableGene(tables.Table):
     choose_user = tables.Column(
         verbose_name="Assign gene", empty_values=(), orderable=False
     )
+    emailAnnotator = tables.Column(verbose_name="Annotator")
+    emailValidator = tables.Column(verbose_name="Validator")
 
     class Meta:
         template_name = "django_tables2/table.html"

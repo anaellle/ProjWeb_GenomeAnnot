@@ -18,7 +18,23 @@
 {% block body %}  
 
     {% load render_table from django_tables2 %}
-    {% render_table table %}     
+    {% load bootstrap3 %}
+
+    {% if filter %}
+   
+    <div class=" py-3 px-2 filter "  id="filter" >
+        <div class=" card-body">
+            <form action="" method="get" class="form form-flex">
+                {% bootstrap_form filter.form layout='block' %}
+                {% bootstrap_button 'filter' %}
+            </form>   
+        </div>
+    </div>
+    
+{% endif %} 
+{% render_table table 'django_tables2/bootstrap.html' %}
+
+
     <nav class=" mb-4">
         <ul class="pagination override">
             {% if page_obj.has_previous %}            
