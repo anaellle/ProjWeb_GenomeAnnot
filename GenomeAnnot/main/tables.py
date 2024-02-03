@@ -24,9 +24,10 @@ class TableGenome(tables.Table):
         fields = ("id", "species", "strain", "substrain", "status")
 
     def render_id(self, value):
-        # url = reverse("main:genome", kwargs={"genome_id": record.id})
-        # return format_html('<a href="{}" class="nav-link">{}</a>', url, record.id)
-        url = reverse("main:sequenceAdmin")
+        url = (
+            reverse("main:sequenceAdmin")
+            + f"?idChrom__idGenome__id__icontains={value}"
+        )
         ## TO DO : filter on genome on the other page
         return format_html(
             '<a href="{}" target="_blank" class="nav-link">{}</a>', url, value

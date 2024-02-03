@@ -597,7 +597,12 @@ class sequenceAdmin(SingleTableMixin, FilterView):
         return context
 
     def get_queryset(self):
-        return Gene.objects.order_by("id")
+        queryset = super().get_queryset()
+        genome_id = self.request.GET.get("idChrom__idGenome__id__icontains")
+        print(genome_id)
+        # if genome_id:
+        # queryset = queryset.filter(idChrom__idGenome__id=genome_id)
+        return queryset
 
     def get(self, request, *args, **kwargs):
 
