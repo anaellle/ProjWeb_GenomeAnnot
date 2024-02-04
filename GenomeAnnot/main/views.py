@@ -10,6 +10,7 @@ from django_tables2.views import SingleTableMixin
 from django_tables2.paginators import LazyPaginator
 from django_filters.views import FilterView
 
+
 from .forms import GeneUpdateForm, PeptideUpdateForm, CommentForm
 from .tables import TableGenome, TableGene, TableAccount, TableAssignAccount
 from .models import Gene, Message, Genome, Chromosome, CustomUser
@@ -19,6 +20,10 @@ from .filters import (
     AdminAccountFilter,
     AdminAssignFilter,
 )
+
+# from fileParser import file_to_dico
+# from insertion import addData
+
 
 # Library required for lauching the Blast API
 from Bio.Blast import NCBIWWW
@@ -245,7 +250,7 @@ def blast(request, sequence=None):
         # db = request.POST['database']
         alignments = request.POST["alignments"]
         # Request to ncbi blast api, rajouter gestion des erreurs ensuite
-        """
+        
         match kind_of_sequence(sequence):
             case "pb_seq":
                 return render(
@@ -281,7 +286,7 @@ def blast(request, sequence=None):
                             "active_tab": "blast",
                             "error_message": "Please choose a programm who works with your type of query (prot)",
                         },
-                    )"""
+                    )
 
         try:
             result_handle = NCBIWWW.qblast(
@@ -311,6 +316,7 @@ def blast(request, sequence=None):
             )
 
 
+
 ##############################################################################################
 ######### Add Genome
 ##############################################################################################
@@ -325,6 +331,14 @@ def addGenome(request):
             cdsfile = request.POST.get("cdsfile")
             peptidefile = request.POST.get("peptidefile")
             # python parser to insert into BD : ...
+            # print(genomefile)
+            # genomeDict = file_to_dico(genomefile)
+            # cdsDict = file_to_dico(cdsfile)
+            # pepDict = file_to_dico(peptidefile)
+            # if genomeDict==-1 or cdsDict==-1 or pepDict==-1 :
+            #     print("File is not a .fa file")
+            # else :
+            #     addData(genomeDict, cdsDict, pepDict)
     return render(request, "main/addGenome/addGenome.html", context)
 
 

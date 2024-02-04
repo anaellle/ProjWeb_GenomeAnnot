@@ -46,9 +46,11 @@ class PeptideUpdateForm(forms.ModelForm):
             "transcriptBiotype",
             "descriptionPep",
         ]
+
         widgets = {
             "descriptionPep": forms.Textarea(attrs={"cols": 100, "rows": 5}),
         }
+
 
 
 class CommentForm(forms.ModelForm):
@@ -65,3 +67,4 @@ class CommentForm(forms.ModelForm):
                 }
             ),
         }
+

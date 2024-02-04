@@ -4,7 +4,7 @@
 
 {% block body %}
 
-<h2>Résultats de la recherche BLAST</h2>
+<h2>Blast Search Results</h2>
 {% for hit in results.hits %}
 <br>
     <div>
@@ -15,10 +15,15 @@
         hit length : {{ hit.seq_len }}<br>
         {% for hsp in hit.hsps %}
             bit score : {{ hsp.bitscore }}<br>
-            evalue : {{ hsp.evalue }}<br>
-            <p align="justify">{{ hsp.query.seq }}<br>
-            {{ hsp.aln_annotation.similarity }}<br>
-            {{ hsp.hit.seq }}</p>
+            evalue : {{  hsp.evalue }}<br>
+
+            <br>
+            <br>
+            <pre align="left">
+                {{ hsp.query.seq }}<br>
+                {{ hsp.aln_annotation.similarity }}<br>
+                {{ hsp.hit.seq }}
+            </pre>
 
         {% endfor %}
         
