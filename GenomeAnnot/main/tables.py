@@ -1,5 +1,5 @@
 # myapp/tables.py
-
+import GenomeAnnot.wsgi.py
 import django_tables2 as tables
 from django.urls import reverse
 from django.utils.html import format_html

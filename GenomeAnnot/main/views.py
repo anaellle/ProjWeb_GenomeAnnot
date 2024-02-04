@@ -1,3 +1,5 @@
+import GenomeAnnot.wsgi.py
+
 from django.shortcuts import render, redirect
 from django.views.generic import DetailView, UpdateView
 from django.http import HttpResponseRedirect
@@ -250,7 +252,8 @@ def blast(request, sequence=None):
         # db = request.POST['database']
         alignments = request.POST["alignments"]
         # Request to ncbi blast api, rajouter gestion des erreurs ensuite
-        
+
+        """
         match kind_of_sequence(sequence):
             case "pb_seq":
                 return render(
@@ -286,7 +289,7 @@ def blast(request, sequence=None):
                             "active_tab": "blast",
                             "error_message": "Please choose a programm who works with your type of query (prot)",
                         },
-                    )
+                    ) """
 
         try:
             result_handle = NCBIWWW.qblast(
@@ -314,7 +317,6 @@ def blast(request, sequence=None):
                 "main/blast/error_blast.html",
                 {"error_message": "No results found"},
             )
-
 
 
 ##############################################################################################
