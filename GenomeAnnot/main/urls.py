@@ -1,6 +1,6 @@
 from django.urls import include, path
 from . import views
-from .views import GeneDetailView, GeneValidDetailView, GeneUpdateView, CustomUserLoginView
+from .views import GeneDetailView, GeneValidDetailView, GeneUpdateView, CustomUserLoginView, SignUpView
 from django.contrib.auth.views import LoginView, LogoutView
 app_name = "main"
 
@@ -9,17 +9,14 @@ urlpatterns = [
     # Home :
     path("", views.home, name="home"),
     
-    # Login :
+    # Login - Logout :
     path('login/', CustomUserLoginView.as_view(), name='login'),
-    # path('login/', LoginView.as_view(template_name='main/login.html'), name='login'),
-
-    # path('login/', LoginView.as_view(template_name='login.html'), name='login'),
-    # path("logout/", LogoutView.as_view(next_page="login"), name="logout"),
-    # path('profile/',  login_required(UserView.as_view()), name='profile'),
-    # path('signup/', signup, name='signup'),
-    # path("login/", CustomUserLoginView.as_view(), name="custom_user_login"),
-    # path("logout/", LogoutView.as_view(next_page="login"), name="logout"),
+    path('logout/', LogoutView.as_view(next_page='main:login'), name='logout'),
     
+    # Sign up :
+    path('signUp/', SignUpView.as_view(), name='signUp'),
+    # path('profile/',  login_required(UserView.as_view()), name='profile'),
+
     # Blast and blast with sequence:
     path("blast/", views.blast, name="blast"),
     path("blast/<str:sequence>", views.blast, name="blastseq"),

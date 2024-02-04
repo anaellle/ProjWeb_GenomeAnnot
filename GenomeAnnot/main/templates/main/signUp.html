@@ -1,0 +1,45 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+<!-- --------------- CONTENT --------------- -->
+{% block body %}
+
+<div class="body container" >
+    <div class="row g-0">
+        <!-- ------ IMAGE LOGIN/SIGN UP ------ -->
+        <div class="col-md-5">
+            <img src="{% static 'main/images/password.png' %}" class="img-fluid rounded-start" alt="...">
+        </div>
+
+        <!-- ------ FORM SIGN UP ------ -->
+        <div class="col-md-7 card-body align-items-center d-flex flex-column justify-content-center">
+            <form method="post" novalidate> <!-- class="card" -->
+                {% csrf_token %}
+                
+                <!-------- TITLE -------->
+                <h2 class="text-center">Sign up</h2>
+                <hr>
+                
+                {% for field in form %}
+                    <div class="d-flex align-items-center " style="text-align: center;">
+                        {{ field.label_tag }}
+                    </div>
+                    <div class="d-flex align-items-center ">
+                        {{ field }}
+                        {% if field.errors %}
+                            <small class="error">{{ field.errors|striptags  }}</small> 
+                        {% endif %}
+                    </div>
+		        {% endfor %}
+                
+                <br>
+                <input type="submit" value="Confirm" class="btn btn-primary full-width">
+                <hr>
+                <p class="text-center">Already have an account? <a href="{% url 'main:login'%}">Login Here</a></p>
+                <br>
+
+            </form>
+        </div>
+    </div>
+
+{% endblock %}

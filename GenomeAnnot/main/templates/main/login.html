@@ -4,17 +4,10 @@
 <!-- --------------- CONTENT --------------- -->
 {% block body %}
 
-  <!-- ------------- TITLE ------------- -->
-  {% comment %} <div class="header">
-    <h1 class="title fs-10" id="titleLogin">Login</h1>
-  </div> {% endcomment %}
-
-  <!-- ------------- BODY ------------- -->
-  <br>
   <div class="body container" >
     <div class="row g-0">
 
-      <!-- ------ IMAGE LOGIN ------ -->
+      <!-- ------ IMAGE LOGIN/SIGN UP ------ -->
       <div class="col-md-5">
         <img src="{% static 'main/images/password.png' %}" class="img-fluid rounded-start" alt="...">
       </div>
@@ -24,10 +17,7 @@
         <form method="post" novalidate> <!-- action="{% url 'main:home' %}" -->
           {% csrf_token %}
 
-          {% comment %} <div class="form-group">
-            {{ form.as_p }}
-          </div> {% endcomment %}
-          
+          <!-------- TITLE -------->
           <h2 class="text-center">User Login</h2>
           <hr>
           <br>
@@ -73,13 +63,13 @@
 
           <br>
           <div class="form-group">
-            <button type="submit" class="btn btn-primary" id="submitting_login" value="submitting_login">Login</button>
+            <button type="submit" class="btn btn-primary" id="submitting_login" value="submitting_login">Connexion</button>
           </div>
           
           <br>
           <hr>
 		      <p class="text-center">Forgot your password <a href="#">Reset Password</a></p>
-		      <p class="text-center">Don't have an account? <a href="#">Join Now</a></p>
+		      <p class="text-center">Don't have an account? <a href="{% url 'main:signUp' %}">Sign up</a></p>
 
         </form>
       </div>

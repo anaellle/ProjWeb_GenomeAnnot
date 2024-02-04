@@ -5,12 +5,15 @@ from django.urls import reverse
 from .forms import GeneUpdateForm, PeptideUpdateForm, CommentForm 
 from .models import Gene, Message, Genome
 
+# Library required for sign up
+from django.views.generic.edit import FormView
+from .forms import CustomUserCreationForm
+from django.contrib.auth import login 
+
 # Library required for login
 from django.contrib.auth.views import LoginView
 from django.contrib import messages
 from django.urls import reverse_lazy
-# from django.contrib.auth.forms import AuthenticationForm
-# from .forms import CustomUserLoginForm
 
 # Library required for lauching the Blast API
 from Bio.Blast import NCBIWWW
@@ -40,14 +43,26 @@ def custom_404(request, exception):  # only visible if debug set to false
     )
 
 ##############################################################################################
+######### Sign up
+##############################################################################################
+
+class SignUpView(FormView):
+    template_name = 'main/signUp.html'
+    form_class = CustomUserCreationForm
+    redirect_authenticated_user = True
+    success_url = reverse_lazy('main:home') # ça fonctionne pas, à corriger
+    
+    def form_valid(self, form):
+        user = form.save()
+        if user:
+            login(self.request, user)
+        
+        return super(SignUpView, self).form_valid(form)
+
+##############################################################################################
 ######### Login
 ##############################################################################################
 
-# Pas utilisé #
-# class CustomUserLoginView(LoginView):
-#     form_class = AuthenticationForm
-#     template_name = 'main/login.html'
-# Pas utilisé #
 
 class CustomUserLoginView(LoginView):
     template_name = "main/login.html"
@@ -59,6 +74,7 @@ class CustomUserLoginView(LoginView):
     def form_invalid(self, form):
         messages.error(self.request,'Invalid email or password')
         return self.render_to_response(self.get_context_data(form=form))
+
 
 ##############################################################################################
 ######### Search views (explore, annotate and validate)

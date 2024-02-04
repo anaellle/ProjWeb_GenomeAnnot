@@ -24,14 +24,23 @@
 
     <!-- --------------- HEADER --------------- -->
    <header class="d-flex flex-wrap justify-content-center py-3 ">
-      <a id="nameSite"  class=" d-flex align-items-center mb-3  me-md-auto  text-decoration-none" href="{% url 'main:home' %}">GenomeAnnot</a>  
-        
+    <a id="nameSite"  class=" d-flex align-items-center mb-3  me-md-auto  text-decoration-none" href="{% url 'main:home' %}">GenomeAnnot</a>
+    
+    <nav class="nav">
+        {% if request.user.is_authenticated %}
+                <a href="#" class="d-flex align-items-center">Hi {{request.user.firstName | title}}</a>
+                <a href="{% url 'main:logout' %}" class="btn btn-secondary d-flex align-items-center m-2 me+1">Logout</a>
+        {% else %}
+                <a href="{% url 'main:login' %}" class="btn btn-primary d-flex align-items-center m-2">Login</a>
+                <a href="{% url 'main:signUp' %}" class="btn btn-secondary d-flex align-items-center m-2 me+1">Sign up</a>
+        {% endif %}
+    </nav>
 
        
           <!-------------- Login -------------->
 
             <!-- Button trigger modal -->
-            <button id="login" type="button" class="btn " data-bs-toggle="modal" data-bs-target="#LoginModal" >
+            {% comment %} <button id="login" type="button" class="btn " data-bs-toggle="modal" data-bs-target="#LoginModal" >
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
                     <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
                     <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
@@ -140,7 +149,7 @@
 
                 </div>
                 </div>
-            </div>
+            </div> {% endcomment %}
 
    </header>
     
