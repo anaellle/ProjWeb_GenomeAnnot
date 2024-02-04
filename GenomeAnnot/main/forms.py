@@ -26,14 +26,10 @@ class CustomUserChangeForm(UserChangeForm):
 class GeneUpdateForm(forms.ModelForm):
     class Meta:
         model = Gene
-        fields = [
-            "geneName",
-            "geneSymbol",
-            "geneBiotype",
-            "description",
-        ]
+
+        fields = ["geneName", "geneSymbol", "geneBiotype", "descriptionGene"]
         widgets = {
-            "description": forms.Textarea(attrs={"cols": 100, "rows": 5}),
+            "descriptionGene": forms.Textarea(attrs={"cols": 100, "rows": 5}),
         }
 
 
@@ -43,11 +39,11 @@ class PeptideUpdateForm(forms.ModelForm):
         fields = [
             "transcriptName",
             "transcriptBiotype",
-            # "description",
+            "descriptionPep",
         ]
-        # widgets = {
-        #    "description": forms.Textarea(attrs={"cols": 100, "rows": 5}),
-        # }
+         widgets = {
+              "descriptionPep": forms.Textarea(attrs={"cols": 100, "rows": 5}),
+          }
 
 
 class CommentForm(forms.ModelForm):
@@ -64,4 +60,5 @@ class CommentForm(forms.ModelForm):
                 }
             ),
         }
+
 

@@ -45,7 +45,7 @@ def CDSParser(filename):
 
         # ajout de la description
         if 'description' in record.description:
-            CDSdict["gene"][record.id]['description'] =  record.description.split('description:')[1]
+            CDSdict["gene"][record.id]['descriptionGene'] =  record.description.split('description:')[1]
     
     return CDSdict
 
@@ -82,7 +82,7 @@ def PepParser(filename):
 
         # ajout de la description
         if 'description' in record.description:
-            pepdict["peptide"][record.id]['description'] =  record.description.split('description:')[1]
+            pepdict["peptide"][record.id]['descriptionPep'] =  record.description.split('description:')[1]
     
     return pepdict
 
