@@ -1,13 +1,13 @@
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django import forms
-from .models import Gene, Peptide, Message,CustomUser
-
+from .models import Gene, Peptide, Message, CustomUser
 
 
 class CustomUserCreationForm(UserCreationForm):
     """A form for creating new users. Includes all the required
     fields, plus a repeated password.
     """
+
     class Meta:
         model = CustomUser
         fields = ["email", "firstName", "lastName", "role"]
@@ -18,16 +18,21 @@ class CustomUserChangeForm(UserChangeForm):
     the user, but replaces the password field with admin's
     disabled password hash display field.
     """
+
     class Meta:
         model = CustomUser
-        fields = '__all__'
-        
+        fields = "__all__"
+
 
 class GeneUpdateForm(forms.ModelForm):
     class Meta:
         model = Gene
-
-        fields = ["geneName", "geneSymbol", "geneBiotype", "descriptionGene"]
+        fields = [
+            "geneName",
+            "geneSymbol",
+            "geneBiotype",
+            "descriptionGene",
+        ]
         widgets = {
             "descriptionGene": forms.Textarea(attrs={"cols": 100, "rows": 5}),
         }
@@ -41,9 +46,11 @@ class PeptideUpdateForm(forms.ModelForm):
             "transcriptBiotype",
             "descriptionPep",
         ]
-         widgets = {
-              "descriptionPep": forms.Textarea(attrs={"cols": 100, "rows": 5}),
-          }
+
+        widgets = {
+            "descriptionPep": forms.Textarea(attrs={"cols": 100, "rows": 5}),
+        }
+
 
 
 class CommentForm(forms.ModelForm):
@@ -60,5 +67,4 @@ class CommentForm(forms.ModelForm):
                 }
             ),
         }
-
 
