@@ -6,6 +6,7 @@
 
 <div class="body container" >
     <div class="row g-0">
+
         <!-- ------ IMAGE LOGIN/SIGN UP ------ -->
         <div class="col-md-5">
             <img src="{% static 'main/images/password.png' %}" class="img-fluid rounded-start" alt="...">
@@ -13,7 +14,7 @@
 
         <!-- ------ FORM SIGN UP ------ -->
         <div class="col-md-7 card-body align-items-center d-flex flex-column justify-content-center">
-            <form method="post" novalidate> <!-- class="card" -->
+            <form method="post" novalidate>
                 {% csrf_token %}
                 
                 <!-------- TITLE -------->
@@ -32,6 +33,7 @@
                     </div>
 		        {% endfor %}
                 
+                <!-------- Submit button -------->
                 <br>
                 <input type="submit" value="Confirm" class="btn btn-primary full-width">
                 <hr>
