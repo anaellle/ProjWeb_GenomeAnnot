@@ -1,3 +1,4 @@
+import GenomeAnnot.wsgi.py
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django import forms
 from .models import Gene, Peptide, Message, CustomUser
@@ -52,7 +53,6 @@ class PeptideUpdateForm(forms.ModelForm):
         }
 
 
-
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Message
@@ -67,4 +67,3 @@ class CommentForm(forms.ModelForm):
                 }
             ),
         }
-
