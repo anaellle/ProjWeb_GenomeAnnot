@@ -1,9 +1,27 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import DetailView, UpdateView, CreateView
 from django.http import HttpResponseRedirect, Http404
-from django.urls import reverse
-from .forms import GeneUpdateForm, PeptideUpdateForm, CommentForm 
-from .models import Gene, Message, Genome
+from django.urls import reverse, resolve
+from django.urls.exceptions import Resolver404
+
+from django_tables2 import SingleTableView
+from django_tables2.views import SingleTableMixin
+from django_tables2.paginators import LazyPaginator
+from django_filters.views import FilterView
+
+
+from .forms import GeneUpdateForm, PeptideUpdateForm, CommentForm
+from .tables import TableGenome, TableGene, TableAccount, TableAssignAccount
+from .models import Gene, Message, Genome, Chromosome, CustomUser
+from .filters import (
+    AdminGenomeFilter,
+    AdminGeneFilter,
+    AdminAccountFilter,
+    AdminAssignFilter,
+)
+
+# from fileParser import file_to_dico
+# from insertion import addData
 
 # Library required for sign up
 from django.views.generic.edit import FormView
@@ -42,9 +60,11 @@ def custom_404(request, exception):  # only visible if debug set to false
         context={"role_user": role_user},
     )
 
+
 ##############################################################################################
 ######### Sign up
 ##############################################################################################
+
 
 class SignUpView(FormView):
     template_name = 'main/signUp.html'
@@ -58,6 +78,7 @@ class SignUpView(FormView):
             login(self.request, user)
         
         return super(SignUpView, self).form_valid(form)
+
 
 ##############################################################################################
 ######### Login
@@ -244,16 +265,20 @@ def validate(request):
 ##############################################################################################
 
 
-import re  #regular expression library
+import re  # regular expression library
+
 
 def kind_of_sequence(sequence):
     # Vérifier si la séquence est une séquence d'ADN ou de protéine
-    if re.match(r'^[ACGTURYKMSWBDHVNacgturykmswbdhvn]*$', sequence):
+    if re.match(r"^[ACGTURYKMSWBDHVNacgturykmswbdhvn]*$", sequence):
         return "nuc"
-    elif re.match(r'^[ABCDEFGHIKLMNPQRSTUVWXYZabcdefghiklmnpqrstuvwxyz]*$', sequence):
+    elif re.match(
+        r"^[ABCDEFGHIKLMNPQRSTUVWXYZabcdefghiklmnpqrstuvwxyz]*$", sequence
+    ):
         return "prot"
     else:
         return "pb_seq"
+
 
 
 def blast(request,sequence=None):
@@ -272,17 +297,17 @@ def blast(request,sequence=None):
         alignments = request.POST['alignments']
         #Request to ncbi blast api, rajouter gestion des erreurs ensuite
         
-        match kind_of_sequence(sequence):
-            case "pb_seq":
-                return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please verify that your query is a protein or a nuc sequence"})
-            case "nuc":
-                db="nt"
-                if not(program == "blastn" or program == "blastx" or program =="tblastx"):
-                    return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please choose a programm who works with your type of query (nuc)"})
-            case "prot":
-                db="nr"
-                if not(program == "blastp" or program == "tblastn"):
-                    return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please choose a programm who works with your type of query (prot)"})
+        seq = kind_of_sequence(sequence)
+        if (seq == "pb_seq"):
+            return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please verify that your query is a protein or a nuc sequence"})
+        elif(seq == "nuc"):
+            db="nt"
+            if not(program == "blastn" or program == "blastx" or program =="tblastx"):
+                return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please choose a programm who works with your type of query (nuc)"})
+        elif(seq== "prot"):
+            db="nr"
+            if not(program == "blastp" or program == "tblastn"):
+                return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please choose a programm who works with your type of query (prot)"})
 
 
         try:
@@ -293,8 +318,10 @@ def blast(request,sequence=None):
             return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "No API access, please verify your internet connection"})
         if not blast_results:
             return render(request, 'main/blast/error_blast.html', {'error_message': 'No results found'})
+            
+    return render(request, "main/blast/main_blast.html",context)
 
-          
+
 ##############################################################################################
 ######### Add Genome
 ##############################################################################################
@@ -309,6 +336,14 @@ def addGenome(request):
             cdsfile = request.POST.get("cdsfile")
             peptidefile = request.POST.get("peptidefile")
             # python parser to insert into BD : ...
+            # print(genomefile)
+            # genomeDict = file_to_dico(genomefile)
+            # cdsDict = file_to_dico(cdsfile)
+            # pepDict = file_to_dico(peptidefile)
+            # if genomeDict==-1 or cdsDict==-1 or pepDict==-1 :
+            #     print("File is not a .fa file")
+            # else :
+            #     addData(genomeDict, cdsDict, pepDict)
     return render(request, "main/addGenome/addGenome.html", context)
 
 
@@ -331,7 +366,10 @@ def genome(request, genome_id):  # change to details view later
 ##############################################################################################
 
 
-#### Not for view, but get all related information of a gene :
+#### Not  view, function used in view :
+
+
+# get all related information of a gene
 def get_gene_related_info(gene):
     chrom = gene.idChrom
     genome = chrom.idGenome
@@ -353,6 +391,14 @@ def get_gene_related_info(gene):
         "peptseq": peptseq,
         "messages": messages,
     }
+
+
+# all filed fill ?
+def are_all_fields_filled(form):
+    for field_name, field in form.fields.items():
+        if form[field_name].value() in [None, "", []]:
+            return False
+    return True
 
 
 #### 3 views of gene
@@ -415,11 +461,9 @@ class GeneUpdateView(UpdateView):
     def form_valid(self, form):
         # TO DO : check user can annotate
         gene = form.save(commit=False)
-        peptide_instance = gene.peptide_set.first()
-        if peptide_instance:
-            peptide_form = PeptideUpdateForm(
-                self.request.POST, instance=peptide_instance
-            )
+        peptide = gene.peptide_set.first()
+        if peptide:
+            peptide_form = PeptideUpdateForm(self.request.POST, instance=peptide)
             if peptide_form.is_valid():
                 peptide_form.save()
         # if save and not annotated, status become 1 (in work) :
@@ -427,10 +471,19 @@ class GeneUpdateView(UpdateView):
             if gene.status == 0:
                 gene.status = 1
                 gene.save()
+            genome = self.object.idChrom.idGenome
+            if genome.status == 0:
+                genome.status = 1
+                genome.save()
         # if submited and not just save, status become 3 (submited) :
         if "submit_submit" in self.request.POST:
             gene.status = 3
             gene.save()
+            # the status of the genome become "in work"
+            genome = self.object.idChrom.idGenome
+            if genome.status == 0:
+                genome.status = 1
+                genome.save()
             # automatic message of submission :
             message = Message.objects.create(
                 text="Annotation submitted",
@@ -438,6 +491,7 @@ class GeneUpdateView(UpdateView):
                 emailAuthor=None,  # to change !!!!
             )
             message.save()
+
         return super().form_valid(form)
 
 
@@ -472,6 +526,7 @@ class GeneValidDetailView(DetailView):
         self.request.session["previous_url"] = self.request.META.get(
             "HTTP_REFERER", reverse("main:validate")
         )
+        self.request.session["genome_id"] = context_all["genome"].id
         return context_all
 
     def post(self, request, *args, **kwargs):
@@ -479,7 +534,7 @@ class GeneValidDetailView(DetailView):
         if gene.status == 3:  # if gene can be validated/rejected :
             # TO DO : verification user can validate/reject/comment
 
-            if "submit_comment" in request.POST:
+            if "submit_comment_reject" in request.POST:
                 form = CommentForm(request.POST)
                 if form.is_valid():
                     # add comment to DB :
@@ -489,8 +544,6 @@ class GeneValidDetailView(DetailView):
                     comment.emailAuthor = None  ## change !!
                     comment.save()
 
-            elif "submit_reject" in request.POST:
-                ## TO DO : check a comment has been sent before rejection
                 gene.status = 2  # gene in review
                 gene.save()
                 # automatic message of rejection :
@@ -511,6 +564,23 @@ class GeneValidDetailView(DetailView):
                     emailAuthor=None,  # to change !!!!
                 )
                 message.save()
+
+                # status of genome is validated if all of gene from genome are validated
+                # if gene added after validation of genome : it is not taken into account
+                # (genome stay validated), but usually all the genome is added at the same time
+
+                genome_id = self.request.session.get("genome_id", None)
+                genome = Genome.objects.get(id=genome_id)
+                chromosomes = Chromosome.objects.filter(idGenome=genome)
+                all_genes_status_five = all(
+                    gene.status == 4
+                    for gene in Gene.objects.filter(idChrom__in=chromosomes)
+                )
+
+                if all_genes_status_five:
+                    genome.status = 2
+                    genome.save()
+
         return HttpResponseRedirect(self.get_success_url())
 
 
@@ -519,28 +589,128 @@ class GeneValidDetailView(DetailView):
 ##############################################################################################
 
 
-def genomeAdmin(request):
-    context = {
-        "active_tab": "admin",
-        "active_tab_admin": "genome",
-        "role_user": role_user,
-    }
-    return render(request, "main/admin/admin_genome.html", context)
+class genomeAdmin(SingleTableMixin, FilterView):
+    model = Genome
+    table_class = TableGenome
+    template_name = "main/admin/admin.html"
+    paginate_by = 10
+    paginator_class = LazyPaginator
+    filterset_class = AdminGenomeFilter
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["active_tab"] = "admin"
+        context["active_tab_admin"] = "genome"
+        context["role_user"] = role_user
+
+        return context
 
 
-def sequenceAdmin(request):
-    context = {
-        "active_tab": "admin",
-        "active_tab_admin": "sequence",
-        "role_user": role_user,
-    }
-    return render(request, "main/admin/admin_sequence.html", context)
+class sequenceAdmin(SingleTableMixin, FilterView):
+    model = Gene
+    table_class = TableGene
+    template_name = "main/admin/admin.html"
+    paginate_by = 10
+    paginator_class = LazyPaginator
+    filterset_class = AdminGeneFilter
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["active_tab"] = "admin"
+        context["active_tab_admin"] = "sequence"
+        context["role_user"] = role_user
+
+        return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        genome_id = self.request.GET.get("idChrom__idGenome__id__icontains")
+        if genome_id:
+            queryset = queryset.filter(idChrom__idGenome__id=genome_id)
+        return queryset
 
 
-def accountAdmin(request):
-    context = {
-        "active_tab": "admin",
-        "active_tab_admin": "account",
-        "role_user": role_user,
-    }
-    return render(request, "main/admin/admin_account.html", context)
+class accountAdmin(SingleTableMixin, FilterView):
+    model = CustomUser
+    table_class = TableAccount
+    template_name = "main/admin/admin.html"
+    paginate_by = 10
+    paginator_class = LazyPaginator
+    filterset_class = AdminAccountFilter
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["active_tab"] = "admin"
+        context["active_tab_admin"] = "account"
+        context["role_user"] = role_user
+        return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        email = self.request.GET.get("email__contains")
+        if email:
+            queryset = queryset.filter(email=email)
+        return queryset
+
+
+class accountAssignAdmin(SingleTableMixin, FilterView):
+    model = CustomUser
+    table_class = TableAssignAccount
+    template_name = "main/admin/admin.html"
+    paginate_by = 10
+    paginator_class = LazyPaginator
+    filterset_class = AdminAssignFilter
+
+    def get_success_url(self):
+        previous_url = self.request.session.get("previous_url")
+        if previous_url:
+            return previous_url
+        return reverse("main:sequenceAdmin")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["active_tab"] = "admin"
+        context["active_tab_admin"] = "account"
+        context["role_user"] = role_user
+        previous_url = self.request.META.get(
+            "HTTP_REFERER", reverse("main:sequenceAdmin")
+        )
+        try:
+            match = resolve(previous_url)
+            view_name = match.view_name
+            if view_name == "sequenceAdmin":
+                # store url only if page sequence
+                self.request.session["previous_url"] = previous_url
+        except Resolver404:
+            previous_url = reverse("main:sequenceAdmin")
+        return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        role = self.kwargs.get("role")
+        if role:
+            queryset = queryset.filter(role=role)
+        return queryset.order_by("email")
+
+    def get(self, request, *args, **kwargs):
+        user = None
+        for key in request.GET:
+            if "@" in key:
+                try:
+                    user = CustomUser.objects.get(email=key)
+                except CustomUser.DoesNotExist:
+                    pass
+                break
+
+        gene_id = self.kwargs.get("gene_id")
+        role = int(self.kwargs.get("role"))
+        if gene_id and role and user:
+            gene = Gene.objects.get(id=gene_id)
+            if role == 1:
+                gene.emailAnnotator = user
+            elif role == 2:
+                gene.emailValidator = user
+            gene.save()
+            return HttpResponseRedirect(self.get_success_url())
+
+        return super().get(request, *args, **kwargs)
