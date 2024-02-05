@@ -7,10 +7,19 @@ class CustomUserCreationForm(UserCreationForm):
     """A form for creating new users. Includes all the required
     fields, plus a repeated password.
     """
-
+    email = forms.EmailField(max_length=254)
+    
     class Meta:
         model = CustomUser
-        fields = ["email", "firstName", "lastName", "role"]
+        fields = ["email",
+                  "firstName",
+                  "lastName",
+                  "researchCentre",
+                  "phoneNumber",
+                  "role",
+                  "password1",
+                  "password2",
+                  ]
 
 
 class CustomUserChangeForm(UserChangeForm):

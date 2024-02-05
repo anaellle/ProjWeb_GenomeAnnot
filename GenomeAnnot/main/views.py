@@ -1,8 +1,7 @@
-from django.shortcuts import render, redirect
-from django.views.generic import DetailView, UpdateView
-from django.http import HttpResponseRedirect
-from django.urls import reverse
-from django.urls import resolve
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.generic import DetailView, UpdateView, CreateView
+from django.http import HttpResponseRedirect, Http404
+from django.urls import reverse, resolve
 from django.urls.exceptions import Resolver404
 
 from django_tables2 import SingleTableView
@@ -24,6 +23,15 @@ from .filters import (
 # from fileParser import file_to_dico
 # from insertion import addData
 
+# Library required for sign up
+from django.views.generic.edit import FormView
+from .forms import CustomUserCreationForm
+from django.contrib.auth import login 
+
+# Library required for login
+from django.contrib.auth.views import LoginView
+from django.contrib import messages
+from django.urls import reverse_lazy
 
 # Library required for lauching the Blast API
 from Bio.Blast import NCBIWWW
@@ -31,6 +39,7 @@ from Bio import SeqIO
 from Bio import SearchIO
 
 role_user = "admin"
+
 
 
 ##############################################################################################
@@ -50,6 +59,42 @@ def custom_404(request, exception):  # only visible if debug set to false
         status=404,
         context={"role_user": role_user},
     )
+
+
+##############################################################################################
+######### Sign up
+##############################################################################################
+
+
+class SignUpView(FormView):
+    template_name = 'main/signUp.html'
+    form_class = CustomUserCreationForm
+    redirect_authenticated_user = True
+    success_url = reverse_lazy('main:home') # ça fonctionne pas, à corriger
+    
+    def form_valid(self, form):
+        user = form.save()
+        if user:
+            login(self.request, user)
+        
+        return super(SignUpView, self).form_valid(form)
+
+
+##############################################################################################
+######### Login
+##############################################################################################
+
+
+class CustomUserLoginView(LoginView):
+    template_name = "main/login.html"
+    redirect_authenticated_user = True
+    
+    def get_success_url(self):
+        return reverse_lazy('main:home') 
+    
+    def form_invalid(self, form):
+        messages.error(self.request,'Invalid email or password')
+        return self.render_to_response(self.get_context_data(form=form))
 
 
 ##############################################################################################

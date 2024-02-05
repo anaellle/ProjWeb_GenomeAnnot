@@ -141,8 +141,16 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Default user model
+# Custom user model
 # https://docs.djangoproject.com/fr/4.2/topics/auth/customizing/
 # https://testdriven.io/blog/django-custom-user-model/
 
 AUTH_USER_MODEL = "main.CustomUser"
+
+# Custom user backend
+# AUTHENTICATION_BACKENDS = ['main.backends.CustomUserBackend']
+
+# Login URL
+# If you attempt to access a page that requires login, Django will use this LOGIN_URL for redirection.
+LOGIN_URL = 'login'
+
