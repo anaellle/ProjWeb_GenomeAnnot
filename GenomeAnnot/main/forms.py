@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django import forms
+from .models import Gene, Peptide, Message,CustomUser
 
-from .models import CustomUser, Gene, Peptide
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -23,41 +23,42 @@ class CustomUserChangeForm(UserChangeForm):
         fields = '__all__'
         
 
-class GenePeptideForm(forms.ModelForm):
+class GeneUpdateForm(forms.ModelForm):
     class Meta:
         model = Gene
+
         fields = ["geneName", "geneSymbol", "geneBiotype", "descriptionGene"]
+        widgets = {
+            "descriptionGene": forms.Textarea(attrs={"cols": 100, "rows": 5}),
+        }
 
-    peptide_transcriptName = forms.CharField(
-        max_length=200, required=False, label="Transcript Name"
-    )
-    peptide_transcriptBiotype = forms.CharField(
-        max_length=200, required=False, label="Transcript Biotype"
-    )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["geneName"].required = False
-        self.fields["geneSymbol"].required = False
-        self.fields["geneBiotype"].required = False
-        self.fields["descriptionGene"].required = False
+class PeptideUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Peptide
+        fields = [
+            "transcriptName",
+            "transcriptBiotype",
+            "descriptionPep",
+        ]
+         widgets = {
+              "descriptionPep": forms.Textarea(attrs={"cols": 100, "rows": 5}),
+          }
 
-    def save(self, commit=True):
-        gene = super().save(commit=False)
-        peptide_transcriptName = self.cleaned_data.get(
-            "peptide_transcriptName"
-        )
-        peptide_transcriptBiotype = self.cleaned_data.get(
-            "peptide_transcriptBiotype"
-        )
 
-        if peptide_transcriptName or peptide_transcriptBiotype:
-            peptide, created = Peptide.objects.get_or_create(idGene=gene)
-            peptide.transcriptName = peptide_transcriptName
-            peptide.transcriptBiotype = peptide_transcriptBiotype
-            peptide.save()
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Message
+        fields = ["text"]
+        widgets = {
+            "text": forms.Textarea(
+                attrs={
+                    "cols": 100,
+                    "rows": 5,
+                    "placeholder": "write comment ...",
+                    "required": "true",
+                }
+            ),
+        }
 
-        if commit:
-            gene.save()
 
-        return gene
