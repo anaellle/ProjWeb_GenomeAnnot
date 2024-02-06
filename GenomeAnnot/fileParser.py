@@ -1,4 +1,3 @@
-import sys, os
 from Bio import SeqIO
 
 def CDSParser(filename):
