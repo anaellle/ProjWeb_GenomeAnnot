@@ -26,7 +26,9 @@ urlpatterns = [
     
     # Sign up :
     path('signUp/', SignUpView.as_view(), name='signUp'),
-    # path('profile/',  login_required(UserView.as_view()), name='profile'),
+    
+    # Update profile :
+    path('profile/',  views.profile, name='profile'),
 
     # Blast and blast with sequence:
     path("blast/", views.blast, name="blast"),

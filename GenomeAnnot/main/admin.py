@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from django.contrib.auth.admin import UserAdmin
-from .forms import CustomUserCreationForm, CustomUserChangeForm
+from .forms import CustomUserCreationForm, CustomUserUpdateFormAdmin
 from .models import CustomUser
 
 # Register your models here.
@@ -10,7 +10,7 @@ from .models import *
 
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
-    form = CustomUserChangeForm
+    form = CustomUserUpdateFormAdmin
     model = CustomUser
     list_display = ("email", "role", "is_staff", "is_active",)
     list_filter = ("email", "role", "is_staff", "is_active",)

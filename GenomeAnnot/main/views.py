@@ -35,6 +35,10 @@ from django.contrib.auth.views import LoginView
 from django.contrib import messages
 from django.urls import reverse_lazy
 
+# Libraries required for profile
+from .forms import CustomUserUpdateForm
+from django.contrib.auth.decorators import login_required
+
 # Library required for lauching the Blast API
 from Bio.Blast import NCBIWWW
 from Bio import SeqIO
@@ -104,6 +108,25 @@ class CustomUserLoginView(LoginView):
     def form_invalid(self, form):
         messages.error(self.request,'Invalid email or password')
         return self.render_to_response(self.get_context_data(form=form))
+
+
+##############################################################################################
+######### Profile
+##############################################################################################
+
+@login_required
+def profile(request):
+    if request.method == 'POST':
+        user_form = CustomUserUpdateForm(request.POST, instance=request.user)
+
+        if user_form.is_valid():
+            user_form.save()
+            messages.success(request, 'Your profile was successfully updated')
+            return redirect(to='main:profile')
+    else:
+        user_form = CustomUserUpdateForm(instance=request.user)
+
+    return render(request, 'main/profile.html', {'user_form': user_form})
 
 
 ##############################################################################################
