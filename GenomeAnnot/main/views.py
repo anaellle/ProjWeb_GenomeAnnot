@@ -299,26 +299,31 @@ def blast(request,sequence=None):
         
         seq = kind_of_sequence(sequence)
         if (seq == "pb_seq"):
-            return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please verify that your query is a protein or a nuc sequence"})
+            context["error_message"]="Please verify that your query is a protein or a nuc sequence"
+            return render(request, 'main/blast/error_blast.html', context)
         elif(seq == "nuc"):
             db="nt"
             if not(program == "blastn" or program == "blastx" or program =="tblastx"):
-                return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please choose a programm who works with your type of query (nuc)"})
+                context["error_message"]="Please choose a programm who works with your type of query (nuc)"
+                return render(request, 'main/blast/error_blast.html',context)
         elif(seq== "prot"):
             db="nr"
             if not(program == "blastp" or program == "tblastn"):
-                return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "Please choose a programm who works with your type of query (prot)"})
-
+                context["error_message"]="Please choose a programm who works with your type of query (prot)"
+                return render(request, 'main/blast/error_blast.html',context)
 
         try:
             result_handle = NCBIWWW.qblast(program=program, database=db, sequence=sequence, alignments=alignments, descriptions=50,hitlist_size=5)
             blast_results = SearchIO.read(result_handle, "blast-xml")
         except Exception as e:
             # Gérer les erreurs, par exemple, en renvoyant un message d'erreur à l'utilisateur
-            return render(request, 'main/blast/error_blast.html', {"active_tab": "blast",'error_message': "No API access, please verify your internet connection"})
+            context["error_message"]="No API access, please verify your internet connection"
+            return render(request, 'main/blast/error_blast.html', context)
         if not blast_results:
             return render(request, 'main/blast/error_blast.html', {'error_message': 'No results found'})
-            
+        context["results"]=blast_results
+        return render(request, 'main/blast/blast_results.html',context)
+
     return render(request, "main/blast/main_blast.html",context)
 
 
