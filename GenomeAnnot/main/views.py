@@ -108,6 +108,8 @@ class CustomUserLoginView(LoginView):
 
 def explore(request):
     context = {"active_tab": "explore", "role_user": get_role(request)}
+    if context["role_user"] == None:
+        return redirect("main:home")
 
     if request.method == "GET":
         if "submit_download" in request.GET:
@@ -170,6 +172,8 @@ def explore(request):
 
 def annotate(request):
     context = {"active_tab": "annotate", "role_user": get_role(request)}
+    if context["role_user"] != 1 and context["role_user"] != 3:
+        return redirect("main:home")
 
     # get info about gene/prot
     # filter on annotator
@@ -218,7 +222,8 @@ def annotate(request):
 
 def validate(request):
     context = {"active_tab": "validate", "role_user": get_role(request)}
-
+    if context["role_user"] != 2 and context["role_user"] != 3:
+        return redirect("main:home")
     # get info about gene/prot
     # filter on validator
     genes = Gene.objects.filter(emailValidator=request.user)
@@ -288,6 +293,8 @@ def blast(request, sequence=None):
         "role_user": get_role(request),
         "sequence": sequence,
     }
+    if context["role_user"] == None:
+        return redirect("main:home")
     # return render(request, "main/blast/main_blast.html", context)
 
     if request.method == "POST":
@@ -370,6 +377,8 @@ def blast(request, sequence=None):
 
 def addGenome(request):
     context = {"role_user": get_role(request)}
+    if context["role_user"] == None:
+        return redirect("main:home")
     if request.method == "POST":
         if "submit_addgenome" in request.POST:
             # get parameters
@@ -442,6 +451,12 @@ class GeneDetailView(DetailView):
     template_name = "main/gene.html"
     pk_url_kwarg = "gene_id"
 
+    def dispatch(self, request, *args, **kwargs):
+        gene = get_object_or_404(Gene, pk=self.kwargs.get("gene_id"))
+        if not request.user.is_authenticated:
+            return redirect("main:home")
+        return super().dispatch(request, *args, **kwargs)
+
     # context to extract from DB
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -477,6 +492,17 @@ class GeneUpdateView(UpdateView):
     pk_url_kwarg = "gene_id"
     template_name = "main/gene.html"
     form_class = GeneUpdateForm
+
+    def dispatch(self, request, *args, **kwargs):
+        gene = get_object_or_404(Gene, pk=self.kwargs.get("gene_id"))
+        if (
+            not request.user.is_authenticated
+            or request.user.role == 0
+            or request.user.role == 2
+            or gene.emailAnnotator != self.request.user
+        ):
+            return redirect("main:home")
+        return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
         return self.request.POST.get(
@@ -558,6 +584,17 @@ class GeneValidDetailView(DetailView):
     template_name = "main/gene.html"
     pk_url_kwarg = "gene_id"
     form_class = CommentForm
+
+    def dispatch(self, request, *args, **kwargs):
+        gene = get_object_or_404(Gene, pk=self.kwargs.get("gene_id"))
+        if (
+            not request.user.is_authenticated
+            or request.user.role == 0
+            or request.user.role == 1
+            or gene.emailValidator != self.request.user
+        ):
+            return redirect("main:home")
+        return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
         if "submit_comment" not in self.request.POST:
@@ -663,12 +700,16 @@ class genomeAdmin(SingleTableMixin, FilterView):
     # paginator_class = LazyPaginator
     filterset_class = AdminGenomeFilter
 
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated or request.user.role != 3:
+            return redirect("main:home")
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "admin"
         context["active_tab_admin"] = "genome"
         context["role_user"] = get_role(self.request)
-
         return context
 
 
@@ -679,6 +720,11 @@ class sequenceAdmin(SingleTableMixin, FilterView):
     paginate_by = 10
     # paginator_class = LazyPaginator
     filterset_class = AdminGeneFilter
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated or request.user.role != 3:
+            return redirect("main:home")
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -704,6 +750,11 @@ class accountAdmin(SingleTableMixin, FilterView):
     # paginator_class = LazyPaginator
     filterset_class = AdminAccountFilter
 
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated or request.user.role != 3:
+            return redirect("main:home")
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "admin"
@@ -726,6 +777,12 @@ class accountAssignAdmin(SingleTableMixin, FilterView):
     paginate_by = 10
     # paginator_class = LazyPaginator
     filterset_class = AdminAssignFilter
+
+    def dispatch(self, request, *args, **kwargs):
+        gene = get_object_or_404(Gene, pk=self.kwargs.get("gene_id"))
+        if not request.user.is_authenticated or request.user.role != 3:
+            return redirect("main:home")
+        return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
         previous_url = self.request.session.get("previous_url")
