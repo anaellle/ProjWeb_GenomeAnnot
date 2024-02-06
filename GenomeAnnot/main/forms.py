@@ -26,20 +26,20 @@ class CustomUserUpdateForm(forms.ModelForm):
     """
     email = forms.EmailField(max_length=254,
                              required=True,
-                             widget=forms.TextInput(attrs={'class': 'form-control mb-3'}),
+                             widget=forms.TextInput(attrs={'class': 'form-control mb-3', 'placeholder':'ex: jean.dupont@gmail.com...'}),
                              disabled=False,) # mettre à True si on veut empêcher la modification
     firstName = forms.CharField(max_length=50,
                                required=True,
-                               widget=forms.TextInput(attrs={'class': 'form-control mb-3'}))
+                               widget=forms.TextInput(attrs={'class': 'form-control mb-3', 'placeholder':'ex: Jean...'}))
     lastName = forms.CharField(max_length=50,
                                required=True,
-                               widget=forms.TextInput(attrs={'class': 'form-control mb-3'}))
+                               widget=forms.TextInput(attrs={'class': 'form-control mb-3', 'placeholder':'ex: Dupont...'}))
     researchCentre = forms.CharField(max_length=50,
                                      required=False,
-                                     widget=forms.TextInput(attrs={'class': 'form-control mb-3'}))
+                                     widget=forms.TextInput(attrs={'class': 'form-control mb-3', 'placeholder':'ex: CNRS...'}))
     phoneNumber = forms.CharField(max_length=12,
                                   required=False,
-                                  widget=forms.TextInput(attrs={'class': 'form-control mb-3'}))
+                                  widget=forms.TextInput(attrs={'class': 'form-control mb-3', 'placeholder':'+33...'}))
     role = forms.ChoiceField(required=False,
                              choices=CustomUser.Role.choices,
                              widget=forms.Select(attrs={'class': 'form-control','title':"Non-editable, contact a staff member if you need to."}),

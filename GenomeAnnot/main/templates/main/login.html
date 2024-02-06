@@ -69,7 +69,7 @@
         
         <br>
         <hr>
-        {% comment %} <p class="text-center">Forgot your password <a href="#">Reset Password</a></p> {% endcomment %}
+        <p class="text-center">Forgot your password <a href="{% url 'main:password_reset' %}">Reset Password</a></p>
         <p class="text-center">Don't have an account? <a href="{% url 'main:signUp' %}">Sign up</a></p>
 
       </form>

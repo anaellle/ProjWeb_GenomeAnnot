@@ -30,6 +30,8 @@
 
     <!-------- FORM -------->
     <div class="form-content">
+    <a href="{% url 'main:password_change' %}">Change Password</a>
+    
 	<form method="POST" enctype="multipart/form-data">
 		{% csrf_token %} 
 
