@@ -152,5 +152,5 @@ AUTH_USER_MODEL = "main.CustomUser"
 
 # Login URL
 # If you attempt to access a page that requires login, Django will use this LOGIN_URL for redirection.
-LOGIN_URL = 'login'
+LOGIN_URL = 'main:login'
 
