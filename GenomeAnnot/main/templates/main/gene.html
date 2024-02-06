@@ -126,11 +126,10 @@
           <div class="col">
             <span class="bold">Access to other banks :</span> <br>
             {% if gene.id %}
-            <a href="https://www.ncbi.nlm.nih.gov/gene/?term={{ gene.id }}" target="_blank">NCBI Gene</a> |
+            <a class="nav-link px-3" href="https://www.ncbi.nlm.nih.gov/gene/?term={{ gene.id }}" target="_blank">NCBI Gene</a>
             {% endif %}
-
-            {% if gene.geneSymbol %}
-            <a href="https://www.uniprot.org/taxonomy?query={{ genome.id }}" target="_blank">UniProt Taxonomy</a> |
+            {% if genome.id %}
+            <a class="nav-link px-3" href="https://www.uniprot.org/taxonomy?query={{ genome.id }}" target="_blank">UniProt Taxonomy</a>
             {% endif %}
           </div>
         </div>
@@ -191,13 +190,13 @@
           <div class="col">
             <span class="bold">Access to other banks :</span> <br>
             {% if gene.id %}
-            <a href="https://www.ncbi.nlm.nih.gov/protein/?term={{ gene.id }}" target="_blank">NCBI Prot</a> |
+            <a class="nav-link px-3" href="https://www.ncbi.nlm.nih.gov/protein/?term={{ gene.id }}" target="_blank">NCBI Prot</a>
             {% endif %}
             {% if gene.id %}
-            <a href="https://www.ncbi.nlm.nih.gov/ipg/?term={{ gene.id }}" target="_blank">NCBI identical protein group</a> |
+            <a class="nav-link px-3" href="https://www.ncbi.nlm.nih.gov/ipg/?term={{ gene.id }}" target="_blank">NCBI identical protein group</a>
             {% endif %}
-            {% if gene.geneSymbol %}
-            <a href="https://www.uniprot.org/uniprotkb?query={{ gene.id }}" target="_blank">UniProt Search</a> |
+            {% if gene.id %}
+            <a class="nav-link px-3" href="https://www.uniprot.org/uniprotkb?query={{ gene.id }}" target="_blank">UniProt Search</a>
             {% endif %}
           </div>
         </div>
