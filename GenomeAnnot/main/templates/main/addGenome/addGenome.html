@@ -7,7 +7,7 @@
    
     <div class="container pt-3 pb-3">
         <h4 class="mb-4">Add a genome to the database</h4>
-    <form method="post" action='{% url "main:explore" %}'>
+    <form enctype="multipart/form-data" method="post" action='{% url "main:explore" %}'>
         {% csrf_token %}
         <div class="row align-items-center mb-3">
             <label for="genomefile" class="mb-2 bold"> Choose a genome file : </label>

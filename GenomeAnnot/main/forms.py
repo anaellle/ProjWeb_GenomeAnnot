@@ -1,8 +1,11 @@
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django import forms
-from .models import Gene, Peptide, Message,CustomUser
+from .models import Gene, Peptide, Message, CustomUser
 
 
+class UploadFileForm(forms.Form):
+    title = forms.CharField(max_length=50)
+    file = forms.FileField()
 
 class CustomUserCreationForm(UserCreationForm):
     """A form for creating new users. Includes all the required
@@ -41,7 +44,7 @@ class PeptideUpdateForm(forms.ModelForm):
             "transcriptBiotype",
             "descriptionPep",
         ]
-         widgets = {
+        widgets = {
               "descriptionPep": forms.Textarea(attrs={"cols": 100, "rows": 5}),
           }
 

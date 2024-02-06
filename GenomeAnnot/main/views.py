@@ -1,13 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import DetailView, UpdateView, CreateView
+from django.views.generic import DetailView, UpdateView, CreateView, FormView
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse, reverse_lazy
-from .forms import GeneUpdateForm, PeptideUpdateForm, CommentForm
+from .forms import GeneUpdateForm, PeptideUpdateForm, CommentForm, UploadFileForm
 
 from .models import Gene, Message, Genome
 
-# from fileParser import file_to_dico
-# from insertion import addData
+from .insertion import downloadAndFill
 
 
 # Library required for lauching the Blast API
@@ -266,18 +265,14 @@ def addGenome(request):
     if request.method == "POST":
         if "submit_addgenome" in request.POST:
             # get parameters
-            genomefile = request.POST.get("genomefile")
-            cdsfile = request.POST.get("cdsfile")
-            peptidefile = request.POST.get("peptidefile")
-            # python parser to insert into BD : ...
-            # print(genomefile)
-            # genomeDict = file_to_dico(genomefile)
-            # cdsDict = file_to_dico(cdsfile)
-            # pepDict = file_to_dico(peptidefile)
-            # if genomeDict==-1 or cdsDict==-1 or pepDict==-1 :
-            #     print("File is not a .fa file")
-            # else :
-            #     addData(genomeDict, cdsDict, pepDict)
+            form = UploadFileForm(request.POST, request.FILES)
+            if form.is_valid():
+                genomefile = request.FILES.get("genomefile")
+                cdsfile = request.FILES.get("cdsfile")
+                peptidefile = request.FILES.get("peptidefile")
+                # python parser to insert into BD : ...
+                downloadAndFill(genomefile, cdsfile, peptidefile)
+
     return render(request, "main/addGenome/addGenome.html", context)
 
 
