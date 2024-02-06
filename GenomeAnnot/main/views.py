@@ -24,6 +24,8 @@ from .filters import (
 # from insertion import addData
 
 # Library required for sign up
+from django.contrib.auth.mixins import AccessMixin
+from django.shortcuts import redirect
 from django.views.generic.edit import FormView
 from .forms import CustomUserCreationForm
 from django.contrib.auth import login 
@@ -65,19 +67,26 @@ def custom_404(request, exception):  # only visible if debug set to false
 ######### Sign up
 ##############################################################################################
 
-
-class SignUpView(FormView):
+class SignUpView(AccessMixin, FormView):
     template_name = 'main/signUp.html'
     form_class = CustomUserCreationForm
-    redirect_authenticated_user = True
-    success_url = reverse_lazy('main:home') # ça fonctionne pas, à corriger
+    success_url = reverse_lazy('main:home')
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_authenticated:
+            # Redirect authenticated users away from the sign-up page, to the home page
+            return redirect(self.get_success_url())
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get_success_url(self):
+        return reverse_lazy('main:home')
     
     def form_valid(self, form):
         user = form.save()
         if user:
             login(self.request, user)
-        
-        return super(SignUpView, self).form_valid(form)
+
+        return super().form_valid(form)
 
 
 ##############################################################################################
