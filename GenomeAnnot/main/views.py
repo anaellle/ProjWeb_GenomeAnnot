@@ -127,7 +127,7 @@ class CustomUserLoginView(LoginView):
 ##############################################################################################
 
 
-@login_required
+@login_required(login_url=reverse_lazy("main:login"))
 def profile(request):
     if request.method == 'POST':
         user_form = CustomUserUpdateForm(request.POST, instance=request.user)
@@ -139,7 +139,7 @@ def profile(request):
     else:
         user_form = CustomUserUpdateForm(instance=request.user)
 
-    return render(request, 'main/profile.html', {'user_form': user_form})
+    return render(request, 'main/profile.html', {'role_user': get_role(request),'user_form': user_form})
 
 
 ##############################################################################################
@@ -161,12 +161,12 @@ class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
 class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
     template_name = 'main/password/password_reset.html'
     email_template_name = 'main/password/password_reset_email.html'
-    subject_template_name = 'main/password/password_reset_subject'
+    subject_template_name = 'main/password/password_reset_subject.txt'
     success_message = "We've emailed you instructions for setting your password, " \
                       "if an account exists with the email you entered. You should receive them shortly." \
                       " If you don't receive an email, " \
                       "please make sure you've entered the address you registered with, and check your spam folder."
-    success_url = reverse_lazy('main:home')
+    success_url = reverse_lazy('main:login')
 
 
 ##############################################################################################
