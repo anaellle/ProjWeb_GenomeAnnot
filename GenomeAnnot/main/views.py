@@ -23,17 +23,30 @@ from .filters import (
 # from fileParser import file_to_dico
 # from insertion import addData
 
-# Library required for sign up
+# Libraries required for sign up
+from django.contrib.auth.mixins import AccessMixin
+from django.shortcuts import redirect
 from django.views.generic.edit import FormView
 from .forms import CustomUserCreationForm
 from django.contrib.auth import login
 
-# Library required for login
+# Libraries required to login
 from django.contrib.auth.views import LoginView
 from django.contrib import messages
 from django.urls import reverse_lazy
 
-# Library required for lauching the Blast API
+# Libraries required for profile
+from .forms import CustomUserUpdateForm
+from django.contrib.auth.decorators import login_required
+
+# Libraries required to change password (once logged in)
+from django.contrib.auth.views import PasswordChangeView
+
+# Libraries required to reset password (if forgotten)
+from django.contrib.auth.views import PasswordResetView
+from django.contrib.messages.views import SuccessMessageMixin
+
+# Libraries required for lauching the Blast API
 from Bio.Blast import NCBIWWW
 from Bio import SeqIO
 from Bio import SearchIO
@@ -70,18 +83,26 @@ def custom_404(request, exception):  # only visible if debug set to false
 ##############################################################################################
 
 
-class SignUpView(FormView):
-    template_name = "main/signUp.html"
+class SignUpView(AccessMixin, FormView):
+    template_name = 'main/signUp.html'
     form_class = CustomUserCreationForm
-    redirect_authenticated_user = True
-    success_url = reverse_lazy("main:home")  # ça fonctionne pas, à corriger
+    success_url = reverse_lazy('main:home')
 
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_authenticated:
+            # Redirect authenticated users away from the sign-up page, to the home page
+            return redirect(self.get_success_url())
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get_success_url(self):
+        return reverse_lazy('main:home')
+    
     def form_valid(self, form):
         user = form.save()
         if user:
             login(self.request, user)
 
-        return super(SignUpView, self).form_valid(form)
+        return super().form_valid(form)
 
 
 ##############################################################################################
@@ -99,6 +120,53 @@ class CustomUserLoginView(LoginView):
     def form_invalid(self, form):
         messages.error(self.request, "Invalid email or password")
         return self.render_to_response(self.get_context_data(form=form))
+
+
+##############################################################################################
+######### Profile
+##############################################################################################
+
+
+@login_required(login_url=reverse_lazy("main:login"))
+def profile(request):
+    if request.method == 'POST':
+        user_form = CustomUserUpdateForm(request.POST, instance=request.user)
+
+        if user_form.is_valid():
+            user_form.save()
+            messages.success(request, 'Your profile was successfully updated')
+            return redirect(to='main:profile')
+    else:
+        user_form = CustomUserUpdateForm(instance=request.user)
+
+    return render(request, 'main/profile.html', {'role_user': get_role(request),'user_form': user_form})
+
+
+##############################################################################################
+######### Change password (once logged in)
+##############################################################################################
+
+
+class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
+    template_name = 'main/password/change_password.html'
+    success_message = "Successfully Changed Your Password"
+    success_url = reverse_lazy('main:home')
+
+
+##############################################################################################
+######### Reset password (if forgotten) --> non-functional (email not set)
+##############################################################################################
+
+
+class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
+    template_name = 'main/password/password_reset.html'
+    email_template_name = 'main/password/password_reset_email.html'
+    subject_template_name = 'main/password/password_reset_subject.txt'
+    success_message = "We've emailed you instructions for setting your password, " \
+                      "if an account exists with the email you entered. You should receive them shortly." \
+                      " If you don't receive an email, " \
+                      "please make sure you've entered the address you registered with, and check your spam folder."
+    success_url = reverse_lazy('main:login')
 
 
 ##############################################################################################

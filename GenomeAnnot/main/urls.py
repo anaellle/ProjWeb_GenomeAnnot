@@ -1,6 +1,7 @@
-from django.urls import include, path
+from django.urls import include, path, reverse_lazy
 from . import views
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import LogoutView
+from django.contrib.auth import views as auth_views
 from .views import (
     GeneDetailView,
     GeneValidDetailView,
@@ -11,6 +12,8 @@ from .views import (
     accountAssignAdmin,
     CustomUserLoginView,
     SignUpView,
+    ChangePasswordView,
+    ResetPasswordView,
 )
 
 app_name = "main"
@@ -26,8 +29,23 @@ urlpatterns = [
     
     # Sign up :
     path('signUp/', SignUpView.as_view(), name='signUp'),
-    # path('profile/',  login_required(UserView.as_view()), name='profile'),
+    
+    # Update profile :
+    path('profile/',  views.profile, name='profile'),
 
+    # Change password (once logged in) :
+    path('password-change/', ChangePasswordView.as_view(), name='password_change'),
+    
+    # Reset password (if forgotten) :
+    path('password-reset/', ResetPasswordView.as_view(), name='password_reset'),
+    path('password-reset-confirm/<uidb64>/<token>/',
+         auth_views.PasswordResetConfirmView.as_view(template_name='main/password/password_reset_confirm.html',
+                                                     success_url = reverse_lazy("main:password_reset_complete")),
+         name='password_reset_confirm'),
+    path('password-reset-complete/',
+         auth_views.PasswordResetCompleteView.as_view(template_name='main/password/password_reset_complete.html'),
+         name='password_reset_complete'),
+    
     # Blast and blast with sequence:
     path("blast/", views.blast, name="blast"),
     path("blast/<str:sequence>", views.blast, name="blastseq"),
