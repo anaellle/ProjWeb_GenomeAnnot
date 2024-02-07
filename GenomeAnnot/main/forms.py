@@ -7,7 +7,23 @@ class CustomUserCreationForm(UserCreationForm):
     """A form for creating new users. Includes all the required
     fields, plus a repeated password.
     """
-    email = forms.EmailField(max_length=254)
+    email = forms.EmailField(max_length=254,) # mettre à True si on veut empêcher la modification
+    firstName = forms.CharField(max_length=50,
+                               required=True,
+                               widget=forms.TextInput())
+    lastName = forms.CharField(max_length=50,
+                               required=True,
+                               widget=forms.TextInput())
+    researchCentre = forms.CharField(max_length=50,
+                                     required=False,
+                                     widget=forms.TextInput())
+    phoneNumber = forms.CharField(max_length=12,
+                                  required=False,
+                                  widget=forms.TextInput(attrs={'placeholder':'+33...'}))
+    role = forms.ChoiceField(required=True,
+                             choices=CustomUser.Role.choices,
+                             widget=forms.Select(),
+                            )
 
     class Meta:
         model = CustomUser
@@ -40,7 +56,7 @@ class CustomUserUpdateForm(forms.ModelForm):
     phoneNumber = forms.CharField(max_length=12,
                                   required=False,
                                   widget=forms.TextInput(attrs={'class': 'form-control mb-3', 'placeholder':'+33...'}))
-    role = forms.ChoiceField(required=False,
+    role = forms.ChoiceField(required=True,
                              choices=CustomUser.Role.choices,
                              widget=forms.Select(attrs={'class': 'form-control','title':"Non-editable, contact a staff member if you need to."}),
                              disabled=True,
@@ -53,6 +69,24 @@ class CustomUserUpdateForm(forms.ModelForm):
                   "researchCentre",
                   "phoneNumber",
                   "role",
+                  ]
+
+class CustomUserCreationFormAdmin(UserCreationForm):
+    """A form for creating new users. Includes all the required
+    fields, plus a repeated password.
+    """
+    email = forms.EmailField(max_length=254)
+
+    class Meta:
+        model = CustomUser
+        fields = ["email",
+                  "firstName",
+                  "lastName",
+                  "researchCentre",
+                  "phoneNumber",
+                  "role",
+                  "password1",
+                  "password2",
                   ]
 
 class CustomUserUpdateFormAdmin(UserChangeForm):
