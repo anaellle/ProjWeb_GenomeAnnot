@@ -176,8 +176,6 @@ class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
 
 def explore(request):
     context = {"active_tab": "explore", "role_user": get_role(request)}
-    if context["role_user"] == None:
-        return redirect("main:home")
 
     if request.method == "GET":
         if "submit_download" in request.GET:
@@ -361,33 +359,38 @@ def blast(request, sequence=None):
         "role_user": get_role(request),
         "sequence": sequence,
     }
-    if context["role_user"] == None:
-        return redirect("main:home")
+
     # return render(request, "main/blast/main_blast.html", context)
 
     if request.method == "POST":
         sequence = request.POST["sequence"]
         program = request.POST["program"]
 
+        # db = request.POST['database']
+        alignments = request.POST["alignments"]
+        # Request to ncbi blast api, rajouter gestion des erreurs ensuite
 
-        #db = request.POST['database']
-        alignments = request.POST['alignments']
-        #Request to ncbi blast api, rajouter gestion des erreurs ensuite
-        
         seq = kind_of_sequence(sequence)
-        if (seq == "pb_seq"):
-            context["error_message"]="Please verify that your query is a protein or a nuc sequence"
-            return render(request, 'main/blast/error_blast.html', context)
-        elif(seq == "nuc"):
-            db="nt"
-            if not(program == "blastn" or program == "blastx" or program =="tblastx"):
-                context["error_message"]="Please choose a programm who works with your type of query (nuc)"
-                return render(request, 'main/blast/error_blast.html',context)
-        elif(seq== "prot"):
-            db="nr"
-            if not(program == "blastp" or program == "tblastn"):
-                context["error_message"]="Please choose a programm who works with your type of query (prot)"
-
+        if seq == "pb_seq":
+            context["error_message"] = (
+                "Please verify that your query is a protein or a nuc sequence"
+            )
+            return render(request, "main/blast/error_blast.html", context)
+        elif seq == "nuc":
+            db = "nt"
+            if not (
+                program == "blastn" or program == "blastx" or program == "tblastx"
+            ):
+                context["error_message"] = (
+                    "Please choose a programm who works with your type of query (nuc)"
+                )
+                return render(request, "main/blast/error_blast.html", context)
+        elif seq == "prot":
+            db = "nr"
+            if not (program == "blastp" or program == "tblastn"):
+                context["error_message"] = (
+                    "Please choose a programm who works with your type of query (prot)"
+                )
 
         try:
             result_handle = NCBIWWW.qblast(
@@ -402,15 +405,20 @@ def blast(request, sequence=None):
         except Exception as e:
             # Gérer les erreurs, par exemple, en renvoyant un message d'erreur à l'utilisateur
 
-            context["error_message"]="No API access, please verify your internet connection"
-            return render(request, 'main/blast/error_blast.html', context)
+            context["error_message"] = (
+                "No API access, please verify your internet connection"
+            )
+            return render(request, "main/blast/error_blast.html", context)
         if not blast_results:
-            return render(request, 'main/blast/error_blast.html', {'error_message': 'No results found'})
-        context["results"]=blast_results
-        return render(request, 'main/blast/blast_results.html',context)
+            return render(
+                request,
+                "main/blast/error_blast.html",
+                {"error_message": "No results found"},
+            )
+        context["results"] = blast_results
+        return render(request, "main/blast/blast_results.html", context)
 
-    return render(request, "main/blast/main_blast.html",context)
-
+    return render(request, "main/blast/main_blast.html", context)
 
 
 ##############################################################################################
@@ -459,7 +467,7 @@ def genome(request, genome_id):  # change to details view later
 ##############################################################################################
 
 
-#### Not  view, function used in view :
+#### Function used in view :
 
 
 # get all related information of a gene
@@ -470,9 +478,9 @@ def get_gene_related_info(gene, role):
     geneseq = gene.nucleotidicseq_set.first()
     peptseq = peptide.peptideseq_set.first() if peptide else None
     if role != 0:
-        messages = Message.objects.filter(
-            idGene=gene
-        )  # TO DO : be sure to order by date !!!
+        # if not reader : get the messages associated with gene
+        messages = Message.objects.filter(idGene=gene).order_by("date")
+
     else:
         messages = None
     return {
@@ -486,14 +494,16 @@ def get_gene_related_info(gene, role):
     }
 
 
-#### 3 views of gene
+#### The views of gene
 
 
+### View to read information of a gene
 class GeneDetailView(DetailView):
     model = Gene
     template_name = "main/gene.html"
     pk_url_kwarg = "gene_id"
 
+    # return home page if url blocked for this user
     def dispatch(self, request, *args, **kwargs):
         gene = get_object_or_404(Gene, pk=self.kwargs.get("gene_id"))
         if not request.user.is_authenticated:
@@ -503,13 +513,14 @@ class GeneDetailView(DetailView):
     # context to extract from DB
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # get role of user
         role_user = get_role(self.request)
         # get gene info
         gene = self.object
         gene_info = get_gene_related_info(gene, role_user)
         # merge all info
         context_all = {**context, **gene_info}
-        # get accessibility to annotation/validation
+        # get accessibility to annotation/validation :
         # we allow admin to annotate and valid in order to test easily our code as admin,
         # but an admin can assign a gene to himself only via admin of django, not interface
         # (so just for us to test)
@@ -536,6 +547,7 @@ class GeneUpdateView(UpdateView):
     template_name = "main/gene.html"
     form_class = GeneUpdateForm
 
+    # return home page if url blocked for this user
     def dispatch(self, request, *args, **kwargs):
         gene = get_object_or_404(Gene, pk=self.kwargs.get("gene_id"))
         if (
@@ -547,13 +559,16 @@ class GeneUpdateView(UpdateView):
             return redirect("main:home")
         return super().dispatch(request, *args, **kwargs)
 
+    # url to return after success of a form
     def get_success_url(self):
         return self.request.POST.get(
             "previousAnnot", self.get_context_data()["previous_url"]
         )
 
+    # context to extract from DB
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # get role of user
         role_user = get_role(self.request)
         # get gene info
         gene = self.object
@@ -567,7 +582,7 @@ class GeneUpdateView(UpdateView):
             else None
         )
         context_all["peptide_form"] = peptide_form
-        # add info for tabs and role
+        # add info for tabs, role and previous url
         context_all["active_tab"] = "annotate"
         context_all["role"] = "annotator"
         context_all["role_user"] = role_user
@@ -576,6 +591,7 @@ class GeneUpdateView(UpdateView):
         )
         return context_all
 
+    # get informations of forms and do actions
     def form_valid(self, form):
         # check user can annotate
         role_user = self.get_context_data()["role_user"]
@@ -583,7 +599,7 @@ class GeneUpdateView(UpdateView):
         if (
             role_user == 1 or role_user == 3
         ) and gene.emailAnnotator == self.request.user:
-
+            # save change of gene and peptide :
             gene = form.save(commit=False)
             peptide = gene.peptide_set.first()
             if peptide:
@@ -592,9 +608,11 @@ class GeneUpdateView(UpdateView):
                     peptide_form.save()
             # if save and not annotated, status become 1 (in work) :
             if "submit_save" in self.request.POST:
+                # for gene :
                 if gene.status == 0:
                     gene.status = 1
                     gene.save()
+                # for genome :
                 genome = self.object.idChrom.idGenome
                 if genome.status == 0:
                     genome.status = 1
@@ -604,7 +622,7 @@ class GeneUpdateView(UpdateView):
                 user = self.request.user
                 gene.status = 3
                 gene.save()
-                # the status of the genome become "in work"
+                # the status of the genome become "in work" if not already the case
                 genome = self.object.idChrom.idGenome
                 if genome.status == 0:
                     genome.status = 1
@@ -628,6 +646,7 @@ class GeneValidDetailView(DetailView):
     pk_url_kwarg = "gene_id"
     form_class = CommentForm
 
+    # return home page if url blocked for this user
     def dispatch(self, request, *args, **kwargs):
         gene = get_object_or_404(Gene, pk=self.kwargs.get("gene_id"))
         if (
@@ -639,6 +658,7 @@ class GeneValidDetailView(DetailView):
             return redirect("main:home")
         return super().dispatch(request, *args, **kwargs)
 
+    # url to return after success of a form
     def get_success_url(self):
         if "submit_comment" not in self.request.POST:
             previous_url = self.request.session.get(
@@ -648,6 +668,7 @@ class GeneValidDetailView(DetailView):
         else:
             return self.request.path
 
+    # context to extract from DB
     def get_context_data(self, **kwargs):
         context = super(GeneValidDetailView, self).get_context_data(**kwargs)
         role_user = get_role(self.request)
@@ -668,6 +689,7 @@ class GeneValidDetailView(DetailView):
         self.request.session["genome_id"] = context_all["genome"].id
         return context_all
 
+    # get informations of forms and do actions (post form)
     def post(self, request, *args, **kwargs):
         gene = self.get_object()
         if gene.status == 3:  # if gene can be validated/rejected :
@@ -677,7 +699,7 @@ class GeneValidDetailView(DetailView):
             if (
                 role_user == 2 or role_user == 3
             ) and gene.emailValidator == self.request.user:
-
+                # modify gene status and do comment :
                 if "submit_comment_reject" in request.POST:
                     form = CommentForm(request.POST)
                     if form.is_valid():
@@ -740,14 +762,15 @@ class genomeAdmin(SingleTableMixin, FilterView):
     table_class = TableGenome
     template_name = "main/admin/admin.html"
     paginate_by = 10
-    # paginator_class = LazyPaginator
     filterset_class = AdminGenomeFilter
 
+    # return home page if url blocked for this user
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated or request.user.role != 3:
             return redirect("main:home")
         return super().dispatch(request, *args, **kwargs)
 
+    # context to extract from DB
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "admin"
@@ -761,14 +784,15 @@ class sequenceAdmin(SingleTableMixin, FilterView):
     table_class = TableGene
     template_name = "main/admin/admin.html"
     paginate_by = 10
-    # paginator_class = LazyPaginator
     filterset_class = AdminGeneFilter
 
+    # return home page if url blocked for this user
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated or request.user.role != 3:
             return redirect("main:home")
         return super().dispatch(request, *args, **kwargs)
 
+    # context to extract from DB
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "admin"
@@ -777,6 +801,7 @@ class sequenceAdmin(SingleTableMixin, FilterView):
 
         return context
 
+    # filter by genome
     def get_queryset(self):
         queryset = super().get_queryset()
         genome_id = self.request.GET.get("idChrom__idGenome__id__icontains")
@@ -790,14 +815,15 @@ class accountAdmin(SingleTableMixin, FilterView):
     table_class = TableAccount
     template_name = "main/admin/admin.html"
     paginate_by = 10
-    # paginator_class = LazyPaginator
     filterset_class = AdminAccountFilter
 
+    # return home page if url blocked for this user
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated or request.user.role != 3:
             return redirect("main:home")
         return super().dispatch(request, *args, **kwargs)
 
+    # context to extract from DB
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "admin"
@@ -805,6 +831,7 @@ class accountAdmin(SingleTableMixin, FilterView):
         context["role_user"] = get_role(self.request)
         return context
 
+    # filter by email
     def get_queryset(self):
         queryset = super().get_queryset()
         email = self.request.GET.get("email__contains")
@@ -818,21 +845,23 @@ class accountAssignAdmin(SingleTableMixin, FilterView):
     table_class = TableAssignAccount
     template_name = "main/admin/admin.html"
     paginate_by = 10
-    # paginator_class = LazyPaginator
     filterset_class = AdminAssignFilter
 
+    # return home page if url blocked for this user
     def dispatch(self, request, *args, **kwargs):
         gene = get_object_or_404(Gene, pk=self.kwargs.get("gene_id"))
         if not request.user.is_authenticated or request.user.role != 3:
             return redirect("main:home")
         return super().dispatch(request, *args, **kwargs)
 
+    # url to return after success of a form
     def get_success_url(self):
         previous_url = self.request.session.get("previous_url")
         if previous_url:
             return previous_url
         return reverse("main:sequenceAdmin")
 
+    # context to extract from DB
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "admin"
@@ -851,6 +880,7 @@ class accountAssignAdmin(SingleTableMixin, FilterView):
             previous_url = reverse("main:sequenceAdmin")
         return context
 
+    # filter by role
     def get_queryset(self):
         queryset = super().get_queryset()
         role = self.kwargs.get("role")
@@ -858,6 +888,7 @@ class accountAssignAdmin(SingleTableMixin, FilterView):
             queryset = queryset.filter(role=role)
         return queryset.order_by("email")
 
+    # get informations of forms and do actions (get form)
     def get(self, request, *args, **kwargs):
         user = None
         for key in request.GET:
@@ -870,6 +901,7 @@ class accountAssignAdmin(SingleTableMixin, FilterView):
 
         gene_id = self.kwargs.get("gene_id")
         role = int(self.kwargs.get("role"))
+        # assign gene to user
         if gene_id and role and user:
             gene = Gene.objects.get(id=gene_id)
             if role == 1:
