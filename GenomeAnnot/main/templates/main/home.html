@@ -40,10 +40,9 @@ comprehensive genomic repository. <br><br>
                 <div class="card-body">
                 <h5 class="card-title">Explore Genomes</h5>
                 <h6 class="card-subtitle mb-2 text-body-secondary">All</h6>
-                <div  {% if role_user == None %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Not connected"{% endif %}>
                 <p class="card-text"> Exploration of genomes, providing detailed insights into the information related to genes and proteins.</p>
-                <a href="{% url 'main:explore' %}" class="btn btn-primary {% if role_user == None %}disabled{% endif %}">Go to Explore</a>
-                </div></div>
+                <a href="{% url 'main:explore' %}" class="btn btn-primary">Go to Explore</a>
+                </div>
             </div>
 
 
@@ -55,9 +54,8 @@ comprehensive genomic repository. <br><br>
                 <h5 class="card-title">Blast Sequences</h5>
                 <h6 class="card-subtitle mb-2 text-body-secondary">All</h6>
                 <p class="card-text"> Blast using sequences stored in the database.</p>
-                <div  {% if role_user == None %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Not connected"{% endif %}>
-                <a href="{% url 'main:blast' %}" class="btn btn-primary {% if role_user == None %}disabled{% endif %}">Go to Blast</a>
-                </div></div>
+                <a href="{% url 'main:blast' %}" class="btn btn-primary">Go to Blast</a>
+                </div>
             </div>
 
             <!-- ------------- AddGenome ------------- -->
