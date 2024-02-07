@@ -8,6 +8,8 @@ from .models import Gene, Message, Genome
 
 from .insertion import downloadAndFill
 
+from django.contrib import messages
+
 
 # Library required for lauching the Blast API
 from Bio.Blast import NCBIWWW
@@ -272,12 +274,17 @@ def addGenome(request):
             form = UploadFileForm(request.POST, request.FILES)
             if form.is_valid():
                 print("here")
+                messages.info(request, 'Your files are being processed')
+
                 genomefile = request.FILES.get("genomefile")
                 cdsfile = request.FILES.get("cdsfile")
                 peptidefile = request.FILES.get("peptidefile")
                 # python parser to insert into BD : ...
                 downloadAndFill(genomefile, cdsfile, peptidefile)
-            print(form.errors)
+                messages.success(request, 'Your files were successfully uploaded')
+                return render(request, "main/addGenome/addGenome.html", context)
+            else :
+                messages.error(request, 'Your files were not uploaded, a problem occured')
     return render(request, "main/addGenome/addGenome.html", context)
 
 

@@ -7,7 +7,7 @@ def CDSParser(filename):
     CDSdict["sequence"] = {}
 
     # on boucle sur toutes les séquences
-    for record in SeqIO.parse(filename, "fasta"):
+    for record in SeqIO.parse(filename.temporary_file_path(), "fasta"):
         # création des dictionnaires pour la séquence et le gène
         CDSdict["gene"][record.id] = {}
         CDSdict["sequence"][record.id] = {}
@@ -34,7 +34,7 @@ def CDSParser(filename):
                 CDSdict["gene"][record.id][names[att]] = record.id
 
         # information du chromosome
-        index_pos = [i for i in range(len(infos)) if 'chromosome' in infos[i]]
+        index_pos = [i for i in range(len(infos)) if ('chromosome' in infos[i] or 'plasmid' in infos[i])]
         chr_infos = infos[index_pos[0]].split(':')
         CDSdict["gene"][record.id]['idChrom'] = chr_infos[1]
         CDSdict["gene"][record.id]['startPos'] = chr_infos[3]
@@ -54,7 +54,7 @@ def PepParser(filename):
     pepdict["peptide"] = {}
     pepdict["sequence"] = {}
 
-    for record in SeqIO.parse(filename, "fasta"):
+    for record in SeqIO.parse(filename.temporary_file_path(), "fasta"):
         pepdict["peptide"][record.id] = {}
         pepdict["sequence"][record.id] = {}
         
@@ -94,7 +94,7 @@ def GenomeParser(filename):
     gendict["sequence"] = {}
 
     # Nom du fichier
-    genomeID = filename.split('.')[0]
+    genomeID = filename.name.split('.')[0]
 
     # Formatage du nom
     strain = genomeID.find('_str')
@@ -130,7 +130,7 @@ def GenomeParser(filename):
         gendict["genome"][genomeName]['substrain'] = substrain
 
     # Remplissage pour les chromosomes et les sequences
-    for record in SeqIO.parse(filename, "fasta"):
+    for record in SeqIO.parse(filename.temporary_file_path(), "fasta"):
         chr_infos = record.description.split()[2]
         chrName = chr_infos.split(':')[1]
 
@@ -156,11 +156,11 @@ def GenomeParser(filename):
 
 
 def file_to_dico(file):
-    if(file.endswith('cds.fa')):
+    if(file.name.endswith('cds.fa')):
         res = CDSParser(file)
-    elif(file.endswith('pep.fa')):
+    elif(file.name.endswith('pep.fa')):
         res = PepParser(file)
-    elif(file.endswith('.fa')):
+    elif(file.name.endswith('.fa')):
         res = GenomeParser(file)
     else: 
         print("file is not a .fa file")
