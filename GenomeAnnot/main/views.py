@@ -108,8 +108,6 @@ class CustomUserLoginView(LoginView):
 
 def explore(request):
     context = {"active_tab": "explore", "role_user": get_role(request)}
-    if context["role_user"] == None:
-        return redirect("main:home")
 
     if request.method == "GET":
         if "submit_download" in request.GET:
@@ -293,33 +291,38 @@ def blast(request, sequence=None):
         "role_user": get_role(request),
         "sequence": sequence,
     }
-    if context["role_user"] == None:
-        return redirect("main:home")
+
     # return render(request, "main/blast/main_blast.html", context)
 
     if request.method == "POST":
         sequence = request.POST["sequence"]
         program = request.POST["program"]
 
+        # db = request.POST['database']
+        alignments = request.POST["alignments"]
+        # Request to ncbi blast api, rajouter gestion des erreurs ensuite
 
-        #db = request.POST['database']
-        alignments = request.POST['alignments']
-        #Request to ncbi blast api, rajouter gestion des erreurs ensuite
-        
         seq = kind_of_sequence(sequence)
-        if (seq == "pb_seq"):
-            context["error_message"]="Please verify that your query is a protein or a nuc sequence"
-            return render(request, 'main/blast/error_blast.html', context)
-        elif(seq == "nuc"):
-            db="nt"
-            if not(program == "blastn" or program == "blastx" or program =="tblastx"):
-                context["error_message"]="Please choose a programm who works with your type of query (nuc)"
-                return render(request, 'main/blast/error_blast.html',context)
-        elif(seq== "prot"):
-            db="nr"
-            if not(program == "blastp" or program == "tblastn"):
-                context["error_message"]="Please choose a programm who works with your type of query (prot)"
-
+        if seq == "pb_seq":
+            context["error_message"] = (
+                "Please verify that your query is a protein or a nuc sequence"
+            )
+            return render(request, "main/blast/error_blast.html", context)
+        elif seq == "nuc":
+            db = "nt"
+            if not (
+                program == "blastn" or program == "blastx" or program == "tblastx"
+            ):
+                context["error_message"] = (
+                    "Please choose a programm who works with your type of query (nuc)"
+                )
+                return render(request, "main/blast/error_blast.html", context)
+        elif seq == "prot":
+            db = "nr"
+            if not (program == "blastp" or program == "tblastn"):
+                context["error_message"] = (
+                    "Please choose a programm who works with your type of query (prot)"
+                )
 
         try:
             result_handle = NCBIWWW.qblast(
@@ -334,15 +337,20 @@ def blast(request, sequence=None):
         except Exception as e:
             # Gérer les erreurs, par exemple, en renvoyant un message d'erreur à l'utilisateur
 
-            context["error_message"]="No API access, please verify your internet connection"
-            return render(request, 'main/blast/error_blast.html', context)
+            context["error_message"] = (
+                "No API access, please verify your internet connection"
+            )
+            return render(request, "main/blast/error_blast.html", context)
         if not blast_results:
-            return render(request, 'main/blast/error_blast.html', {'error_message': 'No results found'})
-        context["results"]=blast_results
-        return render(request, 'main/blast/blast_results.html',context)
+            return render(
+                request,
+                "main/blast/error_blast.html",
+                {"error_message": "No results found"},
+            )
+        context["results"] = blast_results
+        return render(request, "main/blast/blast_results.html", context)
 
-    return render(request, "main/blast/main_blast.html",context)
-
+    return render(request, "main/blast/main_blast.html", context)
 
 
 ##############################################################################################
