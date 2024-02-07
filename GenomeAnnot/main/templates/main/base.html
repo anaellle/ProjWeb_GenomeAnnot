@@ -28,7 +28,7 @@
           <!-------------- Login -------------->
             <nav class="nav">
                 {% if request.user.is_authenticated %}
-                        <a href="{% url 'main:profile' %}" class="d-flex align-items-center" title="Update my profile">Hi {{request.user.firstName | title}}</a>
+                        <a href="{% url 'main:profile' %}" class="d-flex align-items-center ebony" title="Update my profile">Hi {{request.user.firstName | title}}</a>
                         <a href="{% url 'main:logout' %}" class="btn btn-secondary d-flex align-items-center m-2 me+1">Logout</a>
                 {% else %}
                         <a href="{% url 'main:login' %}" class="btn btn-primary d-flex align-items-center m-2">Login</a>
