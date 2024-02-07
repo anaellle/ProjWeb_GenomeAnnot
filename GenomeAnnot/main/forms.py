@@ -4,8 +4,9 @@ from .models import Gene, Peptide, Message, CustomUser
 
 
 class UploadFileForm(forms.Form):
-    title = forms.CharField(max_length=50)
-    file = forms.FileField()
+    genomefile = forms.FileField()
+    cdsfile = forms.FileField()
+    peptidefile = forms.FileField()
 
 class CustomUserCreationForm(UserCreationForm):
     """A form for creating new users. Includes all the required

@@ -262,17 +262,22 @@ def blast(request,sequence=None):
 
 def addGenome(request):
     context = {"role_user": role_user}
+    print("test")
+    print(request.method)
     if request.method == "POST":
+        print("1st passed")
         if "submit_addgenome" in request.POST:
+            print("2nd passed")
             # get parameters
             form = UploadFileForm(request.POST, request.FILES)
             if form.is_valid():
+                print("here")
                 genomefile = request.FILES.get("genomefile")
                 cdsfile = request.FILES.get("cdsfile")
                 peptidefile = request.FILES.get("peptidefile")
                 # python parser to insert into BD : ...
                 downloadAndFill(genomefile, cdsfile, peptidefile)
-
+            print(form.errors)
     return render(request, "main/addGenome/addGenome.html", context)
 
 
