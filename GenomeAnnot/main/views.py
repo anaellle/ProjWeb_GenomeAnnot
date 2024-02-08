@@ -8,7 +8,7 @@ from django_tables2 import SingleTableView
 from django_tables2.views import SingleTableMixin
 from django_tables2.paginators import LazyPaginator
 from django_filters.views import FilterView
-
+import plotly.graph_objects as go
 
 from .forms import GeneUpdateForm, PeptideUpdateForm, CommentForm
 from .tables import TableGenome, TableGene, TableAccount, TableAssignAccount
@@ -385,12 +385,62 @@ def addGenome(request):
 ##############################################################################################
 
 
-def genome(request, genome_id):  # change to details view later
+def get_color_status(status):
+    if status == 0:
+        return "#a1ab9d"
+    elif status in [1, 2, 3]:
+        return "#FAB431"
+    elif status == 4:
+        return "#1CB61C"
+    else:
+        return "black"
+
+
+def handle_click(trace, points, selector):
+    print("click")
+
+
+def genome(request, genome_id):
+
+    fig = go.Figure()
+
+    # get all genes and plot informations
+    genes = Gene.objects.filter(idChrom__idGenome=genome_id)
+    i = 0
+    for gene in genes:
+        if i >= 20:
+            break
+        length = gene.endPos - gene.startPos + 1
+        text_pos = f"{gene.startPos}-{gene.endPos}"
+        line = go.Scatter(
+            x=list(range(gene.startPos, gene.endPos + 1)),
+            y=[gene.strand] * length,
+            mode="lines",
+            name=f"Gene {gene.id}",
+            line=dict(color=get_color_status(gene.status), width=6),
+            hoverinfo="text",
+            hovertemplate=text_pos,
+        )
+        fig.add_trace(line)
+        line.on_click(handle_click)
+        i += 1
+
+    # add label
+    fig.update_layout(
+        yaxis_title="Strand",
+        xaxis_title="Position",
+    )
+    # convert to html
+    plot_genome = fig.to_html(
+        full_html=False, default_height=500, default_width=1500
+    )
+
     context = {
         "genome_id": genome_id,
         "active_tab": "explore",
         "role_user": get_role(request),
-    }  # ex of context (no db for now)
+        "plot_genome": plot_genome,
+    }
     return render(request, "main/explore/genome.html", context)
 
 
