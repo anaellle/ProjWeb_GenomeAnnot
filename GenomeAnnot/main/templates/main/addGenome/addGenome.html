@@ -3,11 +3,30 @@
 <!-- --------------- CONTENT --------------- -->
 
 {% block body %}  
+    <!-------- ERRORS -------->
+    {% if user_form.errors %}
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        <div id="form_errors">
+            {% for key, value in user_form.errors.items %}
+                <strong>{{ value }}</strong>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{message.tags}}">
+                {{message}}
+            </div>
+        {% endfor %}
+    {% endif %}
+
 <div class="filter p-4">
    
     <div class="container pt-3 pb-3">
         <h4 class="mb-4">Add a genome to the database</h4>
-    <form method="post" action='{% url "main:explore" %}'>
+    <form enctype="multipart/form-data" method="post">
         {% csrf_token %}
         <div class="row align-items-center mb-3">
             <label for="genomefile" class="mb-2 bold"> Choose a genome file : </label>
