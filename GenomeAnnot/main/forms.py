@@ -2,6 +2,10 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django import forms
 from .models import Gene, Peptide, Message, CustomUser
 
+class UploadFileForm(forms.Form):
+    genomefile = forms.FileField()
+    cdsfile = forms.FileField()
+    peptidefile = forms.FileField()
 
 class CustomUserCreationForm(UserCreationForm):
     """A form for creating new users. Includes all the required

@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import DetailView, UpdateView, CreateView
+from django.views.generic import DetailView, UpdateView, CreateView, FormView
 from django.http import HttpResponseRedirect, Http404
-from django.urls import reverse, resolve
+
+from django.urls import reverse, resolve, reverse_lazy
 from django.urls.exceptions import Resolver404
 
 from django_tables2 import SingleTableView
@@ -10,7 +11,7 @@ from django_tables2.paginators import LazyPaginator
 from django_filters.views import FilterView
 
 
-from .forms import GeneUpdateForm, PeptideUpdateForm, CommentForm
+from .forms import GeneUpdateForm, PeptideUpdateForm, CommentForm, UploadFileForm
 from .tables import TableGenome, TableGene, TableAccount, TableAssignAccount
 from .models import Gene, Message, Genome, Chromosome, CustomUser
 from .filters import (
@@ -20,8 +21,9 @@ from .filters import (
     AdminAssignFilter,
 )
 
-# from fileParser import file_to_dico
-# from insertion import addData
+from .insertion import downloadAndFill
+
+from django.contrib import messages
 
 # Libraries required for sign up
 from django.contrib.auth.mixins import AccessMixin
@@ -427,24 +429,26 @@ def blast(request, sequence=None):
 
 
 def addGenome(request):
-    context = {"role_user": get_role(request)}
-    if context["role_user"] == None:
-        return redirect("main:home")
+    context = {"role_user": role_user}
     if request.method == "POST":
+        print("1st passed")
         if "submit_addgenome" in request.POST:
+            print("2nd passed")
             # get parameters
-            genomefile = request.POST.get("genomefile")
-            cdsfile = request.POST.get("cdsfile")
-            peptidefile = request.POST.get("peptidefile")
-            # python parser to insert into BD : ...
-            # print(genomefile)
-            # genomeDict = file_to_dico(genomefile)
-            # cdsDict = file_to_dico(cdsfile)
-            # pepDict = file_to_dico(peptidefile)
-            # if genomeDict==-1 or cdsDict==-1 or pepDict==-1 :
-            #     print("File is not a .fa file")
-            # else :
-            #     addData(genomeDict, cdsDict, pepDict)
+            form = UploadFileForm(request.POST, request.FILES)
+            if form.is_valid():
+                print("here")
+                messages.info(request, 'Your files are being processed')
+
+                genomefile = request.FILES.get("genomefile")
+                cdsfile = request.FILES.get("cdsfile")
+                peptidefile = request.FILES.get("peptidefile")
+                # python parser to insert into BD : ...
+                downloadAndFill(genomefile, cdsfile, peptidefile)
+                messages.success(request, 'Your files were successfully uploaded')
+                return render(request, "main/addGenome/addGenome.html", context)
+            else :
+                messages.error(request, 'Your files were not uploaded, a problem occured')
     return render(request, "main/addGenome/addGenome.html", context)
 
 
