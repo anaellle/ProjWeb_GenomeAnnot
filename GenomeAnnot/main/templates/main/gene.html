@@ -13,10 +13,12 @@
     <div class="nav nav-pills">
       {% if active_tab == "explore"%}
         <!--TO DISABLED DEPENDING ON ASSIGNATION !!! (OR DELETE LINKS)-->
-        <a class="nav-link px-3 {% if role_user != 'annotator' and role_user != 'admin' %}disabled{% endif %}" href="{% url 'main:geneAnnot' gene_id=gene.id  %}"> Annotate</a>
-      
-        <a class="nav-link px-3 {% if role_user != 'validator' and role_user != 'admin' %}disabled{% endif %}" href="{% url 'main:geneValid' gene_id=gene.id  %}"> Validate</a>
-      
+        {% if accesAnnot %}
+        <a class="nav-link px-3 " href="{% url 'main:geneAnnot' gene_id=gene.id  %}"> Annotate</a>
+        {% endif %}
+        {% if accesValid %}
+        <a class="nav-link px-3 " href="{% url 'main:geneValid' gene_id=gene.id  %}"> Validate</a>
+        {% endif %}
       
         
       
@@ -27,7 +29,7 @@
         </svg>
         Go to Save or Submit </a>  
       {% elif active_tab == "validate" and gene.status == 3 %}
-      <a class="nav-link px-3" href="#reject"> 
+      <a class="nav-link px-3" href="#validate"> 
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-short" viewBox="0 0 16 16">
           <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8"/>
         </svg>
@@ -36,6 +38,8 @@
       </div>
     
   </nav>
+
+{% if form %}  {{ form.non_field_errors }} {%endif%}
 
 {% if active_tab == "annotate"%}
 
@@ -105,9 +109,9 @@
             <span class="bold" >Description : </span>
                 {% if active_tab == "annotate" and gene.status != 3 and gene.status != 4%}
                 <br>
-                {{ form.description }}
+                {{ form.descriptionGene }}
                 {% else %}
-                <p class="{% if status != 4 %} notvalid {% endif %}">{{gene.description}}</p>
+                <p class="{% if status != 4 %} notvalid {% endif %}">{{gene.descriptionGene}}</p>
               {% endif %} 
           </div>
         </div>
@@ -150,17 +154,19 @@
               {% endif %} 
             </div>
         </div>
-        <!--
+        
         <div class="row align-items-center my-4 mx-2 ">
           <div class="col">
             <span class="bold" >Description : </span>
               {% if active_tab == "annotate" and gene.status != 3 and gene.status != 4%}
-                <textarea name="descriProt" rows="7" class="w-100"></textarea>
+                <br>
+                {{peptide_form.descriptionPep}}
+
               {% else %}
-              <p class="{% if status != 4 %} notvalid {% endif %}">...a mettre ds bd...</p>
+              <p class="{% if status != 4 %} notvalid {% endif %}"> {{peptide.descriptionPep}} </p>
               {% endif %} 
           </div>
-          -->
+          
         </div>
         <div class="row align-items-center mt-4 mx-2 ">
           <div class="col">
@@ -175,7 +181,7 @@
   </div>
 
   <!--------------------------Comments----------------------------------->
-  {% if active_tab == "annotate" or active_tab == "validate" or role_user == "admin" %}
+  {% if role_user == 3 or accesAnnot or accesValid %}
 
   {% for comment in messages %}
   {% if comment.type == 0 %}
@@ -216,7 +222,7 @@
   <!--<textarea  class="w-100 mb-1 px-3 py-2" rows="4" placeholder="write comment ..." name="comment"></textarea>-->
   {{comment_form.text}}
   <br>
-  <input class="btn btn-secondary" type="submit" name="submit_comment" value="Comment"></input > 
+  <input class="btn btn-secondary reject" type="submit" name="submit_comment_reject" value="Comment and Reject"></input > 
   </div>
   </form>
   {% endif %} 
@@ -225,6 +231,7 @@
   {% if active_tab == "annotate" and gene.status != 3 and gene.status != 4 %}
     <div class=" mb-5">
       <input type="hidden" name="previousAnnot" value="{{ previous_url }}">
+      
       <input id="save" class="btn btn-secondary " type="submit" name="submit_save" value="Save"></input > 
       <input id="submit" class="btn btn-primary" type="submit" name="submit_submit" value="Submit"></input > 
     </div>
@@ -232,7 +239,7 @@
   <form method="post" >
     {% csrf_token %}
   <div class=" mb-5">
-    <input id="reject" class="btn btn-primary reject" type="submit" name="submit_reject" value="Reject"></input > 
+    <!--<input id="reject" class="btn btn-primary reject" type="submit" name="submit_reject" value="Reject"></input > -->
     <input id="validate" class="btn btn-primary validate" type="submit" name="submit_validate" value="Validate"></input > 
   </div>
   {% endif %} 

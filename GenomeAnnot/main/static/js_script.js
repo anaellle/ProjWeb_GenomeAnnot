@@ -4,7 +4,12 @@ window.addEventListener('load', function() {
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 });
 
+//----------------Hide automatic pagination
 
+/* $(document).ready(function(){
+    alert("cool");
+    $("table > .pagination").hide();
+}); */
 
 // --------------- Scroll button
 
@@ -12,6 +17,7 @@ $(document).ready(function() {
     var sizeFooter = $('footer').height();
     var sizeButton=$('#scrollTop').height();
     $('#scrollTop').css("bottom", (sizeButton+sizeFooter+10)+"px");
+
 });
 
 
