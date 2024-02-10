@@ -1,10 +1,13 @@
 from Bio import SeqIO
 
 def CDSParser(filename):
-    # création des dictionnaires
+    # dictionnariy creation
     CDSdict = {}
     CDSdict["gene"] = {}
     CDSdict["sequence"] = {}
+
+    # to know how many genes are annotated
+    cpt = 0
 
     # on boucle sur toutes les séquences
     for record in SeqIO.parse(filename.temporary_file_path(), "fasta"):
@@ -45,6 +48,10 @@ def CDSParser(filename):
         # ajout de la description
         if 'description' in record.description:
             CDSdict["gene"][record.id]['descriptionGene'] =  record.description.split('description:')[1]
+            CDSdict["gene"][record.id]['status'] = 4
+            cpt = cpt +1
+
+        CDSdict["status"] = cpt
     
     return CDSdict
 

@@ -429,17 +429,13 @@ def blast(request, sequence=None):
 
 
 def addGenome(request):
-    context = {"role_user": role_user}
+    context = {"role_user": get_role(request)}
     if request.method == "POST":
-        print("1st passed")
         if "submit_addgenome" in request.POST:
-            print("2nd passed")
             # get parameters
             form = UploadFileForm(request.POST, request.FILES)
             if form.is_valid():
-                print("here")
                 messages.info(request, 'Your files are being processed')
-
                 genomefile = request.FILES.get("genomefile")
                 cdsfile = request.FILES.get("cdsfile")
                 peptidefile = request.FILES.get("peptidefile")
