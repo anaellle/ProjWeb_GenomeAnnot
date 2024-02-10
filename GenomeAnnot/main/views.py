@@ -1,14 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
-<<<<<<< HEAD
-from django.views.generic import DetailView, UpdateView
-from django.http import HttpResponseRedirect
-from django.urls import reverse, resolve
-=======
-from django.views.generic import DetailView, UpdateView, CreateView, FormView
+from django.views.generic import DetailView, UpdateView, CreateView
 from django.http import HttpResponseRedirect, Http404
-
-from django.urls import reverse, resolve, reverse_lazy
->>>>>>> 3ecdc3fc35d5841b5cb02861f0c6f716b4a537b2
+from django.urls import reverse, resolve
 from django.urls.exceptions import Resolver404
 from django.utils.html import format_html
 from django.core.paginator import Paginator
@@ -94,19 +87,19 @@ def custom_404(request, exception):  # only visible if debug set to false
 
 
 class SignUpView(AccessMixin, FormView):
-    template_name = 'main/signUp.html'
+    template_name = "main/signUp.html"
     form_class = CustomUserCreationForm
-    success_url = reverse_lazy('main:home')
+    success_url = reverse_lazy("main:home")
 
     def dispatch(self, request, *args, **kwargs):
         if self.request.user.is_authenticated:
             # Redirect authenticated users away from the sign-up page, to the home page
             return redirect(self.get_success_url())
         return super().dispatch(request, *args, **kwargs)
-    
+
     def get_success_url(self):
-        return reverse_lazy('main:home')
-    
+        return reverse_lazy("main:home")
+
     def form_valid(self, form):
         user = form.save()
         if user:
@@ -139,17 +132,21 @@ class CustomUserLoginView(LoginView):
 
 @login_required(login_url=reverse_lazy("main:login"))
 def profile(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         user_form = CustomUserUpdateForm(request.POST, instance=request.user)
 
         if user_form.is_valid():
             user_form.save()
-            messages.success(request, 'Your profile was successfully updated')
-            return redirect(to='main:profile')
+            messages.success(request, "Your profile was successfully updated")
+            return redirect(to="main:profile")
     else:
         user_form = CustomUserUpdateForm(instance=request.user)
 
-    return render(request, 'main/profile.html', {'role_user': get_role(request),'user_form': user_form})
+    return render(
+        request,
+        "main/profile.html",
+        {"role_user": get_role(request), "user_form": user_form},
+    )
 
 
 ##############################################################################################
@@ -158,9 +155,9 @@ def profile(request):
 
 
 class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
-    template_name = 'main/password/change_password.html'
+    template_name = "main/password/change_password.html"
     success_message = "Successfully Changed Your Password"
-    success_url = reverse_lazy('main:home')
+    success_url = reverse_lazy("main:home")
 
 
 ##############################################################################################
@@ -169,14 +166,16 @@ class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
 
 
 class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
-    template_name = 'main/password/password_reset.html'
-    email_template_name = 'main/password/password_reset_email.html'
-    subject_template_name = 'main/password/password_reset_subject.txt'
-    success_message = "We've emailed you instructions for setting your password, " \
-                      "if an account exists with the email you entered. You should receive them shortly." \
-                      " If you don't receive an email, " \
-                      "please make sure you've entered the address you registered with, and check your spam folder."
-    success_url = reverse_lazy('main:login')
+    template_name = "main/password/password_reset.html"
+    email_template_name = "main/password/password_reset_email.html"
+    subject_template_name = "main/password/password_reset_subject.txt"
+    success_message = (
+        "We've emailed you instructions for setting your password, "
+        "if an account exists with the email you entered. You should receive them shortly."
+        " If you don't receive an email, "
+        "please make sure you've entered the address you registered with, and check your spam folder."
+    )
+    success_url = reverse_lazy("main:login")
 
 
 ##############################################################################################
@@ -437,7 +436,7 @@ def blast(request, sequence=None):
 
 
 def addGenome(request):
-    context = {"role_user": role_user}
+    context = {"role_user": "reader"}
     if request.method == "POST":
         print("1st passed")
         if "submit_addgenome" in request.POST:
@@ -446,17 +445,19 @@ def addGenome(request):
             form = UploadFileForm(request.POST, request.FILES)
             if form.is_valid():
                 print("here")
-                messages.info(request, 'Your files are being processed')
+                messages.info(request, "Your files are being processed")
 
                 genomefile = request.FILES.get("genomefile")
                 cdsfile = request.FILES.get("cdsfile")
                 peptidefile = request.FILES.get("peptidefile")
                 # python parser to insert into BD : ...
                 downloadAndFill(genomefile, cdsfile, peptidefile)
-                messages.success(request, 'Your files were successfully uploaded')
+                messages.success(request, "Your files were successfully uploaded")
                 return render(request, "main/addGenome/addGenome.html", context)
-            else :
-                messages.error(request, 'Your files were not uploaded, a problem occured')
+            else:
+                messages.error(
+                    request, "Your files were not uploaded, a problem occured"
+                )
     return render(request, "main/addGenome/addGenome.html", context)
 
 
