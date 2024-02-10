@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+from django.urls import reverse_lazy
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -152,4 +153,12 @@ AUTH_USER_MODEL = "main.CustomUser"
 
 # Login URL
 # If you attempt to access a page that requires login, Django will use this LOGIN_URL for redirection.
+<<<<<<< HEAD
 LOGIN_URL = "login"
+=======
+LOGIN_URL = reverse_lazy('main:login')
+
+# Email Backend
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+>>>>>>> 3ecdc3fc35d5841b5cb02861f0c6f716b4a537b2
