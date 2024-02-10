@@ -5,6 +5,8 @@ from .views import (
     GeneDetailView,
     GeneValidDetailView,
     GeneUpdateView,
+    GenomeDetailView,
+    GenomeSeqDetailView,
     genomeAdmin,
     sequenceAdmin,
     accountAdmin,
@@ -19,30 +21,26 @@ app_name = "main"
 urlpatterns = [
     # Home :
     path("", views.home, name="home"),
-    
     # Login - Logout :
-    path('login/', CustomUserLoginView.as_view(), name='login'),
-    path('logout/', LogoutView.as_view(next_page='main:login'), name='logout'),
-    
+    path("login/", CustomUserLoginView.as_view(), name="login"),
+    path("logout/", LogoutView.as_view(next_page="main:login"), name="logout"),
     # Sign up :
-    path('signUp/', SignUpView.as_view(), name='signUp'),
+    path("signUp/", SignUpView.as_view(), name="signUp"),
     # path('profile/',  login_required(UserView.as_view()), name='profile'),
-
     # Blast and blast with sequence:
     path("blast/", views.blast, name="blast"),
     path("blast/<str:sequence>", views.blast, name="blastseq"),
-    
     # Add genome :
     path("addGenome", views.addGenome, name="addGenome"),
-    
     # Explore and read gene/genome info :
     path("explore/", views.explore, name="explore"),  # change to listview !!!
-
+    path("explore/genome<str:genome_id>", GenomeDetailView.as_view(), name="genome"),
     path(
-        "explore/genome<str:genome_id>", views.genome, name="genome"
-    ),  # change to detailsview !!!
+        "explore/genome<str:genome_id>/sequence",
+        GenomeSeqDetailView.as_view(),
+        name="genomeSeq",
+    ),
     path("explore/gene<str:gene_id>", GeneDetailView.as_view(), name="gene"),
-  
     # Annotate gene info :
     path("annotate/", views.annotate, name="annotate"),  # change to list view !!!
     path(
@@ -50,7 +48,6 @@ urlpatterns = [
         GeneUpdateView.as_view(),
         name="geneAnnot",
     ),
-  
     # Validate gene info :
     path("validate/", views.validate, name="validate"),  # change to list view !!!
     path(
@@ -58,7 +55,6 @@ urlpatterns = [
         GeneValidDetailView.as_view(),
         name="geneValid",
     ),
-
     # Admin
     path("administrator/genome/", genomeAdmin.as_view(), name="genomeAdmin"),
     path("administrator/sequence/", sequenceAdmin.as_view(), name="sequenceAdmin"),

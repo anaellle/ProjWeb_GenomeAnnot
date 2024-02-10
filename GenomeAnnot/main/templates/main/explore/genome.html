@@ -2,17 +2,108 @@
 
 {% block body %}
 
-Genome {{genome_id}} <br>
+{% with status=genome.status type="genome" role="reader" %}
+
+<h4 class="mb-5 ms-3">Genome {{genome.id}} <span class="ps-3">{% include 'main/status.html' %}</span> </h4>
+
+{% endwith %}
+
+<!--Info genome-->
+<div class="container pt-2 ">
+
+    <div class="row align-items-center mx-2">
+
+        {% if genome.species %}
+      <div class="col">
+        <span class="bold">Species : </span>  {{genome.species}}
+      </div>
+      {% endif %}
+      {% if genome.strain %}
+      <div class="col">
+        <span class="bold">Strain : </span>  {{genome.strain}}
+      </div>
+      {% endif %}
+      {% if genome.substrain %}
+      <div class="col">
+        <span class="bold">Substrain : </span>  {{genome.substrain}}
+      </div>
+      {% endif %}
+    </div>
+</div>
+
+<!-- Dropdown for Gene Per Page -->
+<form method="get" action="">
+    <label for="genePerPage">Genes Per Page:</label>
+    <select name="genePerPage" id="genePerPage" class="form-control" onchange="this.form.submit()">
+        <option value="5" {% if gene_per_page == 5 %} selected {% endif %}>5</option>
+        <option value="10" {% if gene_per_page == 10 %} selected {% endif %}>10</option>
+        <option value="20" {% if gene_per_page == 20 %} selected {% endif %}>20</option>
+        <option value="30" {% if gene_per_page == 30 %} selected {% endif %}>30</option>
+        <option value="50" {% if gene_per_page == 50 %} selected {% endif %}>50</option>
+        <option value="100" {% if gene_per_page == 100 %} selected {% endif %}>100</option>
+    </select>
+</form>
 
 
-
+<!--Visualisation-->
 <div id="plot_genome">
     {{ plot_genome|safe }}
 </div>
 
 
-<br>
-<div class="btn btn-primary">See gene list</div >
+<!--Text for link-->
+{% with  type="sequence" role="reader" %}
+<div class="container ">
+    <div class="row">
+        <div class="col text-center grey smallerTxt">            
+                 Click on the gene id above the gene to see more information.
+        </div>
+    </div>
+    <div class="row">
+        <div class="col text-center smallerTxt">            
+            <span class="px-2">{% with  status=0 %}{% include 'main/status.html' %}{% endwith %}</span>
+                 
+            <span class="px-2">{% with  status=1 %}{% include 'main/status.html' %}{% endwith %}</span>
+                   
+            <span class="px-2">{% with  status=4 %}{% include 'main/status.html' %}{% endwith %} </span>    
+    </div>
+</div>
+{% endwith %}
+
+<!--Buttons-->
+<div class="container ">
+    <div class="row my-3">
+        <!--Links-->
+        <div class="col  justify-content-start">
+            <a href="{% url 'main:genomeSeq' genome_id=genome.id  %}"  target="_blank" class="btn btn-primary">See genome sequence</a >
+            <div class="btn btn-secondary">See gene list</div >
+        </div>
+
+        <!--Pagination-->
+        <nav class="col d-flex justify-content-end">
+            <ul class="pagination override">
+                {% if page_obj.has_previous %}            
+                    <li class=" page-item "><a class=" page-link" href="?page=1&genePerPage={{ gene_per_page }}">&laquo; First</a></li>
+                    <li class="page-item "><a class=" page-link" href="?page={{ page_obj.previous_page_number }}&genePerPage={{ gene_per_page }}">Previous</a></li>
+                {% endif %}
+
+                <li class="page-item ">
+                    <span class="page-link">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+                </li>
+
+                {% if page_obj.has_next %}
+                <li class="page-item "><a class=" page-link" href="?page={{ page_obj.next_page_number }}&genePerPage={{ gene_per_page }}">Next</a></li>
+                <li class="page-item "><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&genePerPage={{ gene_per_page }}">Last &raquo;</a></li>
+                {% endif %}
+            
+            </ul>  
+            </nav>
+   
+    </div>
+</div>
+
 
 
 {% endblock%}

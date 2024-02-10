@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import DetailView, UpdateView, CreateView
-from django.http import HttpResponseRedirect, Http404
+from django.views.generic import DetailView, UpdateView
+from django.http import HttpResponseRedirect
 from django.urls import reverse, resolve
 from django.urls.exceptions import Resolver404
+from django.utils.html import format_html
+from django.core.paginator import Paginator
 
 from django_tables2 import SingleTableView
 from django_tables2.views import SingleTableMixin
@@ -12,7 +14,7 @@ import plotly.graph_objects as go
 
 from .forms import GeneUpdateForm, PeptideUpdateForm, CommentForm
 from .tables import TableGenome, TableGene, TableAccount, TableAssignAccount
-from .models import Gene, Message, Genome, Chromosome, CustomUser
+from .models import Gene, Message, Genome, Chromosome, CustomUser, ChromosomeSeq
 from .filters import (
     AdminGenomeFilter,
     AdminGeneFilter,
@@ -387,7 +389,7 @@ def addGenome(request):
 
 def get_color_status(status):
     if status == 0:
-        return "#a1ab9d"
+        return "#576b5c"
     elif status in [1, 2, 3]:
         return "#FAB431"
     elif status == 4:
@@ -396,52 +398,126 @@ def get_color_status(status):
         return "black"
 
 
-def handle_click(trace, points, selector):
-    print("click")
+### See genome
+class GenomeDetailView(DetailView):  ### TO DO : GENE LIST LINK
+    model = Genome
+    template_name = "main/explore/genome.html"
+    pk_url_kwarg = "genome_id"
 
+    # return home page if url blocked for this user
+    def dispatch(self, request, *args, **kwargs):
+        genome = get_object_or_404(Genome, pk=self.kwargs.get("genome_id"))
+        if not request.user.is_authenticated:
+            return redirect("main:home")
+        return super().dispatch(request, *args, **kwargs)
 
-def genome(request, genome_id):
+    # context to extract from DB
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        role_user = get_role(self.request)
+        context["genome"] = self.object
+        context["active_tab"] = "explore"
+        context["role_user"] = role_user
 
-    fig = go.Figure()
-
-    # get all genes and plot informations
-    genes = Gene.objects.filter(idChrom__idGenome=genome_id)
-    i = 0
-    for gene in genes:
-        if i >= 20:
-            break
-        length = gene.endPos - gene.startPos + 1
-        text_pos = f"{gene.startPos}-{gene.endPos}"
-        line = go.Scatter(
-            x=list(range(gene.startPos, gene.endPos + 1)),
-            y=[gene.strand] * length,
-            mode="lines",
-            name=f"Gene {gene.id}",
-            line=dict(color=get_color_status(gene.status), width=6),
-            hoverinfo="text",
-            hovertemplate=text_pos,
+        ## Figure with plotly :
+        fig = go.Figure()
+        # get all genes and plot informations
+        genes = Gene.objects.filter(idChrom__idGenome=self.object).order_by(
+            "startPos"
         )
-        fig.add_trace(line)
-        line.on_click(handle_click)
-        i += 1
+        # do pagination :
+        default_gene_per_page = 30
+        gene_per_page = self.request.GET.get("genePerPage", default_gene_per_page)
+        gene_per_page = int(gene_per_page)
+        paginator = Paginator(genes, gene_per_page)
+        page_number = self.request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+        context["page_obj"] = page_obj
+        context["gene_per_page"] = gene_per_page
 
-    # add label
-    fig.update_layout(
-        yaxis_title="Strand",
-        xaxis_title="Position",
-    )
-    # convert to html
-    plot_genome = fig.to_html(
-        full_html=False, default_height=500, default_width=1500
-    )
+        decalage_strand_1 = 0
+        decalage_strand_2 = 0
+        for gene in page_obj:
+            strand = gene.strand
+            if strand == 1:
+                decalage_strand_1 = 0.3 - decalage_strand_1
+                decalage = decalage_strand_1
+            elif strand == -1:
+                decalage_strand_2 = 0.3 - decalage_strand_2
+                decalage = decalage_strand_2
+            length = gene.endPos - gene.startPos + 1
+            text_pos = f"{gene.startPos}-{gene.endPos}"
+            line = go.Scatter(
+                x=list(range(gene.startPos, gene.endPos + 1)),
+                y=[strand + decalage] * length,
+                mode="lines",
+                name=gene.id,
+                line=dict(color=get_color_status(gene.status), width=6),
+                opacity=0.8,
+                # hoverinfo="none",
+                hovertemplate=text_pos,
+            )
+            fig.add_trace(line)
+            url = reverse("main:gene", kwargs={"gene_id": gene.id})
+            link_to_gene = format_html(
+                '<a href="{}" target="_blank" style="color: rgb(105, 72, 72); ">{}</a>',
+                url,
+                gene.id,
+            )
+            # add link to gene info with annotation text :
+            fig.add_annotation(
+                x=(gene.startPos + gene.endPos) / 2,
+                y=gene.strand + decalage,
+                text=link_to_gene,
+                ay=-20,
+                # showarrow=False,
+            )
 
-    context = {
-        "genome_id": genome_id,
-        "active_tab": "explore",
-        "role_user": get_role(request),
-        "plot_genome": plot_genome,
-    }
-    return render(request, "main/explore/genome.html", context)
+        # add label
+        fig.update_layout(
+            yaxis_title="Strand",
+            xaxis_title="Position",
+        )
+        # convert to html
+        plot_genome = fig.to_html(
+            full_html=False, default_height=500, default_width=1500
+        )
+        context["plot_genome"] = plot_genome
+
+        return context
+
+
+### Get sequence of genome
+class GenomeSeqDetailView(DetailView):
+    model = Genome
+    template_name = "main/explore/genomeSeq.html"
+    pk_url_kwarg = "genome_id"
+
+    # return home page if url blocked for this user
+    def dispatch(self, request, *args, **kwargs):
+        genome = get_object_or_404(Genome, pk=self.kwargs.get("genome_id"))
+        if not request.user.is_authenticated:
+            return redirect("main:home")
+        return super().dispatch(request, *args, **kwargs)
+
+    # context to extract from DB
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        role_user = get_role(self.request)
+        context["genome"] = self.object
+        context["active_tab"] = "explore"
+        context["role_user"] = role_user
+        # get all sequence from chromosomes of genome
+        chromosomes = Chromosome.objects.filter(
+            idGenome=self.kwargs.get("genome_id")
+        )
+        sequence = ""
+        for chrom in chromosomes:
+            chrom_seq = ChromosomeSeq.objects.get(idChrom=chrom)
+            sequence += chrom_seq.sequence
+
+        context["sequence"] = sequence
+        return context
 
 
 ##############################################################################################
