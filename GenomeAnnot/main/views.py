@@ -1,19 +1,20 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import DetailView, UpdateView, CreateView, FormView
+from django.views.generic import DetailView, UpdateView, CreateView
 from django.http import HttpResponseRedirect, Http404
-
-from django.urls import reverse, resolve, reverse_lazy
+from django.urls import reverse, resolve
 from django.urls.exceptions import Resolver404
+from django.utils.html import format_html
+from django.core.paginator import Paginator
 
 from django_tables2 import SingleTableView
 from django_tables2.views import SingleTableMixin
 from django_tables2.paginators import LazyPaginator
 from django_filters.views import FilterView
-
+import plotly.graph_objects as go
 
 from .forms import GeneUpdateForm, PeptideUpdateForm, CommentForm, UploadFileForm
 from .tables import TableGenome, TableGene, TableAccount, TableAssignAccount
-from .models import Gene, Message, Genome, Chromosome, CustomUser
+from .models import Gene, Message, Genome, Chromosome, CustomUser, ChromosomeSeq
 from .filters import (
     AdminGenomeFilter,
     AdminGeneFilter,
@@ -86,19 +87,19 @@ def custom_404(request, exception):  # only visible if debug set to false
 
 
 class SignUpView(AccessMixin, FormView):
-    template_name = 'main/signUp.html'
+    template_name = "main/signUp.html"
     form_class = CustomUserCreationForm
-    success_url = reverse_lazy('main:home')
+    success_url = reverse_lazy("main:home")
 
     def dispatch(self, request, *args, **kwargs):
         if self.request.user.is_authenticated:
             # Redirect authenticated users away from the sign-up page, to the home page
             return redirect(self.get_success_url())
         return super().dispatch(request, *args, **kwargs)
-    
+
     def get_success_url(self):
-        return reverse_lazy('main:home')
-    
+        return reverse_lazy("main:home")
+
     def form_valid(self, form):
         user = form.save()
         if user:
@@ -131,17 +132,21 @@ class CustomUserLoginView(LoginView):
 
 @login_required(login_url=reverse_lazy("main:login"))
 def profile(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         user_form = CustomUserUpdateForm(request.POST, instance=request.user)
 
         if user_form.is_valid():
             user_form.save()
-            messages.success(request, 'Your profile was successfully updated')
-            return redirect(to='main:profile')
+            messages.success(request, "Your profile was successfully updated")
+            return redirect(to="main:profile")
     else:
         user_form = CustomUserUpdateForm(instance=request.user)
 
-    return render(request, 'main/profile.html', {'role_user': get_role(request),'user_form': user_form})
+    return render(
+        request,
+        "main/profile.html",
+        {"role_user": get_role(request), "user_form": user_form},
+    )
 
 
 ##############################################################################################
@@ -150,9 +155,9 @@ def profile(request):
 
 
 class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
-    template_name = 'main/password/change_password.html'
+    template_name = "main/password/change_password.html"
     success_message = "Successfully Changed Your Password"
-    success_url = reverse_lazy('main:home')
+    success_url = reverse_lazy("main:home")
 
 
 ##############################################################################################
@@ -161,14 +166,16 @@ class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
 
 
 class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
-    template_name = 'main/password/password_reset.html'
-    email_template_name = 'main/password/password_reset_email.html'
-    subject_template_name = 'main/password/password_reset_subject.txt'
-    success_message = "We've emailed you instructions for setting your password, " \
-                      "if an account exists with the email you entered. You should receive them shortly." \
-                      " If you don't receive an email, " \
-                      "please make sure you've entered the address you registered with, and check your spam folder."
-    success_url = reverse_lazy('main:login')
+    template_name = "main/password/password_reset.html"
+    email_template_name = "main/password/password_reset_email.html"
+    subject_template_name = "main/password/password_reset_subject.txt"
+    success_message = (
+        "We've emailed you instructions for setting your password, "
+        "if an account exists with the email you entered. You should receive them shortly."
+        " If you don't receive an email, "
+        "please make sure you've entered the address you registered with, and check your spam folder."
+    )
+    success_url = reverse_lazy("main:login")
 
 
 ##############################################################################################
@@ -443,8 +450,10 @@ def addGenome(request):
                 uploadAndFill(genomefile, cdsfile, peptidefile)
                 messages.success(request, 'Your files were successfully uploaded')
                 return render(request, "main/addGenome/addGenome.html", context)
-            else :
-                messages.error(request, 'Your files were not uploaded, a problem occured')
+            else:
+                messages.error(
+                    request, "Your files were not uploaded, a problem occured"
+                )
     return render(request, "main/addGenome/addGenome.html", context)
 
 
@@ -453,13 +462,137 @@ def addGenome(request):
 ##############################################################################################
 
 
-def genome(request, genome_id):  # change to details view later
-    context = {
-        "genome_id": genome_id,
-        "active_tab": "explore",
-        "role_user": get_role(request),
-    }  # ex of context (no db for now)
-    return render(request, "main/explore/genome.html", context)
+def get_color_status(status):
+    if status == 0:
+        return "#576b5c"
+    elif status in [1, 2, 3]:
+        return "#FAB431"
+    elif status == 4:
+        return "#1CB61C"
+    else:
+        return "black"
+
+
+### See genome
+class GenomeDetailView(DetailView):  ### TO DO : GENE LIST LINK
+    model = Genome
+    template_name = "main/explore/genome.html"
+    pk_url_kwarg = "genome_id"
+
+    # return home page if url blocked for this user
+    def dispatch(self, request, *args, **kwargs):
+        genome = get_object_or_404(Genome, pk=self.kwargs.get("genome_id"))
+        if not request.user.is_authenticated:
+            return redirect("main:home")
+        return super().dispatch(request, *args, **kwargs)
+
+    # context to extract from DB
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        role_user = get_role(self.request)
+        context["genome"] = self.object
+        context["active_tab"] = "explore"
+        context["role_user"] = role_user
+
+        ## Figure with plotly :
+        fig = go.Figure()
+        # get all genes and plot informations
+        genes = Gene.objects.filter(idChrom__idGenome=self.object).order_by(
+            "startPos"
+        )
+        # do pagination :
+        default_gene_per_page = 30
+        gene_per_page = self.request.GET.get("genePerPage", default_gene_per_page)
+        gene_per_page = int(gene_per_page)
+        paginator = Paginator(genes, gene_per_page)
+        page_number = self.request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+        context["page_obj"] = page_obj
+        context["gene_per_page"] = gene_per_page
+
+        decalage_strand_1 = 0
+        decalage_strand_2 = 0
+        for gene in page_obj:
+            strand = gene.strand
+            if strand == 1:
+                decalage_strand_1 = 0.3 - decalage_strand_1
+                decalage = decalage_strand_1
+            elif strand == -1:
+                decalage_strand_2 = 0.3 - decalage_strand_2
+                decalage = decalage_strand_2
+            length = gene.endPos - gene.startPos + 1
+            text_pos = f"{gene.startPos}-{gene.endPos}"
+            line = go.Scatter(
+                x=list(range(gene.startPos, gene.endPos + 1)),
+                y=[strand + decalage] * length,
+                mode="lines",
+                name=gene.id,
+                line=dict(color=get_color_status(gene.status), width=6),
+                opacity=0.8,
+                # hoverinfo="none",
+                hovertemplate=text_pos,
+            )
+            fig.add_trace(line)
+            url = reverse("main:gene", kwargs={"gene_id": gene.id})
+            link_to_gene = format_html(
+                '<a href="{}" target="_blank" style="color: rgb(105, 72, 72); ">{}</a>',
+                url,
+                gene.id,
+            )
+            # add link to gene info with annotation text :
+            fig.add_annotation(
+                x=(gene.startPos + gene.endPos) / 2,
+                y=gene.strand + decalage,
+                text=link_to_gene,
+                ay=-20,
+                # showarrow=False,
+            )
+
+        # add label
+        fig.update_layout(
+            yaxis_title="Strand",
+            xaxis_title="Position",
+        )
+        # convert to html
+        plot_genome = fig.to_html(
+            full_html=False, default_height=500, default_width=1500
+        )
+        context["plot_genome"] = plot_genome
+
+        return context
+
+
+### Get sequence of genome
+class GenomeSeqDetailView(DetailView):
+    model = Genome
+    template_name = "main/explore/genomeSeq.html"
+    pk_url_kwarg = "genome_id"
+
+    # return home page if url blocked for this user
+    def dispatch(self, request, *args, **kwargs):
+        genome = get_object_or_404(Genome, pk=self.kwargs.get("genome_id"))
+        if not request.user.is_authenticated:
+            return redirect("main:home")
+        return super().dispatch(request, *args, **kwargs)
+
+    # context to extract from DB
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        role_user = get_role(self.request)
+        context["genome"] = self.object
+        context["active_tab"] = "explore"
+        context["role_user"] = role_user
+        # get all sequence from chromosomes of genome
+        chromosomes = Chromosome.objects.filter(
+            idGenome=self.kwargs.get("genome_id")
+        )
+        sequence = ""
+        for chrom in chromosomes:
+            chrom_seq = ChromosomeSeq.objects.get(idChrom=chrom)
+            sequence += chrom_seq.sequence
+
+        context["sequence"] = sequence
+        return context
 
 
 ##############################################################################################
