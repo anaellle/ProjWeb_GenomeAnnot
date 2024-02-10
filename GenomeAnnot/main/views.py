@@ -21,7 +21,7 @@ from .filters import (
     AdminAssignFilter,
 )
 
-from .insertion import downloadAndFill
+from .insertion import uploadAndFill
 
 from django.contrib import messages
 
@@ -440,7 +440,7 @@ def addGenome(request):
                 cdsfile = request.FILES.get("cdsfile")
                 peptidefile = request.FILES.get("peptidefile")
                 # python parser to insert into BD : ...
-                downloadAndFill(genomefile, cdsfile, peptidefile)
+                uploadAndFill(genomefile, cdsfile, peptidefile)
                 messages.success(request, 'Your files were successfully uploaded')
                 return render(request, "main/addGenome/addGenome.html", context)
             else :

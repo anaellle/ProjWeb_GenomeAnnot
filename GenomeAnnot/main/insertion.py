@@ -97,7 +97,7 @@ def addData(genomeDict, geneDict, pepDict):
     fillDBPepSeq(pepDict["sequence"])
 
 
-def downloadAndFill(genomeFile, geneFile, peptideFile):
+def uploadAndFill(genomeFile, geneFile, peptideFile):
     genome = file_to_dico(genomeFile)
     gene = file_to_dico(geneFile)
     peptide = file_to_dico(peptideFile)

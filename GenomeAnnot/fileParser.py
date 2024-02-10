@@ -1,4 +1,6 @@
 from Bio import SeqIO
+from django.core.files import File
+from django.db.models.fields.files import FileField
 
 def CDSParser(filename):
     # dictionnariy creation
@@ -10,7 +12,12 @@ def CDSParser(filename):
     cpt = 0
 
     # on boucle sur toutes les séquences
-    for record in SeqIO.parse(filename.temporary_file_path(), "fasta"):
+    if isinstance(filename, FileField):
+        records = SeqIO.parse(filename.temporary_file_path(), "fasta")
+    elif isinstance(filename, str):
+        records = SeqIO.parse(filename, "fasta")
+
+    for record in records:
         # création des dictionnaires pour la séquence et le gène
         CDSdict["gene"][record.id] = {}
         CDSdict["sequence"][record.id] = {}
@@ -61,7 +68,12 @@ def PepParser(filename):
     pepdict["peptide"] = {}
     pepdict["sequence"] = {}
 
-    for record in SeqIO.parse(filename.temporary_file_path(), "fasta"):
+    if isinstance(filename, FileField):
+        records = SeqIO.parse(filename.temporary_file_path(), "fasta")
+    elif isinstance(filename, str):
+        records = SeqIO.parse(filename, "fasta")
+
+    for record in records:
         pepdict["peptide"][record.id] = {}
         pepdict["sequence"][record.id] = {}
         
@@ -101,7 +113,10 @@ def GenomeParser(filename):
     gendict["sequence"] = {}
 
     # Nom du fichier
-    genomeID = filename.name.split('.')[0]
+    if isinstance(filename, str):
+        genomeID = filename.split('.')[0].split('/')[-1]
+    elif isinstance(filename, FileField):
+        genomeID = filename.name.split('.')[0]
 
     # Formatage du nom
     strain = genomeID.find('_str')
@@ -137,7 +152,12 @@ def GenomeParser(filename):
         gendict["genome"][genomeName]['substrain'] = substrain
 
     # Remplissage pour les chromosomes et les sequences
-    for record in SeqIO.parse(filename.temporary_file_path(), "fasta"):
+    if isinstance(filename, FileField):
+        records = SeqIO.parse(filename.temporary_file_path(), "fasta")
+    elif isinstance(filename, str):
+        records = SeqIO.parse(filename, "fasta")
+
+    for record in records:
         chr_infos = record.description.split()[2]
         chrName = chr_infos.split(':')[1]
 
@@ -163,13 +183,23 @@ def GenomeParser(filename):
 
 
 def file_to_dico(file):
-    if(file.name.endswith('cds.fa')):
-        res = CDSParser(file)
-    elif(file.name.endswith('pep.fa')):
-        res = PepParser(file)
-    elif(file.name.endswith('.fa')):
-        res = GenomeParser(file)
+    if isinstance(file, str):
+        if(file.endswith('cds.fa')):
+            res = CDSParser(file)
+        elif(file.endswith('pep.fa')):
+            res = PepParser(file)
+        elif(file.endswith('.fa')):
+            res = GenomeParser(file)
+    
+    elif isinstance(file, FileField):
+        if(file.name.endswith('cds.fa')):
+            res = CDSParser(file)
+        elif(file.name.endswith('pep.fa')):
+            res = PepParser(file)
+        elif(file.name.endswith('.fa')):
+            res = GenomeParser(file)
+    
     else: 
-        print("file is not a .fa file")
-        res = -1
+        print("The file does not have the required format")
+        return
     return res
