@@ -21,6 +21,7 @@ from .filters import (
     AdminAccountFilter,
     AdminAssignFilter,
     AnnotateFilter,
+    ValidateFilter,
 )
 
 from .insertion import downloadAndFill
@@ -306,12 +307,18 @@ class PaginatedFilterViews(View):
             context['querystring'] = querystring.urlencode()
         return context
     
-class AnnotateView(PaginatedFilterViews,FilterView):
+class AnnotateView(AccessMixin,PaginatedFilterViews,FilterView):
     model = Gene
     template_name = "main/annotate/main_annotate.html"
     paginate_by = 20
     filterset_class = AnnotateFilter
 
+    # return home page if url blocked for this user
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated or request.user.role not in (CustomUser.Role.ANNOTATOR,CustomUser.Role.ADMIN):
+            return redirect("main:home")
+        return super().dispatch(request, *args, **kwargs)
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         role_user = get_role(self.request)
@@ -329,52 +336,79 @@ class AnnotateView(PaginatedFilterViews,FilterView):
         return queryset
     
 
-def validate(request):
-    context = {"active_tab": "validate", "role_user": get_role(request)}
-    if context["role_user"] != 2 and context["role_user"] != 3:
-        return redirect("main:home")
-    # get info about gene/prot
-    # filter on validator
-    genes = Gene.objects.filter(emailValidator=request.user)
-    genes_info = []
-    for gene in genes:
-        genome = gene.idChrom.idGenome
-        peptide = gene.peptide_set.first()
-        gene_info = {
-            "gene_id": gene.id,
-            "gene_name": gene.geneName,
-            "status": gene.status,
-            "peptide_id": peptide.id if peptide else None,
-            "peptide_name": peptide.transcriptName if peptide else None,
-            "genome_id": genome.id,
-            "genome_species": genome.species,
-        }
-        genes_info.append(gene_info)
-        context["genes_info"] = genes_info
+# def validate(request):
+#     context = {"active_tab": "validate", "role_user": get_role(request)}
+#     if context["role_user"] != 2 and context["role_user"] != 3:
+#         return redirect("main:home")
+#     # get info about gene/prot
+#     # filter on validator
+#     genes = Gene.objects.filter(emailValidator=request.user)
+#     genes_info = []
+#     for gene in genes:
+#         genome = gene.idChrom.idGenome
+#         peptide = gene.peptide_set.first()
+#         gene_info = {
+#             "gene_id": gene.id,
+#             "gene_name": gene.geneName,
+#             "status": gene.status,
+#             "peptide_id": peptide.id if peptide else None,
+#             "peptide_name": peptide.transcriptName if peptide else None,
+#             "genome_id": genome.id,
+#             "genome_species": genome.species,
+#         }
+#         genes_info.append(gene_info)
+#         context["genes_info"] = genes_info
 
-    if request.method == "GET":
-        if "submitsearch" in request.GET:
-            # get parameters of search
-            for info in [
-                "searchbar",
-                "genome",
-                "chrom",
-                "motif_gene",
-                "motif_prot",
-            ]:
-                context[info] = request.GET.get(info)
+#     if request.method == "GET":
+#         if "submitsearch" in request.GET:
+#             # get parameters of search
+#             for info in [
+#                 "searchbar",
+#                 "genome",
+#                 "chrom",
+#                 "motif_gene",
+#                 "motif_prot",
+#             ]:
+#                 context[info] = request.GET.get(info)
 
-            for status in [
-                "status012",
-                "status3",
-                "status4",
-            ]:
-                if status in request.GET:
-                    context[status] = "checked"
-                else:
-                    context[status] = "unchecked"
-    return render(request, "main/validate/main_validate.html", context)
+#             for status in [
+#                 "status012",
+#                 "status3",
+#                 "status4",
+#             ]:
+#                 if status in request.GET:
+#                     context[status] = "checked"
+#                 else:
+#                     context[status] = "unchecked"
+#     return render(request, "main/validate/main_validate.html", context)
 
+class ValidateView(AccessMixin,PaginatedFilterViews,FilterView):
+    model = Gene
+    template_name = "main/validate/main_validate.html"
+    paginate_by = 20
+    filterset_class = ValidateFilter
+
+    # return home page if url blocked for this user
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated or request.user.role not in (CustomUser.Role.VALIDATOR,CustomUser.Role.ADMIN):
+            return redirect("main:home")
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        role_user = get_role(self.request)
+        context["role_user"]=role_user
+        context["active_tab"]="validate"
+        return context
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        # Apply the filter to get genes assigned to the current user
+        user = self.request.user
+        if user:
+            assigned_genes = queryset.filter(emailValidator=user)
+            queryset = queryset.filter(Q(id__in=assigned_genes))
+        return queryset
 
 ##############################################################################################
 ######### Blast

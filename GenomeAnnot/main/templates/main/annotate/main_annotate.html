@@ -11,7 +11,7 @@
 <!-- --------------- CONTENT --------------- -->
 
 {% block body %}  
-  {% with role="annotator" type="sequence" %}
+{% with role="annotator" type="sequence" %}
 
   {% comment %} {% for gene in object_list%}
 
@@ -35,51 +35,51 @@
 
 <!-- --------------- GENES LIST --------------- -->
 
-  {% load bootstrap3 %}
-  {% if filter %}
+{% load bootstrap3 %}
+{% if filter %}
+
+  <div class=" py-3 px-2 filter "  id="filter" >
+      <div class=" card-body">
+          <form action="" method="get" class="form form-flex">
+              {% bootstrap_form filter.form layout='block' %}
+              {% bootstrap_button 'filter' %}
+          </form>   
+      </div>
+  </div>
   
-    <div class=" py-3 px-2 filter "  id="filter" >
-        <div class=" card-body">
-            <form action="" method="get" class="form form-flex">
-                {% bootstrap_form filter.form layout='block' %}
-                {% bootstrap_button 'filter' %}
-            </form>   
-        </div>
-    </div>
-    
-  {% endif %}
+{% endif %}
 
-  <ul>
-    {% for gene in object_list %}
-        <li><a class="nav-link" href="{% url 'main:geneAnnot' gene_id=gene.id %}">{{ gene.id }} - {{ gene.geneName }} - {{ gene.geneSymbol}}</a></li>
-    {% empty %}
-        <li>No genes yet.</li>
-    {% endfor %}
-  </ul>
+<ul>
+  {% for gene in object_list %}
+      <li><a class="nav-link" href="{% url 'main:geneAnnot' gene_id=gene.id %}">{{ gene.id }} - {{ gene.geneName }} - {{ gene.geneSymbol}}</a></li>
+  {% empty %}
+      <li>No genes yet.</li>
+  {% endfor %}
+</ul>
 
-  <!-- --------------- PAGINATION --------------- -->
+<!-- --------------- PAGINATION --------------- -->
 
-  <nav class=" mb-4">
-    <ul class="pagination override">
-        {% if page_obj.has_previous %}            
-            <li class=" page-item "><a class=" page-link" href="?page=1">&laquo; First</a></li>
-            <li class="page-item "><a class=" page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
-        {% endif %}
+<nav class=" mb-4">
+  <ul class="pagination override">
+      {% if page_obj.has_previous %}            
+          <li class=" page-item "><a class=" page-link" href="?page=1">&laquo; First</a></li>
+          <li class="page-item "><a class=" page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+      {% endif %}
 
-        <li class="page-item ">
-            <span class="page-link">
-            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-        </span>
-        </li>
+      <li class="page-item ">
+          <span class="page-link">
+          Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+      </span>
+      </li>
 
-        {% if page_obj.has_next %}
-        <li class="page-item "><a class=" page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
-        <li class="page-item "><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
-        {% endif %}
-    
-    </ul>  
-  </nav>
+      {% if page_obj.has_next %}
+      <li class="page-item "><a class=" page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+      <li class="page-item "><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
+      {% endif %}
+  
+  </ul>  
+</nav>
 
-  {% endwith %}
+{% endwith %}
 {% endblock %}
 

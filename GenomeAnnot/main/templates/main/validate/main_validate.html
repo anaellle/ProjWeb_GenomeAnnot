@@ -12,7 +12,8 @@
 
 {% block body %}  
 {% with role="validator" type="sequence" %}
-{% for gene in genes_info%}
+
+{% comment %} {% for gene in genes_info%}
 
 {% with type="sequence" %}
 <div class="card mb-3 ">
@@ -30,7 +31,55 @@
   </div>
   {% endwith %}
 
-{%endfor%}
+{%endfor%} {% endcomment %}
+
+<!-- --------------- GENES LIST --------------- -->
+
+{% load bootstrap3 %}
+{% if filter %}
+
+  <div class=" py-3 px-2 filter "  id="filter" >
+      <div class=" card-body">
+          <form action="" method="get" class="form form-flex">
+              {% bootstrap_form filter.form layout='block' %}
+              {% bootstrap_button 'filter' %}
+          </form>   
+      </div>
+  </div>
+  
+{% endif %}
+
+<ul>
+  {% for gene in object_list %}
+      <li><a class="nav-link" href="{% url 'main:geneValid' gene_id=gene.id %}">{{ gene.id }} - {{ gene.geneName }} - {{ gene.geneSymbol}}</a></li>
+  {% empty %}
+      <li>No genes yet.</li>
+  {% endfor %}
+</ul>
+
+<!-- --------------- PAGINATION --------------- -->
+
+<nav class=" mb-4">
+  <ul class="pagination override">
+      {% if page_obj.has_previous %}            
+          <li class=" page-item "><a class=" page-link" href="?page=1">&laquo; First</a></li>
+          <li class="page-item "><a class=" page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+      {% endif %}
+
+      <li class="page-item ">
+          <span class="page-link">
+          Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+      </span>
+      </li>
+
+      {% if page_obj.has_next %}
+      <li class="page-item "><a class=" page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+      <li class="page-item "><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
+      {% endif %}
+  
+  </ul>  
+</nav>
+
 {% endwith %}
 {% endblock %}
 
