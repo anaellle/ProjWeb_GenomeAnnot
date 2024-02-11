@@ -1,6 +1,6 @@
 import django_filters
 from django import forms
-from .models import Genome, Gene, CustomUser
+from .models import Genome, Gene, Peptide, CustomUser
 
 
 ####################################################################################
@@ -178,4 +178,93 @@ class AdminAssignFilter(django_filters.FilterSet):
             "firstName": ["contains"],
             "lastName": ["contains"],
             "email": ["contains"],
+        }
+
+####################################################################################
+## Annotate
+####################################################################################
+
+# class AnnotateGeneFilter(django_filters.FilterSet):
+#     idChrom__idGenome__species__exact = django_filters.CharFilter(
+#         field_name="idChrom__idGenome__species",
+#         lookup_expr="exact",
+#         label="Species",
+#         widget=forms.TextInput(),
+#     )
+#     id__icontains = django_filters.CharFilter(
+#         field_name="id",
+#         lookup_expr="icontains",
+#         label="Gene ID",
+#         widget=forms.TextInput(attrs={"placeholder": ""}),
+#     )
+#     geneName__icontains = django_filters.CharFilter(
+#         field_name="geneName",
+#         lookup_expr="icontains",
+#         label="Gene name",
+#         widget=forms.TextInput(attrs={"placeholder": ""}),
+#     )
+#     idChrom__icontains = django_filters.CharFilter(
+#         field_name="idChrom",
+#         lookup_expr="icontains",
+#         label="Chromosome",
+#         widget=forms.TextInput(attrs={"placeholder": ""}),
+#     )
+#     status__exact = django_filters.CharFilter(
+#         field_name="status",
+#         lookup_expr="exact",
+#         widget=forms.TextInput(attrs={"placeholder": ""}),
+#     )
+    
+#     class Meta:
+#         model = Gene
+#         fields = [
+#             "idChrom__idGenome__species",
+#             "id",
+#             "geneName",
+#             "idChrom",
+#             "status",
+#         ]
+
+class AnnotateGeneFilter(django_filters.FilterSet):
+    
+    idChrom__idGenome__species = django_filters.ChoiceFilter(
+        field_name="idChrom__idGenome__species",
+        label="Species",
+        choices=[(species, species) for species in Genome.objects.values_list('species', flat=True).distinct()],
+        widget=forms.Select(attrs={"class": "form-control"})
+    )
+    geneName__contains = django_filters.CharFilter(
+        field_name="geneName",
+        lookup_expr="icontains",
+        label="Gene Name",
+        widget=forms.TextInput(attrs={"placeholder": ""}),
+    )
+    id__contains = django_filters.CharFilter(
+        field_name="id",
+        lookup_expr="icontains",
+        label="Gene ID",
+        widget=forms.TextInput(attrs={"placeholder": ""}),
+    )
+    emailValidator__email__icontains = django_filters.CharFilter(
+        field_name="emailValidator__email",
+        lookup_expr="icontains",
+        label="Validator email",
+        widget=forms.TextInput(attrs={"placeholder": ""}),
+    )
+    # peptide_set__id__icontains = django_filters.CharFilter(
+    #     field_name="peptide_set__id",
+    #     label="Peptide ID",
+    #     widget=forms.TextInput(attrs={"placeholder": ""}),
+    # )
+
+
+    class Meta:
+        model = Gene
+        fields = {
+            "idChrom__idGenome__species":  ["exact"],
+            "id": ["contains"],
+            "geneName": ["contains"],
+            "status": ["exact"],
+            "emailValidator__email": ["icontains"],
+            # "peptide_set__id": ["icontains"],
         }

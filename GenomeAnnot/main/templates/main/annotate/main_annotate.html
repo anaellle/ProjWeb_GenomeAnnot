@@ -11,28 +11,75 @@
 <!-- --------------- CONTENT --------------- -->
 
 {% block body %}  
-{% with role="annotator" type="sequence" %}
+  {% with role="annotator" type="sequence" %}
 
-{% for gene in genes_info%}
+  {% comment %} {% for gene in object_list%}
 
-{% with type="sequence" %}
-<div class="card mb-3 ">
-    <a class="btn card-body cardList" href="{% url 'main:geneAnnot' gene_id=gene.gene_id%}">
-        <span class="left-card">
-          <span class="mx-2">Genome {{gene.genome_species}} {{gene.genome_id}} </span>  | 
-          <span class="mx-2"> Gene {{gene.gene_id}} {{gene.gene_name}} </span>{% if gene.peptide_id %} 
-           | <span class="mx-2">Protein {{gene.peptide_id}} {{gene.peptide_name}} </span>{% endif%}
-        </span> <span class="status right-card">
-          {% with status=gene.status %}
-              {% include 'main/status.html' %}
-        {% endwith %}
-        </span> 
-    </a>
-  </div>
+  {% with type="sequence" %}
+  <div class="card mb-3 ">
+      <a class="btn card-body cardList" href="{% url 'main:geneAnnot' gene_id=gene.id%}">
+          <span class="left-card">
+            <span class="mx-2">Genome {{gene.genome_species}} {{gene.genome_id}} </span>  | 
+            <span class="mx-2"> Gene {{gene.id}} {{gene.name}} </span>{% if gene.peptide_id %} 
+            | <span class="mx-2">Protein {{gene.peptide_id}} {{gene.peptide_name}} </span>{% endif%}
+          </span> <span class="status right-card">
+            {% with status=gene.status %}
+                {% include 'main/status.html' %}
+          {% endwith %}
+          </span> 
+      </a>
+    </div>
   {% endwith %}
 
-{%endfor%}
+  {%endfor%} {% endcomment %}
 
-{% endwith %}
+<!-- --------------- GENES LIST --------------- -->
+
+  {% load bootstrap3 %}
+  {% if filter %}
+  
+    <div class=" py-3 px-2 filter "  id="filter" >
+        <div class=" card-body">
+            <form action="" method="get" class="form form-flex">
+                {% bootstrap_form filter.form layout='block' %}
+                {% bootstrap_button 'filter' %}
+            </form>   
+        </div>
+    </div>
+    
+  {% endif %}
+
+  <ul>
+    {% for gene in object_list %}
+        <li>{{ gene.id }} - {{ gene.geneName }}</li>
+    {% empty %}
+        <li>No genes yet.</li>
+    {% endfor %}
+  </ul>
+
+  <!-- --------------- PAGINATION --------------- -->
+
+  <nav class=" mb-4">
+    <ul class="pagination override">
+        {% if page_obj.has_previous %}            
+            <li class=" page-item "><a class=" page-link" href="?page=1">&laquo; First</a></li>
+            <li class="page-item "><a class=" page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+        {% endif %}
+
+        <li class="page-item ">
+            <span class="page-link">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+        </li>
+
+        {% if page_obj.has_next %}
+        <li class="page-item "><a class=" page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+        <li class="page-item "><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
+        {% endif %}
+    
+    </ul>  
+  </nav>
+
+  {% endwith %}
 {% endblock %}
 

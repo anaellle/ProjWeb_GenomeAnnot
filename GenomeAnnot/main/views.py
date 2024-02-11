@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import DetailView, UpdateView, CreateView
+from django.views.generic import DetailView, UpdateView, CreateView, View
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse, resolve
 from django.urls.exceptions import Resolver404
@@ -20,6 +20,7 @@ from .filters import (
     AdminGeneFilter,
     AdminAccountFilter,
     AdminAssignFilter,
+    AnnotateGeneFilter,
 )
 
 from .insertion import downloadAndFill
@@ -245,55 +246,78 @@ def explore(request):
     return render(request, "main/explore/main_explore.html", context)
 
 
-def annotate(request):
-    context = {"active_tab": "annotate", "role_user": get_role(request)}
-    if context["role_user"] != 1 and context["role_user"] != 3:
-        return redirect("main:home")
+# def annotate(request):
+#     context = {"active_tab": "annotate", "role_user": get_role(request)}
+#     if context["role_user"] != 1 and context["role_user"] != 3:
+#         return redirect("main:home")
 
-    # get info about gene/prot
-    # filter on annotator
-    genes = Gene.objects.filter(emailAnnotator=request.user)
-    genes_info = []
-    for gene in genes:
-        genome = gene.idChrom.idGenome
-        peptide = gene.peptide_set.first()
-        gene_info = {
-            "gene_id": gene.id,
-            "gene_name": gene.geneName,
-            "status": gene.status,
-            "peptide_id": peptide.id if peptide else None,
-            "peptide_name": peptide.transcriptName if peptide else None,
-            "genome_id": genome.id,
-            "genome_species": genome.species,
-        }
-        genes_info.append(gene_info)
-        context["genes_info"] = genes_info
+#     # get info about gene/prot
+#     # filter on annotator
+#     genes = Gene.objects.filter(emailAnnotator=request.user)
+#     genes_info = []
+#     for gene in genes:
+#         genome = gene.idChrom.idGenome
+#         peptide = gene.peptide_set.first()
+#         gene_info = {
+#             "gene_id": gene.id,
+#             "gene_name": gene.geneName,
+#             "status": gene.status,
+#             "peptide_id": peptide.id if peptide else None,
+#             "peptide_name": peptide.transcriptName if peptide else None,
+#             "genome_id": genome.id,
+#             "genome_species": genome.species,
+#         }
+#         genes_info.append(gene_info)
+#         context["genes_info"] = genes_info
 
-    if request.method == "GET":
-        if "submitsearch" in request.GET:
-            # get parameters of search
-            for info in [
-                "searchbar",
-                "genome",
-                "chrom",
-                "motif_gene",
-                "motif_prot",
-            ]:
-                context[info] = request.GET.get(info)
-            for status in [
-                "status0",
-                "status1",
-                "status2",
-                "status3",
-                "status4",
-            ]:
-                if status in request.GET:
-                    context[status] = "checked"
-                else:
-                    context[status] = "unchecked"
+#     if request.method == "GET":
+#         if "submitsearch" in request.GET:
+#             # get parameters of search
+#             for info in [
+#                 "searchbar",
+#                 "genome",
+#                 "chrom",
+#                 "motif_gene",
+#                 "motif_prot",
+#             ]:
+#                 context[info] = request.GET.get(info)
+#             for status in [
+#                 "status0",
+#                 "status1",
+#                 "status2",
+#                 "status3",
+#                 "status4",
+#             ]:
+#                 if status in request.GET:
+#                     context[status] = "checked"
+#                 else:
+#                     context[status] = "unchecked"
 
-    return render(request, "main/annotate/main_annotate.html", context)
+#     return render(request, "main/annotate/main_annotate.html", context)
 
+class PaginatedFilterViews(View):
+    def get_context_data(self, **kwargs):
+        context = super(PaginatedFilterViews, self).get_context_data(**kwargs)
+        if self.request.GET:
+            querystring = self.request.GET.copy()
+            if self.request.GET.get('page'):
+                del querystring['page']
+            context['querystring'] = querystring.urlencode()
+        return context
+    
+class AnnotateView(PaginatedFilterViews,FilterView):  ### TO DO : GENE LIST LINK
+    model = Gene
+    template_name = "main/annotate/main_annotate.html"
+    paginate_by = 20
+    filterset_class = AnnotateGeneFilter
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        role_user = get_role(self.request)
+        context["role_user"]=role_user
+        context["active_tab"]="annotate"
+        return context
+    
 
 def validate(request):
     context = {"active_tab": "validate", "role_user": get_role(request)}

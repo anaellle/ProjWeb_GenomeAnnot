@@ -16,6 +16,7 @@ from .views import (
     SignUpView,
     ChangePasswordView,
     ResetPasswordView,
+    AnnotateView
 )
 
 app_name = "main"
@@ -65,7 +66,7 @@ urlpatterns = [
     ),
     path("explore/gene<str:gene_id>", GeneDetailView.as_view(), name="gene"),
     # Annotate gene info :
-    path("annotate/", views.annotate, name="annotate"),  # change to list view !!!
+    path("annotate/", AnnotateView.as_view(), name="annotate"),  # change to list view !!!
     path(
         "annotate/gene<str:gene_id>",
         GeneUpdateView.as_view(),

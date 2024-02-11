@@ -26,7 +26,7 @@ show
 
 <!-------------- Filter -------------->
 {% block  filter %}
-{% with role="annotator" %}
+{% comment %} {% with role="annotator" %}
 
 <!-------------- Gene or Protein-------------->
 {% with type="sequence" %}
@@ -131,6 +131,6 @@ show
 
     
 {% endwith %}
-{% endwith %}
+{% endwith %} {% endcomment %}
 {% endblock %}
 
