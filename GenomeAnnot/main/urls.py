@@ -16,7 +16,7 @@ from .views import (
     SignUpView,
     ChangePasswordView,
     ResetPasswordView,
-    AnnotateView
+    AnnotateView,
 )
 
 app_name = "main"

@@ -51,7 +51,7 @@
 
   <ul>
     {% for gene in object_list %}
-        <li>{{ gene.id }} - {{ gene.geneName }}</li>
+        <li><a class="nav-link" href="{% url 'main:geneAnnot' gene_id=gene.id %}">{{ gene.id }} - {{ gene.geneName }} - {{ gene.geneSymbol}}</a></li>
     {% empty %}
         <li>No genes yet.</li>
     {% endfor %}

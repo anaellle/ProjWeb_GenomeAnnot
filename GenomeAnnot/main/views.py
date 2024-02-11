@@ -20,12 +20,13 @@ from .filters import (
     AdminGeneFilter,
     AdminAccountFilter,
     AdminAssignFilter,
-    AnnotateGeneFilter,
+    AnnotateFilter,
 )
 
 from .insertion import downloadAndFill
 
 from django.contrib import messages
+from django.db.models import Q
 
 # Libraries required for sign up
 from django.contrib.auth.mixins import AccessMixin
@@ -305,11 +306,11 @@ class PaginatedFilterViews(View):
             context['querystring'] = querystring.urlencode()
         return context
     
-class AnnotateView(PaginatedFilterViews,FilterView):  ### TO DO : GENE LIST LINK
+class AnnotateView(PaginatedFilterViews,FilterView):
     model = Gene
     template_name = "main/annotate/main_annotate.html"
     paginate_by = 20
-    filterset_class = AnnotateGeneFilter
+    filterset_class = AnnotateFilter
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -317,6 +318,15 @@ class AnnotateView(PaginatedFilterViews,FilterView):  ### TO DO : GENE LIST LINK
         context["role_user"]=role_user
         context["active_tab"]="annotate"
         return context
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        # Apply the filter to get genes assigned to the current user
+        user = self.request.user
+        if user:
+            assigned_genes = queryset.filter(emailAnnotator=user)
+            queryset = queryset.filter(Q(id__in=assigned_genes))
+        return queryset
     
 
 def validate(request):
