@@ -522,13 +522,17 @@ def addGenome(request):
             # get parameters
             form = UploadFileForm(request.POST, request.FILES)
             if form.is_valid():
-                messages.info(request, "Your files are being processed")
                 genomefile = request.FILES.get("genomefile")
                 cdsfile = request.FILES.get("cdsfile")
                 peptidefile = request.FILES.get("peptidefile")
-                # python parser to insert into BD : ...
-                uploadAndFill(genomefile, cdsfile, peptidefile)
-                messages.success(request, "Your files were successfully uploaded")
+                genomeName = genomefile.name.split('.')[0]
+                print(genomeName)
+                if (genomeName in cdsfile.name) and (genomeName in peptidefile.name):
+                    messages.info(request, 'Your files are being processed')
+                    uploadAndFill(genomefile, cdsfile, peptidefile)
+                    messages.success(request, 'Your files were successfully uploaded')
+                else :
+                    messages.error(request, "Your files are not from the same genome")
                 return render(request, "main/addGenome/addGenome.html", context)
             else:
                 messages.error(
