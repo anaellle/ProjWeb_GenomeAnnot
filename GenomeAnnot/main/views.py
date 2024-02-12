@@ -338,7 +338,7 @@ class AnnotateView(AccessMixin, PaginatedFilterViews, FilterView):
         if user:
             assigned_genes = queryset.filter(emailAnnotator=user)
             queryset = queryset.filter(Q(id__in=assigned_genes))
-        return queryset
+        return queryset.order_by("id")
 
 
 # def validate(request):
@@ -417,7 +417,7 @@ class ValidateView(AccessMixin, PaginatedFilterViews, FilterView):
         if user:
             assigned_genes = queryset.filter(emailValidator=user)
             queryset = queryset.filter(Q(id__in=assigned_genes))
-        return queryset
+        return queryset.order_by("id")
 
 
 ##############################################################################################
