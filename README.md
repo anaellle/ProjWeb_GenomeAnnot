@@ -46,7 +46,7 @@ python manage.py migrate`
 ```
   - To init the database with 2 genomes :
 ```
-python manage.py init-my-bd
+python manage.py init-my-data
 ```
   - To run the website :
 ```
