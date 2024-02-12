@@ -93,8 +93,8 @@
 
 
                         <div class="col form-check form-switch">
-                            <input class="form-check-input" type="checkbox" role="switch"  id="status0" name="status012" {% if  status012 == 'checked' %}checked{% endif %}>
-                            <label class="form-check-label" for="status0">
+                            {{ filter.form.notannotated}}                            
+                            <label class="form-check-label" for="id_notannotated">
                             {% with status=0  %}
                                 {% include 'main/status.html' %}
                             {% endwith %}
@@ -102,8 +102,8 @@
                         </div>
 
                         <div class=" col form-check form-switch">
-                            <input class="form-check-input" type="checkbox" role="switch" id="status3"  name="status3" {% if not status3 or status3 == 'checked' %}checked{% endif %}>
-                            <label class="form-check-label" for="status3">
+                            {{ filter.form.tovalidate}}                            
+                            <label class="form-check-label" for="id_tovalidate">
                             {% with status=3  %}
                                 {% include 'main/status.html' %}
                             {% endwith %}
@@ -111,8 +111,8 @@
                         </div>
 
                         <div class="col form-check form-switch">
-                            <input class="form-check-input" type="checkbox" role="switch" id="status4" name="status4" {% if status4 == 'checked' %}checked{% endif %}>
-                            <label class="form-check-label" for="status4">
+                            {{ filter.form.validated}}                            
+                            <label class="form-check-label" for="id_validated">
                             {% with status=4  %}
                                 {% include 'main/status.html' %}
                             {% endwith %}

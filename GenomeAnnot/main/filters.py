@@ -1,5 +1,6 @@
 import django_filters
 from django import forms
+from django.db.models import Q
 from .models import Genome, Gene, Peptide, CustomUser
 
 
@@ -277,12 +278,16 @@ class AnnotateFilter(django_filters.FilterSet):
     submited = django_filters.BooleanFilter(
         field_name="status",
         method="filter_submited",
-        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        widget=forms.CheckboxInput(
+            attrs={"class": "form-check-input", "checked": "checked"}
+        ),
     )
     validated = django_filters.BooleanFilter(
         field_name="status",
         method="filter_validated",
-        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        widget=forms.CheckboxInput(
+            attrs={"class": "form-check-input", "checked": "checked"}
+        ),
     )
 
     def filter_notannotated(self, queryset, name, value):
@@ -385,12 +390,54 @@ class ValidateFilter(django_filters.FilterSet):
             }
         ),
     )
-    status__exact = django_filters.ChoiceFilter(
+
+    notannotated = django_filters.BooleanFilter(
+        field_name="status",
+        method="filter_notannotated",
+        widget=forms.CheckboxInput(
+            attrs={"class": "form-check-input", "checked": "checked"}
+        ),
+    )
+    tovalidate = django_filters.BooleanFilter(
+        field_name="status",
+        method="filter_tovalidate",
+        widget=forms.CheckboxInput(
+            attrs={"class": "form-check-input", "checked": "checked"}
+        ),
+    )
+    validated = django_filters.BooleanFilter(
+        field_name="status",
+        method="filter_validated",
+        widget=forms.CheckboxInput(
+            attrs={"class": "form-check-input", "checked": "checked"}
+        ),
+    )
+    """ status__exact = django_filters.ChoiceFilter(
         field_name="status",
         label="Status",
         choices=Gene.Status.choices,
         widget=forms.Select(attrs={"class": "form-control"}),
-    )
+    ) """
+
+    def filter_notannotated(self, queryset, name, value):
+        if value == False:
+            excluded_status = (
+                Q(status=Gene.Status.BEING_ANNOTATED)
+                | Q(status=Gene.Status.BEING_CORRECTED)
+                | Q(status=Gene.Status.NOT_ANNOTATED)
+            )
+            queryset = queryset.exclude(excluded_status)
+        return queryset
+
+    def filter_tovalidate(self, queryset, name, value):
+        if value == False:
+            return queryset.exclude(status=Gene.Status.SUBMITTED)
+        return queryset
+
+    def filter_validated(self, queryset, name, value):
+        if value == False:
+            return queryset.exclude(status=Gene.Status.VALIDATED)
+        return queryset
 
     # class Meta:
     #     model = Gene
