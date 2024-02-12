@@ -22,4 +22,33 @@ Django version 4.2.7. <br>
 
 ### How-to use
 
-list of command ....
+
+- First be sure to clean the environment in ProjWeb_GenomeAnnot:
+```
+git clean -n -d -x
+``` 
+
+```
+git clean -f -d -x
+```
+  
+- Go to the GenomeAnnot directory :
+```
+cd GenomeAnnot
+```
+  - To create the database :
+```
+python manage.py makemigrations main 
+``` 
+then
+```
+python manage.py migrate
+```
+  - To init the database with 2 genomes :
+```
+python manage.py init-my-data
+```
+  - To run the website :
+```
+python manage.py runserver
+```

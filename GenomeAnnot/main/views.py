@@ -24,7 +24,7 @@ from .filters import (
     ValidateFilter,
 )
 
-from .insertion import downloadAndFill
+from .insertion import uploadAndFill
 
 from django.contrib import messages
 from django.db.models import Q
@@ -504,23 +504,21 @@ def blast(request, sequence=None):
 
 
 def addGenome(request):
-    context = {"role_user": "reader"}
+    if not request.user.is_authenticated:
+            return redirect("main:home")
+    context = {"role_user": get_role(request)}
     if request.method == "POST":
-        print("1st passed")
         if "submit_addgenome" in request.POST:
-            print("2nd passed")
             # get parameters
             form = UploadFileForm(request.POST, request.FILES)
             if form.is_valid():
-                print("here")
-                messages.info(request, "Your files are being processed")
-
+                messages.info(request, 'Your files are being processed')
                 genomefile = request.FILES.get("genomefile")
                 cdsfile = request.FILES.get("cdsfile")
                 peptidefile = request.FILES.get("peptidefile")
                 # python parser to insert into BD : ...
-                downloadAndFill(genomefile, cdsfile, peptidefile)
-                messages.success(request, "Your files were successfully uploaded")
+                uploadAndFill(genomefile, cdsfile, peptidefile)
+                messages.success(request, 'Your files were successfully uploaded')
                 return render(request, "main/addGenome/addGenome.html", context)
             else:
                 messages.error(

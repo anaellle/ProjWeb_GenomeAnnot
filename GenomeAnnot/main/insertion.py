@@ -61,6 +61,13 @@ def fillDBPepSeq(dico):
 
 
 def addData(genomeDict, geneDict, pepDict):
+    ## Check annotations
+    genome = list(genomeDict["genome"].keys())[0]
+    if geneDict['status'] == len(geneDict["gene"].keys()):
+        genomeDict["genome"][genome]["status"]=2
+    elif 0 < geneDict['status'] < len(geneDict["gene"].keys()):
+        genomeDict["genome"][genome]["status"]=1
+
     ## Ajout du génome
     print("Adding genome infos")
     fillDBGenome(genomeDict["genome"])
@@ -90,7 +97,7 @@ def addData(genomeDict, geneDict, pepDict):
     fillDBPepSeq(pepDict["sequence"])
 
 
-def downloadAndFill(genomeFile, geneFile, peptideFile):
+def uploadAndFill(genomeFile, geneFile, peptideFile):
     genome = file_to_dico(genomeFile)
     gene = file_to_dico(geneFile)
     peptide = file_to_dico(peptideFile)
