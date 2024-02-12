@@ -42,7 +42,7 @@ python manage.py makemigrations main
 ``` 
 then
 ```
-python manage.py migrate`
+python manage.py migrate
 ```
   - To init the database with 2 genomes :
 ```
