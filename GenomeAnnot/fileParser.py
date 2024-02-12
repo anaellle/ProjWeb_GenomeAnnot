@@ -12,7 +12,7 @@ def CDSParser(filename):
     cpt = 0
 
     # on boucle sur toutes les séquences
-    if isinstance(filename, FileField):
+    if isinstance(filename, File):
         records = SeqIO.parse(filename.temporary_file_path(), "fasta")
     elif isinstance(filename, str):
         records = SeqIO.parse(filename, "fasta")
@@ -68,7 +68,7 @@ def PepParser(filename):
     pepdict["peptide"] = {}
     pepdict["sequence"] = {}
 
-    if isinstance(filename, FileField):
+    if isinstance(filename, File):
         records = SeqIO.parse(filename.temporary_file_path(), "fasta")
     elif isinstance(filename, str):
         records = SeqIO.parse(filename, "fasta")
@@ -115,7 +115,7 @@ def GenomeParser(filename):
     # Nom du fichier
     if isinstance(filename, str):
         genomeID = filename.split('.')[0].split('/')[-1]
-    elif isinstance(filename, FileField):
+    elif isinstance(filename, File):
         genomeID = filename.name.split('.')[0]
 
     # Formatage du nom
@@ -152,7 +152,7 @@ def GenomeParser(filename):
         gendict["genome"][genomeName]['substrain'] = substrain
 
     # Remplissage pour les chromosomes et les sequences
-    if isinstance(filename, FileField):
+    if isinstance(filename, File):
         records = SeqIO.parse(filename.temporary_file_path(), "fasta")
     elif isinstance(filename, str):
         records = SeqIO.parse(filename, "fasta")
@@ -191,7 +191,7 @@ def file_to_dico(file):
         elif(file.endswith('.fa')):
             res = GenomeParser(file)
     
-    elif isinstance(file, FileField):
+    elif isinstance(file, File):
         if(file.name.endswith('cds.fa')):
             res = CDSParser(file)
         elif(file.name.endswith('pep.fa')):
