@@ -331,13 +331,7 @@ class AnnotateFilter(django_filters.FilterSet):
 
 
 class ValidateFilter(django_filters.FilterSet):
-
-    # idChrom__idGenome__species = django_filters.ChoiceFilter(
-    #     field_name="idChrom__idGenome__species",
-    #     label="Species",
-    #     choices=[(species, species) for species in Genome.objects.values_list('species', flat=True).distinct()],
-    #     widget=forms.Select(attrs={"class": "form-control"})
-    # )
+    
     idChrom__idGenome__species__icontains = django_filters.CharFilter(
         field_name="idChrom__idGenome__species",
         lookup_expr="icontains",
@@ -412,12 +406,12 @@ class ValidateFilter(django_filters.FilterSet):
             attrs={"class": "form-check-input", "checked": "checked"}
         ),
     )
-    """ status__exact = django_filters.ChoiceFilter(
-        field_name="status",
-        label="Status",
-        choices=Gene.Status.choices,
-        widget=forms.Select(attrs={"class": "form-control"}),
-    ) """
+    # status__exact = django_filters.ChoiceFilter(
+    #     field_name="status",
+    #     label="Status",
+    #     choices=Gene.Status.choices,
+    #     widget=forms.Select(attrs={"class": "form-control"}),
+    # )
 
     def filter_notannotated(self, queryset, name, value):
         if value == False:
@@ -439,11 +433,210 @@ class ValidateFilter(django_filters.FilterSet):
             return queryset.exclude(status=Gene.Status.VALIDATED)
         return queryset
 
-    # class Meta:
-    #     model = Gene
-    #     fields = {
-    #         "idChrom__idGenome__species":  ["exact"],
-    #         "id": ["contains"],
-    #         "geneName": ["contains"],
-    #         "geneSymbol": ["contains"],
-    #     }
+
+# ####################################################################################
+# ## Explore
+# ####################################################################################
+
+class ExploreGenomeFilter(django_filters.FilterSet):
+
+    # Filters on Genome
+    id__contains = django_filters.CharFilter(
+        field_name="id",
+        lookup_expr="icontains",
+        label="Genome ID",
+        widget=forms.TextInput(attrs={"placeholder": ""}),
+    )
+    species__contains = django_filters.CharFilter(
+        field_name="species",
+        lookup_expr="icontains",
+        label="Species",
+        widget=forms.TextInput(attrs={"placeholder": ""}),
+    )
+    strain__contains = django_filters.CharFilter(
+        field_name="strain",
+        lookup_expr="icontains",
+        label="Strain",
+        widget=forms.TextInput(attrs={"placeholder": ""}),
+    )
+    substrain__contains = django_filters.CharFilter(
+        field_name="substrain",
+        lookup_expr="icontains",
+        label="Substrain",
+        widget=forms.TextInput(attrs={"placeholder": ""}),
+    )
+
+    # Filters on Genome' status
+    notannotated = django_filters.BooleanFilter(
+        field_name="status",
+        method="filter_notannotated",
+        widget=forms.CheckboxInput(
+            attrs={"class": "form-check-input", "checked": "checked"}
+        ),
+    )
+    inwork = django_filters.BooleanFilter(
+        field_name="status",
+        method="filter_inwork",
+        widget=forms.CheckboxInput(
+            attrs={"class": "form-check-input", "checked": "checked"}
+        ),
+    )
+    validated = django_filters.BooleanFilter(
+        field_name="status",
+        method="filter_validated",
+        widget=forms.CheckboxInput(
+            attrs={"class": "form-check-input", "checked": "checked"}
+        ),
+    )
+
+    def filter_notannotated(self, queryset, name, value):
+        if value == False:
+            queryset = queryset.exclude(status=Genome.Status.BLANK)
+        return queryset
+
+    def filter_inwork(self, queryset, name, value):
+        if value == False:
+            queryset = queryset.exclude(status=Genome.Status.IN_WORK)
+        return queryset
+
+    def filter_validated(self, queryset, name, value):
+        if value == False:
+            queryset = queryset.exclude(status=Genome.Status.COMPLETE)
+        return queryset
+    
+    class Meta:
+        model = Genome
+        fields = {
+            "id": ["contains"],
+            "species": ["contains"],
+            "strain": ["contains"],
+            "substrain": ["contains"],
+        }
+
+
+class ExploreGenePepFilter(django_filters.FilterSet):
+
+    # Filters on Genome
+    idChrom__idGenome__species__icontains = django_filters.CharFilter(
+        field_name="idChrom__idGenome__species",
+        lookup_expr="icontains",
+        label="Species",
+        widget=forms.TextInput(attrs={"placeholder": ""}),
+    )
+    # Filters on Chromosome
+    idChrom__chromName__icontains = django_filters.CharFilter(
+        field_name="idChrom__chromName",
+        lookup_expr="icontains",
+        label="Chromosome",
+        widget=forms.TextInput(attrs={"placeholder": ""}),
+    )
+    # Filters on Gene
+    id__contains = django_filters.CharFilter(
+        field_name="id",
+        lookup_expr="icontains",
+        label="Gene ID",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Gene ID",
+                "class": "w-100 rounded border-1",
+                "type": "search",
+            }
+        ),
+    )
+    geneName__contains = django_filters.CharFilter(
+        field_name="geneName",
+        lookup_expr="icontains",
+        label="Gene Name",
+        widget=forms.TextInput(attrs={"placeholder": ""}),
+    )
+    geneSymbol__contains = django_filters.CharFilter(
+        field_name="geneSymbol",
+        lookup_expr="icontains",
+        label="Gene Symbol",
+        widget=forms.TextInput(attrs={"placeholder": ""}),
+    )
+    sequence_gene = django_filters.CharFilter(
+        field_name="nucleotidicseq__sequence",
+        lookup_expr="icontains",
+        label="Gene Sequence",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "",
+                "title": "Search for a motif in the gene's nucleotide sequence",
+            }
+        ),
+    )
+    # Filters on Peptide
+    id_pep = django_filters.CharFilter(
+        field_name="peptide__id",
+        lookup_expr="icontains",
+        label="Peptide Sequence",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "",
+            }
+        ),
+    )
+    name_pep = django_filters.CharFilter(
+        field_name="peptide__transcriptName",
+        lookup_expr="icontains",
+        label="Peptide Sequence",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "",
+            }
+        ),
+    )
+    sequence_pep = django_filters.CharFilter(
+        field_name="peptide__peptideseq__sequence",
+        lookup_expr="icontains",
+        label="Peptide Sequence",
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "",
+                "title": "Search for a motif in the peptide' sequence",
+            }
+        ),
+    )
+    # Filters on Gene' status
+    notannotated = django_filters.BooleanFilter(
+        field_name="status",
+        method="filter_notannotated",
+        widget=forms.CheckboxInput(
+            attrs={"class": "form-check-input", "checked": "checked"}
+        ),
+    )
+    inwork = django_filters.BooleanFilter(
+        field_name="status",
+        method="filter_inwork",
+        widget=forms.CheckboxInput(
+            attrs={"class": "form-check-input", "checked": "checked"}
+        ),
+    )
+    validated = django_filters.BooleanFilter(
+        field_name="status",
+        method="filter_validated",
+        widget=forms.CheckboxInput(
+            attrs={"class": "form-check-input", "checked": "checked"}
+        ),
+    )
+
+    def filter_notannotated(self, queryset, name, value):
+        if value == False:
+            queryset = queryset.exclude(status=Gene.Status.NOT_ANNOTATED)
+        return queryset
+
+    def filter_inwork(self, queryset, name, value):
+        if value == False:
+            excluded_status = (
+                Q(status=Gene.Status.BEING_ANNOTATED)
+                | Q(status=Gene.Status.BEING_CORRECTED)
+                | Q(status=Gene.Status.SUBMITTED)
+            )
+            queryset = queryset.exclude(excluded_status)
+        return queryset
+
+    def filter_validated(self, queryset, name, value):
+        if value == False:
+            queryset = queryset.exclude(status=Gene.Status.VALIDATED)
+        return queryset

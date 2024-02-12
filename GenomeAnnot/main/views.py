@@ -20,6 +20,8 @@ from .filters import (
     AdminGeneFilter,
     AdminAccountFilter,
     AdminAssignFilter,
+    ExploreGenomeFilter,
+    ExploreGenePepFilter,
     AnnotateFilter,
     ValidateFilter,
 )
@@ -185,7 +187,17 @@ class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
 ######### Search views (explore, annotate and validate)
 ##############################################################################################
 
+class PaginatedFilterViews(View):
+    def get_context_data(self, **kwargs):
+        context = super(PaginatedFilterViews, self).get_context_data(**kwargs)
+        if self.request.GET:
+            querystring = self.request.GET.copy()
+            if self.request.GET.get("page"):
+                del querystring["page"]
+            context["querystring"] = querystring.urlencode()
+        return context
 
+## CI-DESSOUS :: à mettre en comm une fois que les vues seront liées aux urls
 def explore(request):
     context = {"active_tab": "explore", "role_user": get_role(request)}
 
@@ -246,7 +258,33 @@ def explore(request):
                     context["genes_info"] = genes_info
 
     return render(request, "main/explore/main_explore.html", context)
+## FIN de ce qui est à mettre en comm
 
+class ExploreGenomeView(PaginatedFilterViews, FilterView):
+    model = Genome
+    template_name = "main/explore/main_explore.html" ## À MODIFIER avec la vue explore pour génome !!!
+    paginate_by = 20
+    filterset_class = ExploreGenomeFilter
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        role_user = get_role(self.request)
+        context["role_user"] = role_user # pas sûre que ça serve --> à part pour upload ?
+        context["active_tab"] = "explore"
+        return context
+
+class ExploreGenePepView(PaginatedFilterViews, FilterView):
+    model = Gene
+    template_name = "main/explore/main_explore.html" ## À MODIFIER avec la vue explore pour gène/peptide !!!
+    paginate_by = 20
+    filterset_class = ExploreGenePepFilter
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        role_user = get_role(self.request)
+        context["role_user"] = role_user # pas sûre que ça serve --> à part pour upload ?
+        context["active_tab"] = "explore"
+        return context
 
 # def annotate(request):
 #     context = {"active_tab": "annotate", "role_user": get_role(request)}
@@ -296,18 +334,6 @@ def explore(request):
 #                     context[status] = "unchecked"
 
 #     return render(request, "main/annotate/main_annotate.html", context)
-
-
-class PaginatedFilterViews(View):
-    def get_context_data(self, **kwargs):
-        context = super(PaginatedFilterViews, self).get_context_data(**kwargs)
-        if self.request.GET:
-            querystring = self.request.GET.copy()
-            if self.request.GET.get("page"):
-                del querystring["page"]
-            context["querystring"] = querystring.urlencode()
-        return context
-
 
 class AnnotateView(AccessMixin, PaginatedFilterViews, FilterView):
     model = Gene
