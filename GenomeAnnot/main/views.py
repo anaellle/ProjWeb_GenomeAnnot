@@ -436,6 +436,8 @@ def blast(request, sequence=None):
 
 
 def addGenome(request):
+    if not request.user.is_authenticated:
+            return redirect("main:home")
     context = {"role_user": get_role(request)}
     if request.method == "POST":
         if "submit_addgenome" in request.POST:
