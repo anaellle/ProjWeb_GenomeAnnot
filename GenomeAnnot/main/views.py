@@ -297,17 +297,19 @@ def explore(request):
 
 #     return render(request, "main/annotate/main_annotate.html", context)
 
+
 class PaginatedFilterViews(View):
     def get_context_data(self, **kwargs):
         context = super(PaginatedFilterViews, self).get_context_data(**kwargs)
         if self.request.GET:
             querystring = self.request.GET.copy()
-            if self.request.GET.get('page'):
-                del querystring['page']
-            context['querystring'] = querystring.urlencode()
+            if self.request.GET.get("page"):
+                del querystring["page"]
+            context["querystring"] = querystring.urlencode()
         return context
-    
-class AnnotateView(AccessMixin,PaginatedFilterViews,FilterView):
+
+
+class AnnotateView(AccessMixin, PaginatedFilterViews, FilterView):
     model = Gene
     template_name = "main/annotate/main_annotate.html"
     paginate_by = 20
@@ -315,17 +317,20 @@ class AnnotateView(AccessMixin,PaginatedFilterViews,FilterView):
 
     # return home page if url blocked for this user
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated or request.user.role not in (CustomUser.Role.ANNOTATOR,CustomUser.Role.ADMIN):
+        if not request.user.is_authenticated or request.user.role not in (
+            CustomUser.Role.ANNOTATOR,
+            CustomUser.Role.ADMIN,
+        ):
             return redirect("main:home")
         return super().dispatch(request, *args, **kwargs)
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         role_user = get_role(self.request)
-        context["role_user"]=role_user
-        context["active_tab"]="annotate"
+        context["role_user"] = role_user
+        context["active_tab"] = "annotate"
         return context
-    
+
     def get_queryset(self):
         queryset = super().get_queryset()
         # Apply the filter to get genes assigned to the current user
@@ -334,7 +339,7 @@ class AnnotateView(AccessMixin,PaginatedFilterViews,FilterView):
             assigned_genes = queryset.filter(emailAnnotator=user)
             queryset = queryset.filter(Q(id__in=assigned_genes))
         return queryset
-    
+
 
 # def validate(request):
 #     context = {"active_tab": "validate", "role_user": get_role(request)}
@@ -382,7 +387,8 @@ class AnnotateView(AccessMixin,PaginatedFilterViews,FilterView):
 #                     context[status] = "unchecked"
 #     return render(request, "main/validate/main_validate.html", context)
 
-class ValidateView(AccessMixin,PaginatedFilterViews,FilterView):
+
+class ValidateView(AccessMixin, PaginatedFilterViews, FilterView):
     model = Gene
     template_name = "main/validate/main_validate.html"
     paginate_by = 20
@@ -390,17 +396,20 @@ class ValidateView(AccessMixin,PaginatedFilterViews,FilterView):
 
     # return home page if url blocked for this user
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated or request.user.role not in (CustomUser.Role.VALIDATOR,CustomUser.Role.ADMIN):
+        if not request.user.is_authenticated or request.user.role not in (
+            CustomUser.Role.VALIDATOR,
+            CustomUser.Role.ADMIN,
+        ):
             return redirect("main:home")
         return super().dispatch(request, *args, **kwargs)
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         role_user = get_role(self.request)
-        context["role_user"]=role_user
-        context["active_tab"]="validate"
+        context["role_user"] = role_user
+        context["active_tab"] = "validate"
         return context
-    
+
     def get_queryset(self):
         queryset = super().get_queryset()
         # Apply the filter to get genes assigned to the current user
@@ -409,6 +418,7 @@ class ValidateView(AccessMixin,PaginatedFilterViews,FilterView):
             assigned_genes = queryset.filter(emailValidator=user)
             queryset = queryset.filter(Q(id__in=assigned_genes))
         return queryset
+
 
 ##############################################################################################
 ######### Blast
@@ -505,20 +515,20 @@ def blast(request, sequence=None):
 
 def addGenome(request):
     if not request.user.is_authenticated:
-            return redirect("main:home")
+        return redirect("main:home")
     context = {"role_user": get_role(request)}
     if request.method == "POST":
         if "submit_addgenome" in request.POST:
             # get parameters
             form = UploadFileForm(request.POST, request.FILES)
             if form.is_valid():
-                messages.info(request, 'Your files are being processed')
+                messages.info(request, "Your files are being processed")
                 genomefile = request.FILES.get("genomefile")
                 cdsfile = request.FILES.get("cdsfile")
                 peptidefile = request.FILES.get("peptidefile")
                 # python parser to insert into BD : ...
                 uploadAndFill(genomefile, cdsfile, peptidefile)
-                messages.success(request, 'Your files were successfully uploaded')
+                messages.success(request, "Your files were successfully uploaded")
                 return render(request, "main/addGenome/addGenome.html", context)
             else:
                 messages.error(

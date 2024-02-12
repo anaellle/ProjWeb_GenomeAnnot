@@ -180,12 +180,14 @@ class AdminAssignFilter(django_filters.FilterSet):
             "email": ["contains"],
         }
 
+
 # ####################################################################################
 # ## Annotate
 # ####################################################################################
 
+
 class AnnotateFilter(django_filters.FilterSet):
-    
+
     # idChrom__idGenome__species = django_filters.ChoiceFilter(
     #     field_name="idChrom__idGenome__species",
     #     label="Species",
@@ -202,7 +204,13 @@ class AnnotateFilter(django_filters.FilterSet):
         field_name="id",
         lookup_expr="icontains",
         label="Gene ID",
-        widget=forms.TextInput(attrs={"placeholder": ""}),
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Gene ID",
+                "class": "w-100 rounded border-1",
+                "type": "search",
+            }
+        ),
     )
     geneName__contains = django_filters.CharFilter(
         field_name="geneName",
@@ -220,21 +228,43 @@ class AnnotateFilter(django_filters.FilterSet):
         field_name="nucleotidicseq__sequence",
         lookup_expr="icontains",
         label="Gene Sequence",
-        widget=forms.TextInput(attrs={"placeholder": "","title":"Search for a motif in the gene's nucleotide sequence"}),
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "",
+                "title": "Search for a motif in the gene's nucleotide sequence",
+            }
+        ),
     )
     sequence_pep = django_filters.CharFilter(
         field_name="peptide__peptideseq__sequence",
         lookup_expr="icontains",
         label="Peptide Sequence",
-        widget=forms.TextInput(attrs={"placeholder": "","title":"Search for a motif in the peptide' sequence"}),
-    )    
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "",
+                "title": "Search for a motif in the peptide' sequence",
+            }
+        ),
+    )
     status__exact = django_filters.ChoiceFilter(
         field_name="status",
         label="Status",
         choices=Gene.Status.choices,
-        widget=forms.Select(attrs={"class": "form-control"})
+        widget=forms.Select(attrs={"class": "form-control"}),
     )
-    
+    validated = django_filters.BooleanFilter(
+        field_name="status", label="Validated", method="filter_validated"
+    )
+
+    class Meta:
+        model = Gene
+        fields = []
+
+    def filter_validated(self, queryset, name, value):
+        if value:
+            return queryset.filter(status=Gene.Status.VALIDATED)
+        return queryset
+
     # class Meta:
     #     model = Gene
     #     fields = {
@@ -249,8 +279,9 @@ class AnnotateFilter(django_filters.FilterSet):
 # ## Validate
 # ####################################################################################
 
+
 class ValidateFilter(django_filters.FilterSet):
-    
+
     # idChrom__idGenome__species = django_filters.ChoiceFilter(
     #     field_name="idChrom__idGenome__species",
     #     label="Species",
@@ -267,7 +298,13 @@ class ValidateFilter(django_filters.FilterSet):
         field_name="id",
         lookup_expr="icontains",
         label="Gene ID",
-        widget=forms.TextInput(attrs={"placeholder": ""}),
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Gene ID",
+                "class": "w-100 rounded border-1",
+                "type": "search",
+            }
+        ),
     )
     geneName__contains = django_filters.CharFilter(
         field_name="geneName",
@@ -285,21 +322,31 @@ class ValidateFilter(django_filters.FilterSet):
         field_name="nucleotidicseq__sequence",
         lookup_expr="icontains",
         label="Gene Sequence",
-        widget=forms.TextInput(attrs={"placeholder": "","title":"Search for a motif in the gene's nucleotide sequence"}),
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "",
+                "title": "Search for a motif in the gene's nucleotide sequence",
+            }
+        ),
     )
     sequence_pep = django_filters.CharFilter(
         field_name="peptide__peptideseq__sequence",
         lookup_expr="icontains",
         label="Peptide Sequence",
-        widget=forms.TextInput(attrs={"placeholder": "","title":"Search for a motif in the peptide' sequence"}),
-    ) 
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "",
+                "title": "Search for a motif in the peptide' sequence",
+            }
+        ),
+    )
     status__exact = django_filters.ChoiceFilter(
         field_name="status",
         label="Status",
         choices=Gene.Status.choices,
-        widget=forms.Select(attrs={"class": "form-control"})
+        widget=forms.Select(attrs={"class": "form-control"}),
     )
-    
+
     # class Meta:
     #     model = Gene
     #     fields = {
