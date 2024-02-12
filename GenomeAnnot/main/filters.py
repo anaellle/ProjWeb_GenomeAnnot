@@ -246,23 +246,68 @@ class AnnotateFilter(django_filters.FilterSet):
             }
         ),
     )
-    status__exact = django_filters.ChoiceFilter(
+    # status__exact = django_filters.ChoiceFilter(
+    #     field_name="status",
+    #     label="Status",
+    #     choices=Gene.Status.choices,
+    #     widget=forms.Select(attrs={"class": "form-control"}),
+    # )
+
+    notannotated = django_filters.BooleanFilter(
         field_name="status",
-        label="Status",
-        choices=Gene.Status.choices,
-        widget=forms.Select(attrs={"class": "form-control"}),
+        method="filter_notannotated",
+        widget=forms.CheckboxInput(
+            attrs={"class": "form-check-input", "checked": "checked"}
+        ),
+    )
+    inwork = django_filters.BooleanFilter(
+        field_name="status",
+        method="filter_inwork",
+        widget=forms.CheckboxInput(
+            attrs={"class": "form-check-input", "checked": "checked"}
+        ),
+    )
+    review = django_filters.BooleanFilter(
+        field_name="status",
+        method="filter_review",
+        widget=forms.CheckboxInput(
+            attrs={"class": "form-check-input", "checked": "checked"}
+        ),
+    )
+    submited = django_filters.BooleanFilter(
+        field_name="status",
+        method="filter_submited",
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )
     validated = django_filters.BooleanFilter(
-        field_name="status", label="Validated", method="filter_validated"
+        field_name="status",
+        method="filter_validated",
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )
 
-    class Meta:
-        model = Gene
-        fields = []
+    def filter_notannotated(self, queryset, name, value):
+        if value == False:
+            return queryset.exclude(status=Gene.Status.NOT_ANNOTATED)
+        return queryset
+
+    def filter_submited(self, queryset, name, value):
+        if value == False:
+            return queryset.exclude(status=Gene.Status.SUBMITTED)
+        return queryset
+
+    def filter_inwork(self, queryset, name, value):
+        if value == False:
+            return queryset.exclude(status=Gene.Status.BEING_ANNOTATED)
+        return queryset
+
+    def filter_review(self, queryset, name, value):
+        if value == False:
+            return queryset.exclude(status=Gene.Status.BEING_CORRECTED)
+        return queryset
 
     def filter_validated(self, queryset, name, value):
-        if value:
-            return queryset.filter(status=Gene.Status.VALIDATED)
+        if value == False:
+            return queryset.exclude(status=Gene.Status.VALIDATED)
         return queryset
 
     # class Meta:

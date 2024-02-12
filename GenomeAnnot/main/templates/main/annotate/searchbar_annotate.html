@@ -1,6 +1,6 @@
 <!-------------- Research -------------->  
 
-<form method="get" action="{% url 'main:annotate' %}">
+<form method="get" id="filter_to_apply"  action="{% url 'main:annotate' %}">
 
     <div class="d-flex search" role="search">
 
@@ -95,10 +95,9 @@
                     <!-------- Status --------->
                     <div class="row align-items-center mb-3">
 
-        TO DOOOOOOOOOO
                         <div class="col form-check form-switch">
-                            <input class="form-check-input" type="checkbox" role="switch" id="status0" name="status0" {% if not status0 or status0 == 'checked' %}checked{% endif %}>
-                            <label class="form-check-label" for="status0">
+                            {{ filter.form.notannotated}}   
+                            <label class="form-check-label" for="id_notannotated">
                             {% with status=0  %}
                                 {% include 'main/status.html' %}
                             {% endwith %}
@@ -106,8 +105,8 @@
                         </div>
 
                         <div class=" col form-check form-switch">
-                            <input class="form-check-input" type="checkbox" role="switch" id="status1" name="status1" {% if not status1 or status1 == 'checked' %}checked{% endif %}>
-                            <label class="form-check-label" for="status1">
+                            {{ filter.form.inwork}}   
+                            <label class="form-check-label" for="id_inwork">
                             {% with status=1  %}
                                 {% include 'main/status.html' %}
                             {% endwith %}
@@ -116,8 +115,8 @@
 
 
                         <div class="col form-check form-switch">
-                            <input class="form-check-input" type="checkbox" role="switch" id="status2" name="status2" {% if not status2 or status2 == 'checked' %}checked{% endif %}>
-                            <label class="form-check-label" for="status2">
+                            {{ filter.form.review}}   
+                            <label class="form-check-label" for="id_review">
                             {% with status=2  %}
                                 {% include 'main/status.html' %}
                             {% endwith %}
@@ -125,8 +124,8 @@
                         </div>
 
                         <div class="col form-check form-switch">
-                            <input class="form-check-input" type="checkbox" role="switch" id="status3"  name="status3" {% if status3 == 'checked' %}checked{% endif %}>
-                            <label class="form-check-label" for="status3">
+                            {{ filter.form.submited}}                            
+                            <label class="form-check-label" for="id_submited">
                             {% with status=3  %}
                                 {% include 'main/status.html' %}
                             {% endwith %}

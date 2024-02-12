@@ -40,7 +40,7 @@ function scrollFunction() {
 //----------------- Create User / Login
 
 
-function changeToLogin(){
+/* function changeToLogin(){
     $('#formCreateUser').css("display","none");
     $('#user_left').removeClass('d-none');
     $('#user_right').addClass('d-none');
@@ -56,9 +56,9 @@ function changeToCreateUser(){
     $('#login_left').removeClass('d-none');
     $('#login_right').addClass('d-none');
     $('#titleLogin').html("Create User");
-}
+} */
 
-// ---------------- Change filter of explore depending on the selection before search bar
+// ---------------- Apply filter or Change filter of explore depending on the selection before search bar
 
 function changeTypeResExplore(){
     const selectedValue = $("#res_type-select")[0].value;
@@ -82,12 +82,15 @@ function changeTypeResExplore(){
 
 }
 
-// change filter on new page after submit (when loading)
-if (window.location.pathname.endsWith('/explore/')) {
-    
-    window.addEventListener('load', changeTypeResExplore);
-}
 
+$(document).ready(function() {
+
+    // change filter on new page after submit (when loading)
+    if (window.location.pathname.endsWith('/explore/')) {
+        
+        window.addEventListener('load', changeTypeResExplore);
+    }
+});
 
 
 
