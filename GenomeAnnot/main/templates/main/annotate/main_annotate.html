@@ -16,8 +16,8 @@
 <!-- --------------- GENES LIST --------------- -->
 
 {% for gene in object_list %}
-
   {% with type="sequence" %}
+
   <div class="card mb-3 ">
       <a class="btn card-body cardList " href="{% url 'main:geneAnnot' gene_id=gene.id%}">
           <span class="left-card ">
@@ -38,6 +38,7 @@
             </span> 
       </a>
     </div>
+    
   {% endwith %}
 
   {% empty %}
