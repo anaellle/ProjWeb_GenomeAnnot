@@ -262,27 +262,27 @@ def explore(request):
 
 class ExploreGenomeView(PaginatedFilterViews, FilterView):
     model = Genome
-    template_name = "main/explore/main_explore.html" ## À MODIFIER avec la vue explore pour génome !!!
+    template_name = "main/explore/main_exploreGenome.html"
     paginate_by = 20
     filterset_class = ExploreGenomeFilter
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         role_user = get_role(self.request)
-        context["role_user"] = role_user # pas sûre que ça serve --> à part pour upload ?
+        context["role_user"] = role_user # pas sûre que ça serve
         context["active_tab"] = "explore"
         return context
 
 class ExploreGenePepView(PaginatedFilterViews, FilterView):
     model = Gene
-    template_name = "main/explore/main_explore.html" ## À MODIFIER avec la vue explore pour gène/peptide !!!
+    template_name = "main/explore/main_exploreGenePep.html"
     paginate_by = 20
     filterset_class = ExploreGenePepFilter
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         role_user = get_role(self.request)
-        context["role_user"] = role_user # pas sûre que ça serve --> à part pour upload ?
+        context["role_user"] = role_user # pas sûre que ça serve
         context["active_tab"] = "explore"
         return context
 

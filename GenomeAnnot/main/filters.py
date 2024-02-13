@@ -445,7 +445,13 @@ class ExploreGenomeFilter(django_filters.FilterSet):
         field_name="id",
         lookup_expr="icontains",
         label="Genome ID",
-        widget=forms.TextInput(attrs={"placeholder": ""}),
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Genome ID",
+                "class": "w-100 rounded border-1",
+                "type": "search",
+            }
+        ),
     )
     species__contains = django_filters.CharFilter(
         field_name="species",
