@@ -1129,21 +1129,20 @@ class sequenceAdmin(SingleTableMixin, FilterView):
                 request.GET,
                 queryset=Gene.objects.filter(Q(emailValidator__isnull=True)),
             ).qs
-            genes = [genes_no_annot, genes_no_valid]
-            # get annotators and validators
+            # get all annotators and
             annotators = CustomUser.objects.filter(role=1)
             validators = CustomUser.objects.filter(role=2)
+            genes = [genes_no_annot, genes_no_valid]
             users = [annotators, validators]
-            # assign genes to role
             for r in range(2):
                 i = 0
-                for gene in genes[r]:
-                    user = users[r]
-                    if len(user) != 0:  # if at least one user with the role
+                user = users[r]
+                if len(user) != 0:
+                    for gene in genes[r]:
                         email = user[i % len(user)]
-                        if r == 0:  # if annotator
+                        if r == 0:
                             gene.emailAnnotator = CustomUser.objects.get(email=email)
-                        elif r == 1:  # if validator
+                        elif r == 1:
                             gene.emailValidator = CustomUser.objects.get(email=email)
                         gene.save()
                         i += 1
