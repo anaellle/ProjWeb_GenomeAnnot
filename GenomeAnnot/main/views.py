@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import DetailView, UpdateView, CreateView
+from django.views.generic import DetailView, UpdateView, CreateView, View
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse, resolve
 from django.urls.exceptions import Resolver404
@@ -20,11 +20,16 @@ from .filters import (
     AdminGeneFilter,
     AdminAccountFilter,
     AdminAssignFilter,
+    ExploreGenomeFilter,
+    ExploreGenePepFilter,
+    AnnotateFilter,
+    ValidateFilter,
 )
 
 from .insertion import uploadAndFill
 
 from django.contrib import messages
+from django.db.models import Q
 
 # Libraries required for sign up
 from django.contrib.auth.mixins import AccessMixin
@@ -182,164 +187,261 @@ class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
 ######### Search views (explore, annotate and validate)
 ##############################################################################################
 
+class PaginatedFilterViews(View):
+    def get_context_data(self, **kwargs):
+        context = super(PaginatedFilterViews, self).get_context_data(**kwargs)
+        if self.request.GET:
+            querystring = self.request.GET.copy()
+            if self.request.GET.get("page"):
+                del querystring["page"]
+            context["querystring"] = querystring.urlencode()
+        return context
 
-def explore(request):
-    context = {"active_tab": "explore", "role_user": get_role(request)}
+# def explore(request):
+#     context = {"active_tab": "explore", "role_user": get_role(request)}
 
-    if request.method == "GET":
-        if "submit_download" in request.GET:
-            ...  # download info gene with gene_id
+#     if request.method == "GET":
+#         if "submit_download" in request.GET:
+#             ...  # download info gene with gene_id
 
-        if "submitsearch" in request.GET:
-            # get parameters of search
-            context["searchbar"] = request.GET.get("searchbar")
-            context["type_res"] = request.GET.get("res_type")
+#         if "submitsearch" in request.GET:
+#             # get parameters of search
+#             context["searchbar"] = request.GET.get("searchbar")
+#             context["type_res"] = request.GET.get("res_type")
 
-            if context["type_res"] == "genome":
-                context["strain"] = request.GET.get("strain")
-                context["species"] = request.GET.get("species")
-                for status in [
-                    "status0_genome",
-                    "status1_genome",
-                    "status2_genome",
-                ]:
-                    if status in request.GET:
-                        context[status] = "checked"
-                    else:
-                        context[status] = "unchecked"
-                # get info about genome
-                context["genomes_info"] = Genome.objects.all()  # TO DO : filter
+#             if context["type_res"] == "genome":
+#                 context["strain"] = request.GET.get("strain")
+#                 context["species"] = request.GET.get("species")
+#                 for status in [
+#                     "status0_genome",
+#                     "status1_genome",
+#                     "status2_genome",
+#                 ]:
+#                     if status in request.GET:
+#                         context[status] = "checked"
+#                     else:
+#                         context[status] = "unchecked"
+#                 # get info about genome
+#                 context["genomes_info"] = Genome.objects.all()  # TO DO : filter
 
-            elif context["type_res"] == "gene" or context["type_res"] == "prot":
-                # get info filter/search
-                for info in ["genome", "chrom", "motif", "seq"]:
-                    context[info] = request.GET.get(info)
-                for status in [
-                    "status0",
-                    "status123",
-                    "status4",
-                ]:
-                    if status in request.GET:
-                        context[status] = "checked"
-                    else:
-                        context[status] = "unchecked"
+#             elif context["type_res"] == "gene" or context["type_res"] == "prot":
+#                 # get info filter/search
+#                 for info in ["genome", "chrom", "motif", "seq"]:
+#                     context[info] = request.GET.get(info)
+#                 for status in [
+#                     "status0",
+#                     "status123",
+#                     "status4",
+#                 ]:
+#                     if status in request.GET:
+#                         context[status] = "checked"
+#                     else:
+#                         context[status] = "unchecked"
 
-                # get info about gene/prot
-                genes = Gene.objects.all()  # TO DO : filter
-                genes_info = []
-                for gene in genes:
-                    genome = gene.idChrom.idGenome
-                    peptide = gene.peptide_set.first()
-                    gene_info = {
-                        "gene_id": gene.id,
-                        "gene_name": gene.geneName,
-                        "status": gene.status,
-                        "peptide_id": peptide.id if peptide else None,
-                        "peptide_name": peptide.transcriptName if peptide else None,
-                        "genome_id": genome.id,
-                        "genome_species": genome.species,
-                    }
-                    genes_info.append(gene_info)
-                    context["genes_info"] = genes_info
+#                 # get info about gene/prot
+#                 genes = Gene.objects.all()  # TO DO : filter
+#                 genes_info = []
+#                 for gene in genes:
+#                     genome = gene.idChrom.idGenome
+#                     peptide = gene.peptide_set.first()
+#                     gene_info = {
+#                         "gene_id": gene.id,
+#                         "gene_name": gene.geneName,
+#                         "status": gene.status,
+#                         "peptide_id": peptide.id if peptide else None,
+#                         "peptide_name": peptide.transcriptName if peptide else None,
+#                         "genome_id": genome.id,
+#                         "genome_species": genome.species,
+#                     }
+#                     genes_info.append(gene_info)
+#                     context["genes_info"] = genes_info
 
-    return render(request, "main/explore/main_explore.html", context)
+#     return render(request, "main/explore/main_explore.html", context)
+
+class ExploreGenomeView(PaginatedFilterViews, FilterView):
+    model = Genome
+    template_name = "main/explore/main_exploreGenome.html"
+    paginate_by = 20
+    filterset_class = ExploreGenomeFilter
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        role_user = get_role(self.request)
+        context["role_user"] = role_user # pas sûre que ça serve
+        context["active_tab"] = "explore"
+        return context
+
+class ExploreGenePepView(PaginatedFilterViews, FilterView):
+    model = Gene
+    template_name = "main/explore/main_exploreGenePep.html"
+    paginate_by = 20
+    filterset_class = ExploreGenePepFilter
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        role_user = get_role(self.request)
+        context["role_user"] = role_user # pas sûre que ça serve
+        context["active_tab"] = "explore"
+        return context
+
+# def annotate(request):
+#     context = {"active_tab": "annotate", "role_user": get_role(request)}
+#     if context["role_user"] != 1 and context["role_user"] != 3:
+#         return redirect("main:home")
+
+#     # get info about gene/prot
+#     # filter on annotator
+#     genes = Gene.objects.filter(emailAnnotator=request.user)
+#     genes_info = []
+#     for gene in genes:
+#         genome = gene.idChrom.idGenome
+#         peptide = gene.peptide_set.first()
+#         gene_info = {
+#             "gene_id": gene.id,
+#             "gene_name": gene.geneName,
+#             "status": gene.status,
+#             "peptide_id": peptide.id if peptide else None,
+#             "peptide_name": peptide.transcriptName if peptide else None,
+#             "genome_id": genome.id,
+#             "genome_species": genome.species,
+#         }
+#         genes_info.append(gene_info)
+#         context["genes_info"] = genes_info
+
+#     if request.method == "GET":
+#         if "submitsearch" in request.GET:
+#             # get parameters of search
+#             for info in [
+#                 "searchbar",
+#                 "genome",
+#                 "chrom",
+#                 "motif_gene",
+#                 "motif_prot",
+#             ]:
+#                 context[info] = request.GET.get(info)
+#             for status in [
+#                 "status0",
+#                 "status1",
+#                 "status2",
+#                 "status3",
+#                 "status4",
+#             ]:
+#                 if status in request.GET:
+#                     context[status] = "checked"
+#                 else:
+#                     context[status] = "unchecked"
+
+#     return render(request, "main/annotate/main_annotate.html", context)
+
+class AnnotateView(AccessMixin, PaginatedFilterViews, FilterView):
+    model = Gene
+    template_name = "main/annotate/main_annotate.html"
+    paginate_by = 20
+    filterset_class = AnnotateFilter
+
+    # return home page if url blocked for this user
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated or request.user.role not in (
+            CustomUser.Role.ANNOTATOR,
+            CustomUser.Role.ADMIN,
+        ):
+            return redirect("main:home")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        role_user = get_role(self.request)
+        context["role_user"] = role_user
+        context["active_tab"] = "annotate"
+        return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        # Apply the filter to get genes assigned to the current user
+        user = self.request.user
+        if user:
+            assigned_genes = queryset.filter(emailAnnotator=user)
+            queryset = queryset.filter(Q(id__in=assigned_genes))
+        return queryset.order_by("id")
 
 
-def annotate(request):
-    context = {"active_tab": "annotate", "role_user": get_role(request)}
-    if context["role_user"] != 1 and context["role_user"] != 3:
-        return redirect("main:home")
+# def validate(request):
+#     context = {"active_tab": "validate", "role_user": get_role(request)}
+#     if context["role_user"] != 2 and context["role_user"] != 3:
+#         return redirect("main:home")
+#     # get info about gene/prot
+#     # filter on validator
+#     genes = Gene.objects.filter(emailValidator=request.user)
+#     genes_info = []
+#     for gene in genes:
+#         genome = gene.idChrom.idGenome
+#         peptide = gene.peptide_set.first()
+#         gene_info = {
+#             "gene_id": gene.id,
+#             "gene_name": gene.geneName,
+#             "status": gene.status,
+#             "peptide_id": peptide.id if peptide else None,
+#             "peptide_name": peptide.transcriptName if peptide else None,
+#             "genome_id": genome.id,
+#             "genome_species": genome.species,
+#         }
+#         genes_info.append(gene_info)
+#         context["genes_info"] = genes_info
 
-    # get info about gene/prot
-    # filter on annotator
-    genes = Gene.objects.filter(emailAnnotator=request.user)
-    genes_info = []
-    for gene in genes:
-        genome = gene.idChrom.idGenome
-        peptide = gene.peptide_set.first()
-        gene_info = {
-            "gene_id": gene.id,
-            "gene_name": gene.geneName,
-            "status": gene.status,
-            "peptide_id": peptide.id if peptide else None,
-            "peptide_name": peptide.transcriptName if peptide else None,
-            "genome_id": genome.id,
-            "genome_species": genome.species,
-        }
-        genes_info.append(gene_info)
-        context["genes_info"] = genes_info
+#     if request.method == "GET":
+#         if "submitsearch" in request.GET:
+#             # get parameters of search
+#             for info in [
+#                 "searchbar",
+#                 "genome",
+#                 "chrom",
+#                 "motif_gene",
+#                 "motif_prot",
+#             ]:
+#                 context[info] = request.GET.get(info)
 
-    if request.method == "GET":
-        if "submitsearch" in request.GET:
-            # get parameters of search
-            for info in [
-                "searchbar",
-                "genome",
-                "chrom",
-                "motif_gene",
-                "motif_prot",
-            ]:
-                context[info] = request.GET.get(info)
-            for status in [
-                "status0",
-                "status1",
-                "status2",
-                "status3",
-                "status4",
-            ]:
-                if status in request.GET:
-                    context[status] = "checked"
-                else:
-                    context[status] = "unchecked"
-
-    return render(request, "main/annotate/main_annotate.html", context)
+#             for status in [
+#                 "status012",
+#                 "status3",
+#                 "status4",
+#             ]:
+#                 if status in request.GET:
+#                     context[status] = "checked"
+#                 else:
+#                     context[status] = "unchecked"
+#     return render(request, "main/validate/main_validate.html", context)
 
 
-def validate(request):
-    context = {"active_tab": "validate", "role_user": get_role(request)}
-    if context["role_user"] != 2 and context["role_user"] != 3:
-        return redirect("main:home")
-    # get info about gene/prot
-    # filter on validator
-    genes = Gene.objects.filter(emailValidator=request.user)
-    genes_info = []
-    for gene in genes:
-        genome = gene.idChrom.idGenome
-        peptide = gene.peptide_set.first()
-        gene_info = {
-            "gene_id": gene.id,
-            "gene_name": gene.geneName,
-            "status": gene.status,
-            "peptide_id": peptide.id if peptide else None,
-            "peptide_name": peptide.transcriptName if peptide else None,
-            "genome_id": genome.id,
-            "genome_species": genome.species,
-        }
-        genes_info.append(gene_info)
-        context["genes_info"] = genes_info
+class ValidateView(AccessMixin, PaginatedFilterViews, FilterView):
+    model = Gene
+    template_name = "main/validate/main_validate.html"
+    paginate_by = 20
+    filterset_class = ValidateFilter
 
-    if request.method == "GET":
-        if "submitsearch" in request.GET:
-            # get parameters of search
-            for info in [
-                "searchbar",
-                "genome",
-                "chrom",
-                "motif_gene",
-                "motif_prot",
-            ]:
-                context[info] = request.GET.get(info)
+    # return home page if url blocked for this user
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated or request.user.role not in (
+            CustomUser.Role.VALIDATOR,
+            CustomUser.Role.ADMIN,
+        ):
+            return redirect("main:home")
+        return super().dispatch(request, *args, **kwargs)
 
-            for status in [
-                "status012",
-                "status3",
-                "status4",
-            ]:
-                if status in request.GET:
-                    context[status] = "checked"
-                else:
-                    context[status] = "unchecked"
-    return render(request, "main/validate/main_validate.html", context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        role_user = get_role(self.request)
+        context["role_user"] = role_user
+        context["active_tab"] = "validate"
+        return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        # Apply the filter to get genes assigned to the current user
+        user = self.request.user
+        if user:
+            assigned_genes = queryset.filter(emailValidator=user)
+            queryset = queryset.filter(Q(id__in=assigned_genes))
+        return queryset.order_by("id")
 
 
 ##############################################################################################
@@ -437,7 +539,7 @@ def blast(request, sequence=None):
 
 def addGenome(request):
     if not request.user.is_authenticated:
-            return redirect("main:home")
+        return redirect("main:home")
     context = {"role_user": get_role(request)}
     if request.method == "POST":
         if "submit_addgenome" in request.POST:

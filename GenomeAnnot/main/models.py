@@ -117,7 +117,7 @@ class Gene(models.Model):
         ANTISENSE = (-1, "Antisense")
 
     class Status(models.IntegerChoices):
-        ASSIGNABLE = (0, "Assignable")
+        NOT_ANNOTATED = (0, "Not annotated")
         BEING_ANNOTATED = (1, "Being annotated")
         BEING_CORRECTED = (2, "Being corrected")
         SUBMITTED = (3, "Submitted to a validator")
@@ -131,7 +131,7 @@ class Gene(models.Model):
     startPos = models.IntegerField()
     endPos = models.IntegerField()
     descriptionGene = models.CharField(max_length=1000, blank=True)
-    status = models.IntegerField(choices=Status.choices, default=Status.ASSIGNABLE)
+    status = models.IntegerField(choices=Status.choices, default=Status.NOT_ANNOTATED)
 
     idChrom = models.ForeignKey(Chromosome, on_delete=models.CASCADE)
     emailAnnotator = models.ForeignKey(

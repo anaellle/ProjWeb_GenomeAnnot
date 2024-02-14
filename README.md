@@ -1,5 +1,5 @@
 # ProjWeb_GenomeAnnot
-__Emeline Bruyère<sup>1</sup>, Anaëlle Cossard<sup>1</sup>, Elora Vigo<sup>1</sup> et Alexis Michalowski-Skarbek<sup>1</sup>__
+__Emeline Bruyère<sup>1</sup>, Anaëlle Cossard<sup>1</sup>, Elora Vigo<sup>1</sup> and Alexis Michalowski-Skarbek<sup>1</sup>__
 <br>
 <sub>1. Université Paris-Saclay
 
