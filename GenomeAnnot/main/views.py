@@ -552,7 +552,6 @@ def addGenome(request):
                 genomeName = genomefile.name.split('.')[0]
                 print(genomeName)
                 if (genomeName in cdsfile.name) and (genomeName in peptidefile.name):
-                    messages.info(request, 'Your files are being processed')
                     uploadAndFill(genomefile, cdsfile, peptidefile)
                     messages.success(request, 'Your files were successfully uploaded')
                 else :
