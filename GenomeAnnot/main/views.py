@@ -736,18 +736,34 @@ class GenomeSeqDetailView(DetailView):
         context["sequence"] = sequence
         return context
 
+
 ### Download sequence of Genome
 class GenomeSeqDownloadView(View):
     def get(self, request, *args, **kwargs):
-        genome_id = kwargs.get('genome_id')
+        genome_id = kwargs.get("genome_id")
         chromosomes = Chromosome.objects.filter(idGenome=genome_id)
-        sequence = ''
+        sequence = ""
         for chrom in chromosomes:
             chrom_seq = ChromosomeSeq.objects.get(idChrom=chrom)
-            sequence += '>Chromosome dna:chromosome chromosome:'+str(chrom.id)+':Chromosome:'+str(chrom.startPos)+':'+str(chrom.endPos)+':'+str(chrom.strand)+' REF\n'+str(chrom_seq.sequence)+'\n'
-        response = HttpResponse(sequence, content_type='text/plain')
-        response['Content-Disposition'] = f'attachment; filename="seq_{genome_id}.fa"'
+            sequence += (
+                ">Chromosome dna:chromosome chromosome:"
+                + str(chrom.id)
+                + ":Chromosome:"
+                + str(chrom.startPos)
+                + ":"
+                + str(chrom.endPos)
+                + ":"
+                + str(chrom.strand)
+                + " REF\n"
+                + str(chrom_seq.sequence)
+                + "\n"
+            )
+        response = HttpResponse(sequence, content_type="text/plain")
+        response["Content-Disposition"] = (
+            f'attachment; filename="seq_{genome_id}.fa"'
+        )
         return response
+
 
 ##############################################################################################
 ######### Gene reading, annotation and validation
@@ -1113,8 +1129,25 @@ class sequenceAdmin(SingleTableMixin, FilterView):
                 request.GET,
                 queryset=Gene.objects.filter(Q(emailValidator__isnull=True)),
             ).qs
-            print(len(genes_no_annot))
-            print(len(genes_no_valid))
+            genes = [genes_no_annot, genes_no_valid]
+            # get annotators and validators
+            annotators = CustomUser.objects.filter(role=1)
+            validators = CustomUser.objects.filter(role=2)
+            users = [annotators, validators]
+            # assign genes to role
+            for r in range(2):
+                i = 0
+                for gene in genes[r]:
+                    user = users[r]
+                    if len(user) != 0:  # if at least one user with the role
+                        email = user[i % len(user)]
+                        if r == 0:  # if annotator
+                            gene.emailAnnotator = CustomUser.objects.get(email=email)
+                        elif r == 1:  # if validator
+                            gene.emailValidator = CustomUser.objects.get(email=email)
+                        gene.save()
+                        i += 1
+
         return super().get(request, *args, **kwargs)
 
 
