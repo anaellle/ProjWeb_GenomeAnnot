@@ -13,10 +13,12 @@
     <div class="nav nav-pills">
       {% if active_tab == "explore"%}
         <!--TO DISABLED DEPENDING ON ASSIGNATION !!! (OR DELETE LINKS)-->
-        <a class="nav-link px-3 {% if role_user != 'annotator' and role_user != 'admin' %}disabled{% endif %}" href="{% url 'main:geneAnnot' gene_id=gene.id  %}"> Annotate</a>
-      
-        <a class="nav-link px-3 {% if role_user != 'validator' and role_user != 'admin' %}disabled{% endif %}" href="{% url 'main:geneValid' gene_id=gene.id  %}"> Validate</a>
-      
+        {% if accesAnnot %}
+        <a class="nav-link px-3 " href="{% url 'main:geneAnnot' gene_id=gene.id  %}"> Annotate</a>
+        {% endif %}
+        {% if accesValid %}
+        <a class="nav-link px-3 " href="{% url 'main:geneValid' gene_id=gene.id  %}"> Validate</a>
+        {% endif %}
       
         
       
@@ -122,6 +124,17 @@
             {%endif%}
           </div>
         </div>
+       <div class="row align-items-center mt-4 mx-2 ">
+          <div class="col">
+            <span class="bold">Access to other banks :</span> <br>
+            {% if gene.id %}
+            <a class="nav-link px-3" href="https://www.ncbi.nlm.nih.gov/gene/?term={{ gene.id }}" target="_blank">NCBI Gene</a>
+            {% endif %}
+            {% if genome.id %}
+            <a class="nav-link px-3" href="https://www.uniprot.org/taxonomy?query={{ genome.id }}" target="_blank">UniProt Taxonomy</a>
+            {% endif %}
+          </div>
+        </div>
       </div>  
   </div>
 
@@ -175,11 +188,25 @@
             {%endif%}
             </div>
         </div>
+       <div class="row align-items-center mt-4 mx-2 ">
+          <div class="col">
+            <span class="bold">Access to other banks :</span> <br>
+            {% if gene.id %}
+            <a class="nav-link px-3" href="https://www.ncbi.nlm.nih.gov/protein/?term={{ gene.id }}" target="_blank">NCBI Prot</a>
+            {% endif %}
+            {% if gene.id %}
+            <a class="nav-link px-3" href="https://www.ncbi.nlm.nih.gov/ipg/?term={{ gene.id }}" target="_blank">NCBI identical protein group</a>
+            {% endif %}
+            {% if gene.id %}
+            <a class="nav-link px-3" href="https://www.uniprot.org/uniprotkb?query={{ gene.id }}" target="_blank">UniProt Search</a>
+            {% endif %}
+          </div>
+        </div>
       </div>  
   </div>
 
   <!--------------------------Comments----------------------------------->
-  {% if active_tab == "annotate" or active_tab == "validate" or role_user == "admin" %}
+  {% if role_user == 3 or accesAnnot or accesValid %}
 
   {% for comment in messages %}
   {% if comment.type == 0 %}

@@ -1,136 +1,159 @@
-{% extends 'main/searchbar_base.html' %}
+<!-------------- Research -------------->  
+
+<form method="get" id="filter_to_apply"  action="{% url 'main:annotate' %}">
+
+    <div class="d-flex search" role="search">
 
 
-<!-------------- Form action -------------->
-
-{%block action%}
-{% url 'main:annotate' %}
-{% endblock %}
-
-<!-------------- Searchbar -------------->
-
-{% block placeholderSearch %}
-Search gene or protein
-{% endblock %}
+        <!-------------- Searchbar -------------->
 
 
-<!-------------- Show filter -------------->
-
-{% block show %}
-{% if genome or chrom or motif_gene or motif_prot %} 
-show 
-{% endif %}
-{%endblock%}
+        {{ filter.form.id__contains }}
+        <button class="btn btn-outline-success" type="submit" id="submit_search" name="submitsearch" >Search</button>
 
 
-
-<!-------------- Filter -------------->
-{% block  filter %}
-{% with role="annotator" %}
-
-<!-------------- Gene or Protein-------------->
-{% with type="sequence" %}
-
-    <div class="filter">
-        <div class="container pt-3 pb-3">
-
-            <div class="row align-items-center mb-3">
-                <!-------- Genome --------->
-                <div class="col">
-                    <div class="d-flex align-items-center">
-                        <label for="genome" class="form-label">Genome</label>
-                        <input type="text" class="form-control ms-2" id="genome" name="genome" value="{% if genome %}{{genome}}{% endif %}">
-                    </div>
-                </div>
-                <!-------- Chromosome --------->
-                <div class="col">
-                    <div class="d-flex align-items-center">
-                        <label for="chrom" class="form-label">Chromosome</label>
-                        <input type="text" class="form-control ms-2" id="chrom" name="chrom" value="{% if chrom %}{{chrom}}{% endif %}">
-                    </div>
-                </div>
-            
-                
-                
-            </div>
-
-            <div class="row align-items-center mb-3">
-
-                <!-------- Motif gene--------->
-                <div class="col">
-                    <div class="d-flex align-items-center">
-                        <label for="motif_gene" class="form-label">DNA Motif</label>
-                        <input type="text" class="form-control ms-2" id="motif_gene" name="motif_gene" value="{% if motif_gene %}{{motif_gene}}{% endif %}">
-                    </div>
-                </div>
-
-                <!-------- Motif prot--------->
-                <div class="col">
-                    <div class="d-flex align-items-center">
-                        <label for="motif_prot" class="form-label">Peptide Motif</label>
-                        <input type="text" class="form-control ms-2" id="motif_prot" name="motif_prot" value="{% if motif_prot %}{{motif_prot}}{% endif %}">
-                    </div>
-                </div>
-                
-
-            </div>
-              
-            <!-------- Status --------->
-            <div class="row align-items-center mb-3">
+        <!-------------- Filter -------------->
 
 
-                <div class="col form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch" id="status0" name="status0" {% if not status0 or status0 == 'checked' %}checked{% endif %}>
-                    <label class="form-check-label" for="status0">
-                    {% with status=0  %}
-                        {% include 'main/status.html' %}
-                    {% endwith %}
-                    </label>
-                </div>
-
-                <div class=" col form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch" id="status1" name="status1" {% if not status1 or status1 == 'checked' %}checked{% endif %}>
-                    <label class="form-check-label" for="status1">
-                    {% with status=1  %}
-                        {% include 'main/status.html' %}
-                    {% endwith %}
-                    </label>
-                </div>
-
-
-                <div class="col form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch" id="status2" name="status2" {% if not status2 or status2 == 'checked' %}checked{% endif %}>
-                    <label class="form-check-label" for="status2">
-                    {% with status=2  %}
-                        {% include 'main/status.html' %}
-                    {% endwith %}
-                    </label>
-                </div>
-
-                <div class="col form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch" id="status3"  name="status3" {% if status3 == 'checked' %}checked{% endif %}>
-                    <label class="form-check-label" for="status3">
-                    {% with status=3  %}
-                        {% include 'main/status.html' %}
-                    {% endwith %}
-                    </label>
-                </div>
-
-                <div class="col form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch"  id="status4" name="status4" {% if status4 == 'checked' %}checked{% endif %}>
-                    <label class="form-check-label" for="status4">
-                    {% with status=4  %}
-                        {% include 'main/status.html' %}
-                    {% endwith %}
-                    </label>
-                </div>
-               
-            </div>
-        </div>
+        <!-- Button trigger filter -->
+        <button class="btn" type="button" data-bs-toggle="collapse" data-bs-target="#filter" aria-expanded="false" >
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-filter" viewBox="0 0 16 16">
+                <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5"/>
+            </svg>
+        </button>
+    
     </div>
+
+    <!-- filter opened -->
+    <div class="collapse" id="filter">
+        <div class=" card-body">
+                
+
+        {% with role="annotator" %}
+
+        <!-------------- Gene or Protein-------------->
+        {% with type="sequence" %}
+
+            <div class="filter">
+                <div class="container pt-3 pb-3">
+
+                    <div class="row align-items-center mb-3">
+                        
+                        <!-------- Species -------->
+                        <div class="col">
+                            <div class="d-flex align-items-center">
+                                <label for="id_idChrom__idGenome__species__icontains" class="form-label pe-3">Species</label>
+                                {{ filter.form.idChrom__idGenome__species__icontains }}
+                                <!--<input type="text" class="form-control ms-2" id="genome" name="genome" value="{% if genome %}{{genome}}{% endif %}">-->
+                            </div>
+                        </div>
+
+                        <!-------- Gene name -------->
+                        <div class="col">
+                            <div class="d-flex align-items-center">
+                                <label for="id_geneName__contains" class="form-label pe-3">Gene Name</label>
+                                {{ filter.form.geneName__contains }}
+                            </div>
+                        </div>
+                        <!-------- Gene symbol -------->
+                        <div class="col">
+                            <div class="d-flex align-items-center">
+                                <label for="id_geneSymbol__contains" class="form-label pe-3">Gene Symbol</label>
+                                {{ filter.form.geneSymbol__contains }}
+                            </div>
+                        </div>
+                    
+                        
+                        
+                    </div>
+
+                    <div class="row align-items-center mb-3">
+
+
+
+                        <!-------- Motif gene -------->
+                        <div class="col">
+                            <div class="d-flex align-items-center">
+                                <label for="id_sequence_gene" class="form-label pe-3">DNA Motif</label>
+                                {{ filter.form.sequence_gene }}
+                                <!--<input type="text" class="form-control ms-2" id="motif_gene" name="motif_gene" value="{% if motif_gene %}{{motif_gene}}{% endif %}">-->
+                            </div>
+                        </div>
+
+                        <!-------- Motif prot -------->
+                        <div class="col">
+                            <div class="d-flex align-items-center">
+                                <label for="id_sequence_pep" class="form-label pe-3">Peptide Motif</label>
+                                {{ filter.form.sequence_pep }}
+                                <!--<input type="text" class="form-control ms-2" id="motif_prot" name="motif_prot" value="{% if motif_prot %}{{motif_prot}}{% endif %}">-->
+                            </div>
+                        </div>
+                        
+
+                    </div>
+                    
+                    <!-------- Status -------->
+                    <div class="row align-items-center mb-3">
+
+                        <div class="col form-check form-switch">
+                            {{ filter.form.notannotated}}   
+                            <label class="form-check-label" for="id_notannotated">
+                            {% with status=0  %}
+                                {% include 'main/status.html' %}
+                            {% endwith %}
+                            </label>
+                        </div>
+
+                        <div class=" col form-check form-switch">
+                            {{ filter.form.inwork}}   
+                            <label class="form-check-label" for="id_inwork">
+                            {% with status=1  %}
+                                {% include 'main/status.html' %}
+                            {% endwith %}
+                            </label>
+                        </div>
+
+
+                        <div class="col form-check form-switch">
+                            {{ filter.form.review}}   
+                            <label class="form-check-label" for="id_review">
+                            {% with status=2  %}
+                                {% include 'main/status.html' %}
+                            {% endwith %}
+                            </label>
+                        </div>
+
+                        <div class="col form-check form-switch">
+                            {{ filter.form.submited}}                            
+                            <label class="form-check-label" for="id_submited">
+                            {% with status=3  %}
+                                {% include 'main/status.html' %}
+                            {% endwith %}
+                            </label>
+                        </div>
+
+                        <div class="col form-check form-switch">
+                            {{ filter.form.validated}}
+                            <!--<input class="form-check-input" type="checkbox" role="switch"  id="status4" name="status4" {% if status4 == 'checked' %}checked{% endif %}>-->
+                            <label class="form-check-label" for="id_validated">
+                            {% with status=4  %}
+                                {% include 'main/status.html' %}
+                            {% endwith %}
+                            </label>
+                        </div>
+                    
+                    </div>
+                </div>
+            </div>
+
 
     
 {% endwith %}
-{% endwith %}
-{% endblock %}
+{% endwith %} 
+
+</div>
+</div>
+
+
+</form>
 

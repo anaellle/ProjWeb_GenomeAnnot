@@ -1,5 +1,4 @@
 # myapp/tables.py
-import GenomeAnnot.wsgi.py
 import django_tables2 as tables
 from django.urls import reverse
 from django.utils.html import format_html
@@ -80,7 +79,7 @@ class TableGenome(tables.Table):
                   fill="currentColor" class="bi bi-dash" viewBox="0 0 16 16">\
                 <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8"/> \
               </svg>\
-               Not Annotate  </span>'
+               Not Annotated  </span>'
         elif value == "In work":
             string = '  <span class="orange"> \
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" \
@@ -149,7 +148,7 @@ class TableGene(tables.Table):
 
     def render_status(self, value):
         # include status.html not possible :bug
-        if value == "Assignable":
+        if value == "Not annotated":
             string = '<span class="grey">  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-dash" viewBox="0 0 16 16"><path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8"/></svg>Not Annotated  </span>'
         elif value == "Being annotated":
             string = '<span class="orange">   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16"><path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"/></svg>In Work  </span>'
