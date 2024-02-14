@@ -13,8 +13,7 @@
 {% block body %}  
 {% with role="reader" %}
 
-{%if object_list %} <!-- J'ai pas réussi à bloquer les requêtes avant d'avoir hit le bouton search-->
-
+{%if object_list %} 
 <!-- card sequence-->
 {% for gene in object_list%}
   {% with type="sequence" %}
