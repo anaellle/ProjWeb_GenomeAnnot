@@ -11,45 +11,70 @@
 <!-- --------------- CONTENT --------------- -->
 
 {% block body %}  
-
 {% with role="reader" %}
 
-{%if genes_info or genomes_info %}
-<!-- card sequence-->
-{% for gene in genes_info%}
+{%if object_list %} <!-- J'ai pas réussi à bloquer les requêtes avant d'avoir hit le bouton search-->
 
-{% with type="sequence" %}
-<div class="card mb-3 ">
-    <a class="btn card-body cardList" href="{% url 'main:gene' gene_id=gene.gene_id%}">
-        <span class="left-card">
-          <span class="mx-2"><span class="bold" >Genome</span> {{gene.genome_id}}  {{gene.genome_species}} </span>  | 
-          <span class="mx-2"> <span class="bold" >Gene</span> {{gene.gene_id}} {{gene.gene_name}} </span>{% if gene.peptide_id %} 
-           | <span class="mx-2"><span class="bold" >Protein</span> {{gene.peptide_id}} {{gene.peptide_name}} </span>{% endif%}
-        </span> <span class="status right-card">
-          {% with status=gene.status %}
-              {% include 'main/status.html' %}
-        {% endwith %}
-        </span> 
-    </a>
-  </div>
+<!-- card sequence-->
+{% for gene in object_list%}
+  {% with type="sequence" %}
+
+    <div class="card mb-3 ">
+        <a class="btn card-body cardList" href="{% url 'main:gene' gene_id=gene.id%}">
+          <span class="left-card ">
+            <span class="mx-2"><span class="bold">Genome</span> {{gene.idChrom.idGenome_id}}  </span>  | 
+            <span class="mx-2"><span class="bold">Gene</span>  {{ gene.id }} - {{ gene.geneName }} {% if gene.geneSymbol != "" %}- {{ gene.geneSymbol }} {% endif %}</span> |
+            <span class="mx-2"><span class="bold">Peptide</span> 
+              {% if gene.peptide_set.all %}
+                  {{ gene.peptide_set.first.transcriptName }}
+              {% else %}
+                  No associated peptide
+              {% endif %}
+            </span>
+          </span>
+          <span class="status right-card">
+              {% with status=gene.status %}
+                  {% include 'main/status.html' %}
+            {% endwith %}
+          </span> 
+        </a>
+    </div>
   {% endwith %}
 
+  {% empty %}
+
+  <div class="container ">
+    <div class="row">
+        <div class="col text-center grey smallerTxt">            
+                No genomes correspond to the request.
+        </div>
+    </div>
+  </div>
+
 {%endfor%}
 
-<!-- card genome-->
-{% for genome in genomes_info%}
-{% with type="genome" %}
-  <div class="card mb-3 ">
-    <a class="btn card-body cardList" href="{% url 'main:genome' genome_id=genome.id %}">
-        <span class="left-card">{{genome.species}}  {{genome.strain}} {{genome.id}} </span> <span class="status right-card">
-          {% with status=genome.status %}
-              {% include 'main/status.html' %}
-        {% endwith %}
-        </span> 
-    </a>
-  </div>
-{% endwith %}
-{%endfor%}
+<!-- --------------- PAGINATION --------------- -->
+
+<nav class=" mb-4">
+  <ul class="pagination override">
+      {% if page_obj.has_previous %}            
+          <li class=" page-item "><a class=" page-link" href="?page=1">&laquo; First</a></li>
+          <li class="page-item "><a class=" page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+      {% endif %}
+
+      <li class="page-item ">
+          <span class="page-link">
+          Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+      </span>
+      </li>
+
+      {% if page_obj.has_next %}
+      <li class="page-item "><a class=" page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+      <li class="page-item "><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
+      {% endif %}
+  
+  </ul>  
+</nav>
 
 {% else %}
 <div class="container">
@@ -73,6 +98,5 @@
 {% endif %}
 
 {% endwith %}
-
 {% endblock %}
 

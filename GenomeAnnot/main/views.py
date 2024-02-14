@@ -197,68 +197,66 @@ class PaginatedFilterViews(View):
             context["querystring"] = querystring.urlencode()
         return context
 
-## CI-DESSOUS :: à mettre en comm une fois que les vues seront liées aux urls
-def explore(request):
-    context = {"active_tab": "explore", "role_user": get_role(request)}
+# def explore(request):
+#     context = {"active_tab": "explore", "role_user": get_role(request)}
 
-    if request.method == "GET":
-        if "submit_download" in request.GET:
-            ...  # download info gene with gene_id
+#     if request.method == "GET":
+#         if "submit_download" in request.GET:
+#             ...  # download info gene with gene_id
 
-        if "submitsearch" in request.GET:
-            # get parameters of search
-            context["searchbar"] = request.GET.get("searchbar")
-            context["type_res"] = request.GET.get("res_type")
+#         if "submitsearch" in request.GET:
+#             # get parameters of search
+#             context["searchbar"] = request.GET.get("searchbar")
+#             context["type_res"] = request.GET.get("res_type")
 
-            if context["type_res"] == "genome":
-                context["strain"] = request.GET.get("strain")
-                context["species"] = request.GET.get("species")
-                for status in [
-                    "status0_genome",
-                    "status1_genome",
-                    "status2_genome",
-                ]:
-                    if status in request.GET:
-                        context[status] = "checked"
-                    else:
-                        context[status] = "unchecked"
-                # get info about genome
-                context["genomes_info"] = Genome.objects.all()  # TO DO : filter
+#             if context["type_res"] == "genome":
+#                 context["strain"] = request.GET.get("strain")
+#                 context["species"] = request.GET.get("species")
+#                 for status in [
+#                     "status0_genome",
+#                     "status1_genome",
+#                     "status2_genome",
+#                 ]:
+#                     if status in request.GET:
+#                         context[status] = "checked"
+#                     else:
+#                         context[status] = "unchecked"
+#                 # get info about genome
+#                 context["genomes_info"] = Genome.objects.all()  # TO DO : filter
 
-            elif context["type_res"] == "gene" or context["type_res"] == "prot":
-                # get info filter/search
-                for info in ["genome", "chrom", "motif", "seq"]:
-                    context[info] = request.GET.get(info)
-                for status in [
-                    "status0",
-                    "status123",
-                    "status4",
-                ]:
-                    if status in request.GET:
-                        context[status] = "checked"
-                    else:
-                        context[status] = "unchecked"
+#             elif context["type_res"] == "gene" or context["type_res"] == "prot":
+#                 # get info filter/search
+#                 for info in ["genome", "chrom", "motif", "seq"]:
+#                     context[info] = request.GET.get(info)
+#                 for status in [
+#                     "status0",
+#                     "status123",
+#                     "status4",
+#                 ]:
+#                     if status in request.GET:
+#                         context[status] = "checked"
+#                     else:
+#                         context[status] = "unchecked"
 
-                # get info about gene/prot
-                genes = Gene.objects.all()  # TO DO : filter
-                genes_info = []
-                for gene in genes:
-                    genome = gene.idChrom.idGenome
-                    peptide = gene.peptide_set.first()
-                    gene_info = {
-                        "gene_id": gene.id,
-                        "gene_name": gene.geneName,
-                        "status": gene.status,
-                        "peptide_id": peptide.id if peptide else None,
-                        "peptide_name": peptide.transcriptName if peptide else None,
-                        "genome_id": genome.id,
-                        "genome_species": genome.species,
-                    }
-                    genes_info.append(gene_info)
-                    context["genes_info"] = genes_info
+#                 # get info about gene/prot
+#                 genes = Gene.objects.all()  # TO DO : filter
+#                 genes_info = []
+#                 for gene in genes:
+#                     genome = gene.idChrom.idGenome
+#                     peptide = gene.peptide_set.first()
+#                     gene_info = {
+#                         "gene_id": gene.id,
+#                         "gene_name": gene.geneName,
+#                         "status": gene.status,
+#                         "peptide_id": peptide.id if peptide else None,
+#                         "peptide_name": peptide.transcriptName if peptide else None,
+#                         "genome_id": genome.id,
+#                         "genome_species": genome.species,
+#                     }
+#                     genes_info.append(gene_info)
+#                     context["genes_info"] = genes_info
 
-    return render(request, "main/explore/main_explore.html", context)
-## FIN de ce qui est à mettre en comm
+#     return render(request, "main/explore/main_explore.html", context)
 
 class ExploreGenomeView(PaginatedFilterViews, FilterView):
     model = Genome

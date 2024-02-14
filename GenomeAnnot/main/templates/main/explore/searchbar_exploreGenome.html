@@ -21,7 +21,8 @@ show
 <select name="res_type" id="res_type-select" class="btn" onchange="changeTypeResExplore()">
     <option value="genome" class="ebony" {% if type_res == 'genome' %}selected{% endif %}> Genome </option>
     <option value="gene" class="ebony" {% if type_res == 'gene' %}selected{% endif %}> Gene </option>
-    <option value="prot" class="ebony" {% if type_res == 'prot' %}selected{% endif %}> Protein </option>
+    
+    <!-- <option value="prot" class="ebony" {% if type_res == 'prot' %}selected{% endif %}> Protein </option> -->
 </select>
 
 {% endblock %}

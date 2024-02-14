@@ -4,6 +4,7 @@ from django.contrib.auth.views import LogoutView
 from django.contrib.auth import views as auth_views
 from .views import (
     ExploreGenomeView,
+    ExploreGenePepView,
     GeneDetailView,
     GeneValidDetailView,
     GeneUpdateView,
@@ -68,8 +69,8 @@ urlpatterns = [
     
     # Explore and read gene/genome info :
     # path("explore/", views.explore, name="explore"),  # change to listview !!!
-    path("explore/genome/", ExploreGenomeView.as_view(), name="exploreGenome"),  # change to listview !!!
-    path("explore/genepep/", views.explore, name="exploreGenePep"),  # change to listview !!!
+    path("explore/genome/", ExploreGenomeView.as_view(), name="exploreGenome"),  # CHANGED to list view ##
+    path("explore/genepep/", ExploreGenePepView.as_view(), name="exploreGenePep"),  # !! Only accessible via URL (no button on the web page yet)
     path("explore/genome<str:genome_id>", GenomeDetailView.as_view(), name="genome"),
     path(
         "explore/genome<str:genome_id>/sequence",

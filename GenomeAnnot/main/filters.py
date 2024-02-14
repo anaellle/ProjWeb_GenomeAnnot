@@ -561,10 +561,10 @@ class ExploreGenePepFilter(django_filters.FilterSet):
         label="Gene Symbol",
         widget=forms.TextInput(attrs={"placeholder": ""}),
     )
-    sequence_gene = django_filters.CharFilter(
+    motif_sequence_gene = django_filters.CharFilter(
         field_name="nucleotidicseq__sequence",
         lookup_expr="icontains",
-        label="Gene Sequence",
+        label="DNA motif",
         widget=forms.TextInput(
             attrs={
                 "placeholder": "",
@@ -576,7 +576,7 @@ class ExploreGenePepFilter(django_filters.FilterSet):
     id_pep = django_filters.CharFilter(
         field_name="peptide__id",
         lookup_expr="icontains",
-        label="Peptide Sequence",
+        label="Peptide ID",
         widget=forms.TextInput(
             attrs={
                 "placeholder": "",
@@ -586,14 +586,14 @@ class ExploreGenePepFilter(django_filters.FilterSet):
     name_pep = django_filters.CharFilter(
         field_name="peptide__transcriptName",
         lookup_expr="icontains",
-        label="Peptide Sequence",
+        label="Peptide Name",
         widget=forms.TextInput(
             attrs={
                 "placeholder": "",
             }
         ),
     )
-    sequence_pep = django_filters.CharFilter(
+    motif_sequence_pep = django_filters.CharFilter(
         field_name="peptide__peptideseq__sequence",
         lookup_expr="icontains",
         label="Peptide Sequence",
