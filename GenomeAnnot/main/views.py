@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import DetailView, UpdateView, CreateView, View
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, HttpResponse
+
 from django.urls import reverse, resolve
 from django.urls.exceptions import Resolver404
 from django.utils.html import format_html
@@ -702,6 +703,18 @@ class GenomeSeqDetailView(DetailView):
         context["sequence"] = sequence
         return context
 
+### Download sequence of Genome
+class GenomeSeqDownloadView(View):
+    def get(self, request, *args, **kwargs):
+        genome_id = kwargs.get('genome_id')
+        chromosomes = Chromosome.objects.filter(idGenome=genome_id)
+        sequence = ''
+        for chrom in chromosomes:
+            chrom_seq = ChromosomeSeq.objects.get(idChrom=chrom)
+            sequence += '>Chromosome dna:chromosome chromosome:'+str(chrom.id)+':Chromosome:'+str(chrom.startPos)+':'+str(chrom.endPos)+':'+str(chrom.strand)+' REF\n'+str(chrom_seq.sequence)+'\n'
+        response = HttpResponse(sequence, content_type='text/plain')
+        response['Content-Disposition'] = f'attachment; filename="seq_{genome_id}.fa"'
+        return response
 
 ##############################################################################################
 ######### Gene reading, annotation and validation
