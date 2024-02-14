@@ -3,7 +3,7 @@
 <!-------------- Form action -------------->
 
 {%block action%}
-{% url 'main:explore' %}
+{% url 'main:exploreGenome' %}
 {% endblock %}
 
 <!-------------- Show filter -------------->
@@ -46,21 +46,21 @@ Search Genome
 
         <div class="container pt-3 pb-3">
             <div class="row align-items-center mb-3">
-                <!-------- Species --------->
+                <!-------- Species -------->
                 <div class="col">
                     <div class="d-flex align-items-center">
                         <label for="species" class="form-label">Species</label>
                         <input type="text" class="form-control ms-2" id="species" name="species" value="{% if species %}{{species}}{% endif %}">
                     </div>
                 </div>
-                <!-------- Strain --------->
+                <!-------- Strain -------->
                 <div class="col">
                     <div class="d-flex align-items-center">
                         <label for="strain" class="form-label">Strain</label>
                         <input type="text" class="form-control ms-2" id="strain" name="strain" value="{% if strain %}{{strain}}{% endif %}">
                     </div>
                 </div>
-                <!-------- Status --------->
+                <!-------- Status -------->
                 <div class="col">
                     <span  class="form-label">Status</span>
 
@@ -68,7 +68,7 @@ Search Genome
                         <input class="form-check-input" type="checkbox" role="switch"  id="status0_genome" name="status0_genome"  {% if not status0_genome or status0_genome == 'checked' %}checked{% endif %} >
                         
                         <label class="form-check-label" for="status0_genome">
-                        {% with status="0"  %}
+                        {% with status=0  %}
                             {% include 'main/status.html' %}
                         {% endwith %}
                         </label>
@@ -76,7 +76,7 @@ Search Genome
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" role="switch" id="status1_genome"  name="status1_genome" {% if not status1_genome or status1_genome == 'checked' %}checked{% endif %}>
                         <label class="form-check-label" for="status1_genome">
-                        {% with status="1"  %}
+                        {% with status=1  %}
                             {% include 'main/status.html' %}
                         {% endwith %}
                         </label>
@@ -84,7 +84,7 @@ Search Genome
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" role="switch" id="status2_genome" name="status2_genome" {% if not status2_genome or status2_genome == 'checked' %}checked{% endif %}>
                         <label class="form-check-label" for="status2_genome">
-                        {% with status="2"  %}
+                        {% with status=2  %}
                             {% include 'main/status.html' %}
                         {% endwith %}
                         </label>
@@ -100,28 +100,28 @@ Search Genome
     
 {% endwith %}
 
-<!-------------- Gene or Protein-------------->
+<!-------------- Gene or Protein -------------->
   
 {% with type="sequence" %}
 
     <div id="filter_expl_seq" style="display: none;" class="filter">
         <div class="container pt-3 pb-3">
             <div class="row align-items-center mb-3">
-                <!-------- Genome --------->
+                <!-------- Genome -------->
                 <div class="col">
                     <div class="d-flex align-items-center">
                         <label for="genome" class="form-label">Genome</label>
                         <input type="text" class="form-control ms-2" id="genome" name="genome" value="{% if genome %}{{genome}}{% endif %}">
                     </div>
                 </div>
-                <!-------- Chromosome --------->
+                <!-------- Chromosome -------->
                 <div class="col">
                     <div class="d-flex align-items-center">
                         <label for="chrom" class="form-label">Chromosome</label>
                         <input type="text" class="form-control ms-2" id="chrom" name="chrom" value="{% if chrom %}{{chrom}}{% endif %}">
                     </div>
                 </div>
-                <!-------- Motif --------->
+                <!-------- Motif -------->
                 <div class="col">
                     <div class="d-flex align-items-center">
                         <label for="motif" class="form-label">Motif</label>
@@ -132,7 +132,7 @@ Search Genome
             </div>
 
             <div class="row align-items-center mb-3">
-                <!-------- Sequence --------->
+                <!-------- Sequence -------->
                 <div class="col">
                     <div class="d-flex align-items-center">
                         <label for="seq" class="form-label">Sequence</label>
@@ -140,14 +140,14 @@ Search Genome
                     </div>
                 </div>
 
-                <!-------- Status --------->
+                <!-------- Status -------->
                 <div class="col">
                     <span class="form-label">Status</span>
 
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" role="switch" id="status0" name="status0" {% if not status0 or status0 == 'checked' %}checked{% endif %}>
                         <label class="form-check-label" for="status0">
-                        {% with status="0"  %}
+                        {% with status=0  %}
                             {% include 'main/status.html' %}
                         {% endwith %}
                         </label>
@@ -155,7 +155,7 @@ Search Genome
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" role="switch" id="status1"  name="status123" {% if not status123 or status123 == 'checked' %}checked{% endif %}>
                         <label class="form-check-label" for="status1">
-                        {% with status="1"  %}
+                        {% with status=1  %}
                             {% include 'main/status.html' %}
                         {% endwith %}
                         </label>
@@ -163,7 +163,7 @@ Search Genome
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" role="switch" id="status4"  name="status4" {% if not status4 or status4 == 'checked' %}checked{% endif %}>
                         <label class="form-check-label" for="status4">
-                        {% with status="4"  %}
+                        {% with status=4  %}
                             {% include 'main/status.html' %}
                         {% endwith %}
                         </label>

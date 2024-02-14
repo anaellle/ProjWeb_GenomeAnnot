@@ -17,10 +17,11 @@
     -->
     
     <!-------------- Search bar -------------->
-
+    {% block  searchbar %}
     <input class="form-control me-2" name="searchbar" type="search" id="searchbar"  placeholder="{% block placeholderSearch %}Search{% endblock %}" aria-label="Search">
+    {% endblock %}
     <button class="btn btn-outline-success" type="submit" id="submit_search" name="submitsearch" >Search</button>
-
+    
 
     <!-------------- Filter -------------->
 

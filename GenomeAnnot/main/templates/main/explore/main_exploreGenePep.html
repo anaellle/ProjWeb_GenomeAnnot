@@ -1,0 +1,102 @@
+{% extends 'main/base.html' %}
+
+<!-- --------------- SEARCHBAR --------------- -->
+
+
+{% block  search %}
+{% include 'main/explore/searchbar_exploreGenePep.html' %}
+{% endblock %}
+
+
+<!-- --------------- CONTENT --------------- -->
+
+{% block body %}  
+{% with role="reader" %}
+
+{%if object_list %} <!-- J'ai pas réussi à bloquer les requêtes avant d'avoir hit le bouton search-->
+
+<!-- card sequence-->
+{% for gene in object_list%}
+  {% with type="sequence" %}
+
+    <div class="card mb-3 ">
+        <a class="btn card-body cardList" href="{% url 'main:gene' gene_id=gene.id%}">
+          <span class="left-card ">
+            <span class="mx-2"><span class="bold">Genome</span> {{gene.idChrom.idGenome_id}}  </span>  | 
+            <span class="mx-2"><span class="bold">Gene</span>  {{ gene.id }} - {{ gene.geneName }} {% if gene.geneSymbol != "" %}- {{ gene.geneSymbol }} {% endif %}</span> |
+            <span class="mx-2"><span class="bold">Peptide</span> 
+              {% if gene.peptide_set.all %}
+                  {{ gene.peptide_set.first.transcriptName }}
+              {% else %}
+                  No associated peptide
+              {% endif %}
+            </span>
+          </span>
+          <span class="status right-card">
+              {% with status=gene.status %}
+                  {% include 'main/status.html' %}
+            {% endwith %}
+          </span> 
+        </a>
+    </div>
+  {% endwith %}
+
+  {% empty %}
+
+  <div class="container ">
+    <div class="row">
+        <div class="col text-center grey smallerTxt">            
+                No genomes correspond to the request.
+        </div>
+    </div>
+  </div>
+
+{%endfor%}
+
+<!-- --------------- PAGINATION --------------- -->
+
+<nav class=" mb-4">
+  <ul class="pagination override">
+      {% if page_obj.has_previous %}            
+          <li class=" page-item "><a class=" page-link" href="?page=1">&laquo; First</a></li>
+          <li class="page-item "><a class=" page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+      {% endif %}
+
+      <li class="page-item ">
+          <span class="page-link">
+          Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+      </span>
+      </li>
+
+      {% if page_obj.has_next %}
+      <li class="page-item "><a class=" page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+      <li class="page-item "><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
+      {% endif %}
+  
+  </ul>  
+</nav>
+
+{% else %}
+<div class="container">
+  <div class="row">
+      <div class="col">
+          <div class="text-center">
+              <span class="my-3 grey">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-arrow-up-short" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M8 12a.5.5 0 0 0 .5-.5V5.707l2.146 2.147a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L7.5 5.707V11.5a.5.5 0 0 0 .5.5"/>
+                </svg>
+                Do a research, more filter are available on 
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-filter" viewBox="0 0 16 16">
+                  <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5"/>
+              </svg>
+              </span>
+          </div>
+      </div>
+  </div>
+</div>
+
+{% endif %}
+
+{% endwith %}
+{% endblock %}
+

@@ -3,32 +3,33 @@
 {% block body %}
 
 
-    
-{% with status="2" type="sequence" role=role %}
+{% with status=gene.status type="sequence" role=role %}
 
  <nav id="navbar-gene" class="navbar filter px-3 py-3 mb-5">
     
-    <h4 >Gene {{ gene_id }} | Protein ???? </h4> 
+    <h4 >Gene {{ gene.id}} | Protein {{peptide.id}} </h4> 
       
     
     <div class="nav nav-pills">
       {% if active_tab == "explore"%}
         <!--TO DISABLED DEPENDING ON ASSIGNATION !!! (OR DELETE LINKS)-->
-        <a class="nav-link px-3 {% if role_user != 'annotator' and role_user != 'admin' %}disabled{% endif %}" href="{% url 'main:geneAnnot' gene_id=gene_id  %}"> Annotate</a>
-      
-        <a class="nav-link px-3 {% if role_user != 'validator' and role_user != 'admin' %}disabled{% endif %}" href="{% url 'main:geneValid' gene_id=gene_id  %}"> Validate</a>
-      
+        {% if accesAnnot %}
+        <a class="nav-link px-3 " href="{% url 'main:geneAnnot' gene_id=gene.id  %}"> Annotate</a>
+        {% endif %}
+        {% if accesValid %}
+        <a class="nav-link px-3 " href="{% url 'main:geneValid' gene_id=gene.id  %}"> Validate</a>
+        {% endif %}
       
         
       
-      {% elif active_tab == "annotate"%}
+      {% elif active_tab == "annotate" and gene.status != 3 and gene.status != 4%}
       <a class="nav-link px-3" href="#save"> 
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-short" viewBox="0 0 16 16">
           <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8"/>
         </svg>
         Go to Save or Submit </a>  
-      {% elif active_tab == "validate"%}
-      <a class="nav-link px-3" href="#reject"> 
+      {% elif active_tab == "validate" and gene.status == 3 %}
+      <a class="nav-link px-3" href="#validate"> 
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-short" viewBox="0 0 16 16">
           <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8"/>
         </svg>
@@ -38,82 +39,100 @@
     
   </nav>
 
+{% if form %}  {{ form.non_field_errors }} {%endif%}
+
 {% if active_tab == "annotate"%}
+
 <form method="post" >
 {% csrf_token %}
 {%endif%}
+
   <!--------Gene---------->
   <div class="bg-body-secondary radius p-3 px-2 mb-5">
 
-    <span><h4 id="genepart" class="ps-3">Gene {{ gene_id }} {% include 'main/status.html' %} </h4>
+    <span><h4 id="genepart" class="ps-3">Gene {{ gene.id}} {% include 'main/status.html' %} </h4>
     </span>
     
       <div class="container pt-3 pb-3">
         <div class="row align-items-center my-4 mx-2">
           <div class="col">
             <span class="bold">Genome : </span>
-            <a  class="ebony" href="{% url 'main:genome' genome_id=genome_id  %}">{{ genome_id }} </a> 
+            <a  class="ebony" href="{% url 'main:genome' genome_id=genome.id  %}"> {{genome.id}} </a> 
           </div>
         </div>
         <div class="row align-items-center my-4 mx-2">
             <div class="col">
-              <span class="bold">Gene name : </span>
-              {% if active_tab == "explore" or active_tab == "validator" %}
-                <span class="{% if status != '4' %} notvalid {% endif %}">...</span>
-              {% elif active_tab == "annotate"%}
-                <textarea name="geneName" rows="1" col="20"></textarea>
+              <span class="bold">Gene name :  </span>
+                {% if active_tab == "annotate" and gene.status != 3 and gene.status != 4%}
+                {{ form.geneName }}
+                {% else %}
+                <span class="{% if status != 4 %} notvalid {% endif %}">{{gene.geneName}}</span>
               {% endif %}   
             </div>
             <div class="col">
-              <span class="bold">Gene symbol : </span>
-              {% if active_tab == "explore" or active_tab == "validator" %}
-                <span class="{% if status != '4' %} notvalid {% endif %}">...</span>
-              {% elif active_tab == "annotate"%}
-                <textarea name="geneSymbol" rows="1" col="20"></textarea>
+              <span class="bold">Gene symbol :  </span>
+                {% if active_tab == "annotate" and gene.status != 3 and gene.status != 4%}
+                {{ form.geneSymbol }}
+                {% else %}
+                <span class="{% if status != 4 %} notvalid {% endif %}">{{gene.geneSymbol}}</span>
               {% endif %} 
             </div>
             <div class="col">
-              <span class="bold">Gene biotype : </span>
-              {% if active_tab == "explore" or active_tab == "validator" %}
-                <span class="{% if status != '4' %} notvalid {% endif %}">...</span>
-              {% elif active_tab == "annotate"%}
-                <textarea name="geneBiotype" rows="1" col="20"></textarea>
+              <span class="bold">Gene biotype :  </span>
+                {% if active_tab == "annotate" and gene.status != 3 and gene.status != 4%}
+                {{ form.geneBiotype }}
+                {% else %} 
+                <span class="{% if status != 4 %} notvalid {% endif %}">{{gene.geneBiotype}}</span>
               {% endif %} 
             </div>
         </div>
         <div class="row align-items-center my-4 mx-2 ">
           <div class="col">
             <span class="bold">Chromosome : </span>
-            <span>...</span>
+            <span>{{chrom.chromName}} </span>
           </div>
           <div class="col">
-            <span class="bold">Strand : </span>
-            <span>...</span>
+            <span class="bold">Strand :  </span>
+            <span>{{gene.strand}}</span>
           </div>
           <div class="col">
-            <span class="bold">Start position : </span>
-            <span>...</span>
+            <span class="bold">Start position :  </span>
+            <span>{{gene.startPos}}</span>
           </div>
           <div class="col">
             <span class="bold">End position : </span>
-            <span>...</span>
+            <span>{{gene.endPos}}</span>
           </div>
         </div>
         <div class="row align-items-center my-4 mx-2 ">
           <div class="col">
             <span class="bold" >Description : </span>
-            {% if active_tab == "explore" or active_tab == "validator" %}
-                <p class="{% if status != '4' %} notvalid {% endif %}">...</p>
-              {% elif active_tab == "annotate"%}
-                <textarea name="descriGene" rows="7" class="w-100"></textarea>
+                {% if active_tab == "annotate" and gene.status != 3 and gene.status != 4%}
+                <br>
+                {{ form.descriptionGene }}
+                {% else %}
+                <p class="{% if status != 4 %} notvalid {% endif %}">{{gene.descriptionGene}}</p>
               {% endif %} 
           </div>
         </div>
         <div class="row align-items-center mt-4 mx-2 ">
           <div class="col">
             <span class="bold">Sequence :</span> <br>
-            <textarea class="w-100 mt-2 mx-2" rows="5" id="seqgene" name="seqgene" readonly> sequence gene... </textarea><br>
-            <a class="btn btn-primary mb-3" target="_blank" href="{% url 'main:blastseq' 'sequence gene' %}">Blast gene</a > 
+            <textarea class="w-100 mt-2 mx-2" rows="5" id="seqgene" name="seqgene" readonly> {{geneseq.sequence}} </textarea><br>
+            {%if geneseq.sequence %}
+            <a class="btn btn-primary mb-3"  target="_blank" href="{% url 'main:blastseq' geneseq.sequence %}" >Blast gene</a > 
+            {%endif%}
+          </div>
+        </div>
+       <div class="row align-items-center mt-4 mx-2 ">
+          <div class="col">
+            <span class="bold">Access to other banks :</span> <br>
+            {% if gene.id %}
+            <a class="nav-link px-3" href="https://www.ncbi.nlm.nih.gov/gene/?term={{ gene.id }}" target="_blank">NCBI Gene</a>
+            {% endif %}
+            {% if genome.id %}
+            <a class="nav-link px-3" href="https://www.uniprot.org/taxonomy?query={{ genome.id }}" target="_blank">UniProt Taxonomy</a>
+            {% endif %}
           </div>
         </div>
       </div>  
@@ -123,26 +142,26 @@
 
   <div class="bg-body-secondary radius p-3 px-2 mb-3">
 
-      <h4 id="protpart" class="ps-3">Protein ??? {% include 'main/status.html' %}</h4>
+      <h4 id="protpart" class="ps-3">Protein {{peptide.id}} {% include 'main/status.html' %}</h4>
 
     
       <div class="container pt-3 pb-3">
         
         <div class="row align-items-center my-4 mx-2">
             <div class="col">
-              <span class="bold">Transcript name : </span>
-              {% if active_tab == "explore" or active_tab == "validator" %}
-                <span class="{% if status != '4' %} notvalid {% endif %}">...</span>
-              {% elif active_tab == "annotate"%}
-                <textarea name="transcriptName" rows="1" col="20"></textarea>
+              <span class="bold">Transcript name : </span>                
+                {% if active_tab == "annotate" and gene.status != 3 and gene.status != 4%}
+                {{peptide_form.transcriptName}}
+                {% else %}
+                <span class="{% if status != 4 %} notvalid {% endif %}">{{peptide.transcriptName}}</span>
               {% endif %} 
             </div>
             <div class="col">
               <span class="bold">Transcript biotype : </span>
-              {% if active_tab == "explore" or active_tab == "validator" %}
-                <span class="{% if status != '4' %} notvalid {% endif %}">...</span>
-              {% elif active_tab == "annotate"%}
-                <textarea name="transcriptBiotype" rows="1" col="20"></textarea>
+                {% if active_tab == "annotate" and gene.status != 3 and gene.status != 4%}
+                {{peptide_form.transcriptBiotype}}
+                {% else %}
+                <span class="{% if status != 4 %} notvalid {% endif %}">{{peptide.transcriptBiotype}}</span>
               {% endif %} 
             </div>
         </div>
@@ -150,72 +169,102 @@
         <div class="row align-items-center my-4 mx-2 ">
           <div class="col">
             <span class="bold" >Description : </span>
-            {% if active_tab == "explore" or active_tab == "validator" %}
-                <p class="{% if status != '4' %} notvalid {% endif %}">...</p>
-              {% elif active_tab == "annotate"%}
-                <textarea name="descriProt" rows="7" class="w-100"></textarea>
+              {% if active_tab == "annotate" and gene.status != 3 and gene.status != 4%}
+                <br>
+                {{peptide_form.descriptionPep}}
+
+              {% else %}
+              <p class="{% if status != 4 %} notvalid {% endif %}"> {{peptide.descriptionPep}} </p>
               {% endif %} 
           </div>
+          
         </div>
         <div class="row align-items-center mt-4 mx-2 ">
           <div class="col">
             <span class="bold">Sequence :</span> <br>
-            <textarea class="w-100 mt-2 mx-2" rows="5" id="seqprot" readonly> sequence protein... </textarea><br>
-            <a class="btn btn-primary mb-3" target="_blank" href="{% url 'main:blastseq' 'sequence protein' %}">Blast protein</a > 
+            <textarea class="w-100 mt-2 mx-2" rows="5" id="seqprot" readonly> {{peptseq.sequence}} </textarea><br>
+            {%if peptseq.sequence %}
+            <a class="btn btn-primary mb-3"  target="_blank" href="{% url 'main:blastseq' peptseq.sequence %}" >Blast protein</a > 
+            {%endif%}
+            </div>
+        </div>
+       <div class="row align-items-center mt-4 mx-2 ">
+          <div class="col">
+            <span class="bold">Access to other banks :</span> <br>
+            {% if gene.id %}
+            <a class="nav-link px-3" href="https://www.ncbi.nlm.nih.gov/protein/?term={{ gene.id }}" target="_blank">NCBI Prot</a>
+            {% endif %}
+            {% if gene.id %}
+            <a class="nav-link px-3" href="https://www.ncbi.nlm.nih.gov/ipg/?term={{ gene.id }}" target="_blank">NCBI identical protein group</a>
+            {% endif %}
+            {% if gene.id %}
+            <a class="nav-link px-3" href="https://www.uniprot.org/uniprotkb?query={{ gene.id }}" target="_blank">UniProt Search</a>
+            {% endif %}
           </div>
         </div>
       </div>  
   </div>
 
   <!--------------------------Comments----------------------------------->
-  {% if active_tab == "annotate" or active_tab == "validate" %}
+  {% if role_user == 3 or accesAnnot or accesValid %}
 
+  {% for comment in messages %}
+  {% if comment.type == 0 %}
+  
   <!---------------Automatic comments ------------>
   <div class="grey my-2">
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-short" viewBox="0 0 16 16">
       <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8"/>
     </svg>
 
-    User submit gene at date-time 
+    {{comment.text}} {% if comment.emailAuthor %} by {{comment.emailAuthor}}{% endif %} {% if comment.date %} the {{comment.date}} {% endif %} 
 
   </div>
   <!---------------Comments by validator/annotator------------>
 
+  {% elif comment.type == 1 %}
   <div class=" p-2 mb-3  borderLeft" >
     <div class="toast-header bg-body-secondary  p-2">
-      <strong class="me-auto  ">User ???</strong>
-      <small> date-time message </small>
+      <strong class="me-auto  ">{% if comment.emailAuthor %}{{comment.emailAuthor}}{% endif %}</strong>
+      <small> {% if comment.date %} {{comment.date}} {% endif %} </small>
     </div>
     <div class="toast-body">
-      Comment ...
+      {{comment.text}}
     </div>
   </div>
 
   {% endif %} 
 
+  {% endfor %}
+
+  {% endif %} 
   <!---------------------Add comment--------------------------->
-  {% if active_tab == "validate" %}
+  {% if active_tab == "validate" and gene.status == 3  %}
   <form method="post" >
   {% csrf_token %}
   <div class="mb-3">
-  <span class="bold">Add a comment</span>
-  <textarea  class="w-100 mb-1 px-3 py-2" rows="4" placeholder="comment ..." name="comment"></textarea>
-  <input class="btn btn-secondary" type="submit" name="submit_comment" value="Comment"></input > 
+  <span class="bold">Add a comment</span><br>
+  <!--<textarea  class="w-100 mb-1 px-3 py-2" rows="4" placeholder="write comment ..." name="comment"></textarea>-->
+  {{comment_form.text}}
+  <br>
+  <input class="btn btn-secondary reject" type="submit" name="submit_comment_reject" value="Comment and Reject"></input > 
   </div>
   </form>
   {% endif %} 
 
   <!--------------------------Buttons----------------------------------->
-  {% if active_tab == "annotate" %}
+  {% if active_tab == "annotate" and gene.status != 3 and gene.status != 4 %}
     <div class=" mb-5">
+      <input type="hidden" name="previousAnnot" value="{{ previous_url }}">
+      
       <input id="save" class="btn btn-secondary " type="submit" name="submit_save" value="Save"></input > 
       <input id="submit" class="btn btn-primary" type="submit" name="submit_submit" value="Submit"></input > 
     </div>
-  {% elif active_tab == "validate"%}
+  {% elif active_tab == "validate" and gene.status == 3 %}
   <form method="post" >
     {% csrf_token %}
   <div class=" mb-5">
-    <input id="reject" class="btn btn-primary reject" type="submit" name="submit_reject" value="Reject"></input > 
+    <!--<input id="reject" class="btn btn-primary reject" type="submit" name="submit_reject" value="Reject"></input > -->
     <input id="validate" class="btn btn-primary validate" type="submit" name="submit_validate" value="Validate"></input > 
   </div>
   {% endif %} 
