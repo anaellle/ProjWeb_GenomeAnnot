@@ -10,6 +10,7 @@ from .views import (
     GeneUpdateView,
     GenomeDetailView,
     GenomeSeqDetailView,
+    GenomeSeqDownloadView,
     genomeAdmin,
     sequenceAdmin,
     accountAdmin,
@@ -76,6 +77,11 @@ urlpatterns = [
         "explore/genome<str:genome_id>/sequence",
         GenomeSeqDetailView.as_view(),
         name="genomeSeq",
+    ),
+    path(
+        "explore/downloadGenome<str:genome_id>/sequence",
+        GenomeSeqDownloadView.as_view(),
+        name="downloadGenomeSeq",
     ),
     path("explore/gene<str:gene_id>", GeneDetailView.as_view(), name="gene"),
     
