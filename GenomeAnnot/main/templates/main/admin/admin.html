@@ -30,8 +30,16 @@
             </form>   
         </div>
     </div>
-    
+    {% if active_tab_admin == "sequence" %}
+<form method="post">
+{% csrf_token %}
+<input type="submit" name="assign" class="btn btn-primary my-2"  value="Assign all genes">
+</form>
+{%endif%}
 {% endif %} 
+
+
+
 {% render_table table 'django_tables2/bootstrap.html' %}
 
 

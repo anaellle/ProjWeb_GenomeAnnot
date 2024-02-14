@@ -38,10 +38,11 @@ comprehensive genomic repository. <br><br>
             <div class="card col my-3 mx-3" style="width: 18rem;">
                 <img src="../static/main/images/explore.png" class="card-img-top" alt="...">
                 <div class="card-body">
-                <h5 class="card-title">Explore Genomes</h5>
+                <h5 class="card-title">Explore Genomes and Genes</h5>
                 <h6 class="card-subtitle mb-2 text-body-secondary">All</h6>
                 <p class="card-text"> Exploration of genomes, providing detailed insights into the information related to genes and proteins.</p>
-                <a href="{% url 'main:exploreGenome' %}" class="btn btn-primary">Go to Explore</a>
+                <a href="{% url 'main:exploreGenome' %}" class="btn btn-primary mb-3">Go to Explore Genomes</a>
+                <a href="{% url 'main:exploreGenePep' %}" class="btn btn-primary">Go to Explore Genes</a>
                 </div>
             </div>
 

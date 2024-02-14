@@ -76,7 +76,9 @@
         <!--Links-->
         <div class="col  justify-content-start">
             <a href="{% url 'main:genomeSeq' genome_id=genome.id  %}" class="btn btn-primary">See genome sequence</a >
-            <div class="btn btn-secondary">See gene list</div >
+            <form method="get">
+            <input type="submit" name="genelist" value="See gene list" class=" my-2 btn btn-secondary">
+            </form>
         </div>
 
         <!--Pagination-->
