@@ -710,7 +710,12 @@ class GenomeSeqDownloadView(View):
         sequence = ''
         for chrom in chromosomes:
             chrom_seq = ChromosomeSeq.objects.get(idChrom=chrom)
-            sequence += '>Chromosome dna:chromosome chromosome:'+str(chrom.id)+':Chromosome:'+str(chrom.startPos)+':'+str(chrom.endPos)+':'+str(chrom.strand)+' REF\n'+str(chrom_seq.sequence)+'\n'
+            # Insert line breaks every 60 characters
+            sequence_with_line_breaks = '\n'.join(str(chrom_seq.sequence)[i:i+60] for i in range(0, len(str(chrom_seq.sequence)), 60))
+            sequence += ('>Chromosome dna:chromosome chromosome:'+str(chrom.id)+
+                         ':Chromosome:'+str(chrom.startPos)+':'+str(chrom.endPos)+':'+str(chrom.strand)+
+                         ' REF\n'+
+                         sequence_with_line_breaks+'\n')
         response = HttpResponse(sequence, content_type='text/plain')
         response['Content-Disposition'] = f'attachment; filename="seq_{genome_id}.fa"'
         return response
