@@ -3,6 +3,10 @@ from django import forms
 from .models import Gene, Peptide, Message, CustomUser
 
 class UploadFileForm(forms.Form):
+    '''
+    A form to upload the fasta files.
+    Contains the genome, cds and peptide files.
+    '''
     genomefile = forms.FileField()
     cdsfile = forms.FileField()
     peptidefile = forms.FileField()

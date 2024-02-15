@@ -1,9 +1,16 @@
 from Bio import SeqIO
 from django.core.files import File
-from django.db.models.fields.files import FileField
 
 def CDSParser(filename):
-    # dictionnariy creation
+    '''
+    Convert a gene fasta file into a dictionary.
+    It contains 3 keys :
+        - gene : a dictionary, for each gene another dictionary is associated
+        with his available attributes
+        - sequence : a dictionary, for each gene his sequence is put in a dictionnary
+        - status : number of gene considered as annotated
+    '''
+    # dictionaries creation
     CDSdict = {}
     CDSdict["gene"] = {}
     CDSdict["sequence"] = {}
@@ -11,31 +18,32 @@ def CDSParser(filename):
     # to know how many genes are annotated
     cpt = 0
 
-    # on boucle sur toutes les séquences
+    # check the format of the file
     if isinstance(filename, File):
         records = SeqIO.parse(filename.temporary_file_path(), "fasta")
     elif isinstance(filename, str):
         records = SeqIO.parse(filename, "fasta")
 
+    # loop trhough the genes
     for record in records:
-        # création des dictionnaires pour la séquence et le gène
+        # dictionaries creation for the gene and the sequence
         CDSdict["gene"][record.id] = {}
         CDSdict["sequence"][record.id] = {}
         
-        ## ajout des informations de la séquence
+        ## add sequence information
         CDSdict["sequence"][record.id]['id'] = record.id
         CDSdict["sequence"][record.id]['idGene'] = record.id
         CDSdict["sequence"][record.id]['sequence'] = str(record.seq)
 
-        ## ajout des informations du gène
-        # récupération des informations
+        ## add gene information
+        # get the info
         infos = record.description.split()
         attributes = ['gene', 'gene_biotype', 'gene_symbol']
         names = ['geneName', 'geneBiotype', 'geneSymbol']
 
         CDSdict["gene"][record.id]['id'] = record.id 
 
-        # stockage des informations du gène
+        # store info if available
         for att in range(len(attributes)) :
             index = [i for i in range(len(infos)) if attributes[att] in infos[i]]
             if index != []:
@@ -43,7 +51,7 @@ def CDSParser(filename):
             elif attributes[att] == 'gene':
                 CDSdict["gene"][record.id][names[att]] = record.id
 
-        # information du chromosome
+        # chromosome information
         index_pos = [i for i in range(len(infos)) if ('chromosome' in infos[i] or 'plasmid' in infos[i])]
         chr_infos = infos[index_pos[0]].split(':')
         CDSdict["gene"][record.id]['idChrom'] = chr_infos[1]
@@ -52,7 +60,7 @@ def CDSParser(filename):
         if len(chr_infos) > 5 :
             CDSdict["gene"][record.id]['strand'] = chr_infos[5]
 
-        # ajout de la description
+        # add description if available and consider gene as annotated
         if 'description' in record.description:
             CDSdict["gene"][record.id]['descriptionGene'] =  record.description.split('description:')[1]
             CDSdict["gene"][record.id]['status'] = 4
@@ -64,25 +72,35 @@ def CDSParser(filename):
 
 
 def PepParser(filename):
+    '''
+    Convert a peptide fasta file into a dictionary.
+    It contains 2 keys :
+        - peptide : a dictionary, for each peptide another dictionary is associated
+        with his available attributes
+        - sequence : a dictionnary, for each peptide his sequence is put in a dictionary
+    '''
+    # dictionaries creation
     pepdict={}
     pepdict["peptide"] = {}
     pepdict["sequence"] = {}
 
+    # check file
     if isinstance(filename, File):
         records = SeqIO.parse(filename.temporary_file_path(), "fasta")
     elif isinstance(filename, str):
         records = SeqIO.parse(filename, "fasta")
 
+    # loop through each peptide
     for record in records:
         pepdict["peptide"][record.id] = {}
         pepdict["sequence"][record.id] = {}
         
-        # dictionnaire pour la séquence
+        # sequence information
         pepdict["sequence"][record.id]['id'] = record.id
         pepdict["sequence"][record.id]['idPeptide'] = record.id
         pepdict["sequence"][record.id]['sequence'] = str(record.seq)
 
-        # dictionnaire pour le peptide
+        # peptide information
         infos = record.description.split()
         attributes = ['transcript', 'transcript_biotype']
         names = ['transcriptName', 'transcriptBiotype']
@@ -90,7 +108,7 @@ def PepParser(filename):
         pepdict["peptide"][record.id]['id'] = record.id
         pepdict["peptide"][record.id]['idGene'] = record.id
 
-        # ajout des informations du peptide
+        # add information if available
         for att in range(len(attributes)) :
             index = [i for i in range(len(infos)) if attributes[att] in infos[i]]
             if index != []:
@@ -98,7 +116,7 @@ def PepParser(filename):
             elif attributes[att] == 'transcript' :
                 pepdict["peptide"][record.id][names[att]] = record.id
 
-        # ajout de la description
+        # add description if available
         if 'description' in record.description:
             pepdict["peptide"][record.id]['descriptionPep'] =  record.description.split('description:')[1]
     
@@ -106,19 +124,26 @@ def PepParser(filename):
 
 
 def GenomeParser(filename):
-    # création des dictionnaires
+    '''
+    Convert a genome fasta file into a dictionnary.
+    It contains 3 key :
+        - genome : a dictionary, contains all the information of the genome
+        - chromosome : a dictionary, for each chromosome contains his information
+        - sequence : a dictionary, for each chromosome his sequence is stored in a dictionary
+    '''
+    # dictionaries creation
     gendict = {}
     gendict["genome"] = {}
     gendict["chromosome"] = {}
     gendict["sequence"] = {}
 
-    # Nom du fichier
+    # Check file
     if isinstance(filename, str):
         genomeID = filename.split('.')[0].split('/')[-1]
     elif isinstance(filename, File):
         genomeID = filename.name.split('.')[0]
 
-    # Formatage du nom
+    # Creation of genome's name
     strain = genomeID.find('_str')
     substr = genomeID.find('_substr')
 
@@ -141,7 +166,7 @@ def GenomeParser(filename):
         flagSTR = False
         flagSUB = False
 
-    # Ajout des informations du génome
+    # add genome information
     gendict["genome"][genomeName]={}
     gendict["genome"][genomeName]['id'] = genomeName
     gendict["genome"][genomeName]['species'] = species
@@ -151,23 +176,23 @@ def GenomeParser(filename):
     if flagSUB:
         gendict["genome"][genomeName]['substrain'] = substrain
 
-    # Remplissage pour les chromosomes et les sequences
     if isinstance(filename, File):
         records = SeqIO.parse(filename.temporary_file_path(), "fasta")
     elif isinstance(filename, str):
         records = SeqIO.parse(filename, "fasta")
 
+    # loop through each chromosome
     for record in records:
         chr_infos = record.description.split()[2]
         chrName = chr_infos.split(':')[1]
 
-        # Ajout de la sequence
+        # add sequence information
         gendict["sequence"][chrName] = {}
         gendict["sequence"][chrName]['id'] = chrName
         gendict["sequence"][chrName]['idChrom'] = chrName
         gendict["sequence"][chrName]['sequence'] = str(record.seq)
 
-        # Ajout des informations du chromosome
+        # add chromosome information
         gendict["chromosome"][chrName] = {}
         
         gendict["chromosome"][chrName]['id'] = chrName
@@ -183,6 +208,11 @@ def GenomeParser(filename):
 
 
 def file_to_dico(file):
+    '''
+    Take a fasta file in input and return a dictionary.
+    Check if the file is the path or the actual file and send it to 
+    the right parser.
+    '''
     if isinstance(file, str):
         if(file.endswith('cds.fa')):
             res = CDSParser(file)
