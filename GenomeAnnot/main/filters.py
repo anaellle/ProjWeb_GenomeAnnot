@@ -331,7 +331,7 @@ class AnnotateFilter(django_filters.FilterSet):
 
 
 class ValidateFilter(django_filters.FilterSet):
-    
+
     idChrom__idGenome__species__icontains = django_filters.CharFilter(
         field_name="idChrom__idGenome__species",
         lookup_expr="icontains",
@@ -438,6 +438,7 @@ class ValidateFilter(django_filters.FilterSet):
 # ## Explore
 # ####################################################################################
 
+
 class ExploreGenomeFilter(django_filters.FilterSet):
 
     # Filters on Genome
@@ -509,7 +510,7 @@ class ExploreGenomeFilter(django_filters.FilterSet):
         if value == False:
             queryset = queryset.exclude(status=Genome.Status.COMPLETE)
         return queryset
-    
+
     class Meta:
         model = Genome
         fields = {
@@ -523,10 +524,10 @@ class ExploreGenomeFilter(django_filters.FilterSet):
 class ExploreGenePepFilter(django_filters.FilterSet):
 
     # Filters on Genome
-    idChrom__idGenome__species__icontains = django_filters.CharFilter(
-        field_name="idChrom__idGenome__species",
+    idChrom__idGenome__id__icontains = django_filters.CharFilter(
+        field_name="idChrom__idGenome__id",
         lookup_expr="icontains",
-        label="Species",
+        label="Genome ID",
         widget=forms.TextInput(attrs={"placeholder": ""}),
     )
     # Filters on Chromosome

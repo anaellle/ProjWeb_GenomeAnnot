@@ -6,6 +6,7 @@ from django.urls import reverse, resolve
 from django.urls.exceptions import Resolver404
 from django.utils.html import format_html
 from django.core.paginator import Paginator
+from django.db.models import Q
 
 from django_tables2 import SingleTableView
 from django_tables2.views import SingleTableMixin
@@ -188,6 +189,7 @@ class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
 ######### Search views (explore, annotate and validate)
 ##############################################################################################
 
+
 class PaginatedFilterViews(View):
     def get_context_data(self, **kwargs):
         context = super(PaginatedFilterViews, self).get_context_data(**kwargs)
@@ -197,6 +199,7 @@ class PaginatedFilterViews(View):
                 del querystring["page"]
             context["querystring"] = querystring.urlencode()
         return context
+
 
 # def explore(request):
 #     context = {"active_tab": "explore", "role_user": get_role(request)}
@@ -259,6 +262,7 @@ class PaginatedFilterViews(View):
 
 #     return render(request, "main/explore/main_explore.html", context)
 
+
 class ExploreGenomeView(PaginatedFilterViews, FilterView):
     model = Genome
     template_name = "main/explore/main_exploreGenome.html"
@@ -268,9 +272,15 @@ class ExploreGenomeView(PaginatedFilterViews, FilterView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         role_user = get_role(self.request)
-        context["role_user"] = role_user # pas sûre que ça serve
+        context["role_user"] = role_user  # pas sûre que ça serve
         context["active_tab"] = "explore"
+        context["active_subtab"] = "genome"
         return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.order_by("id")
+
 
 class ExploreGenePepView(PaginatedFilterViews, FilterView):
     model = Gene
@@ -281,9 +291,15 @@ class ExploreGenePepView(PaginatedFilterViews, FilterView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         role_user = get_role(self.request)
-        context["role_user"] = role_user # pas sûre que ça serve
+        context["role_user"] = role_user  # pas sûre que ça serve
         context["active_tab"] = "explore"
+        context["active_subtab"] = "gene"
         return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.order_by("id")
+
 
 # def annotate(request):
 #     context = {"active_tab": "annotate", "role_user": get_role(request)}
@@ -333,6 +349,7 @@ class ExploreGenePepView(PaginatedFilterViews, FilterView):
 #                     context[status] = "unchecked"
 
 #     return render(request, "main/annotate/main_annotate.html", context)
+
 
 class AnnotateView(AccessMixin, PaginatedFilterViews, FilterView):
     model = Gene
@@ -554,13 +571,18 @@ def addGenome(request):
                 genomefile = request.FILES.get("genomefile")
                 cdsfile = request.FILES.get("cdsfile")
                 peptidefile = request.FILES.get("peptidefile")
-                genomeName = genomefile.name.split('.')[0]
+                genomeName = genomefile.name.split(".")[0]
                 print(genomeName)
                 if (genomeName in cdsfile.name) and (genomeName in peptidefile.name):
+
                     uploadAndFill(genomefile, cdsfile, peptidefile)
-                    messages.success(request, 'Your files were successfully uploaded')
-                else :
-                    messages.error(request, "Your files are not from the same genome")
+                    messages.success(
+                        request, "Your files were successfully uploaded"
+                    )
+                else:
+                    messages.error(
+                        request, "Your files are not from the same genome"
+                    )
                 return render(request, "main/addGenome/addGenome.html", context)
             else:
                 messages.error(
@@ -604,6 +626,7 @@ class GenomeDetailView(DetailView):  ### TO DO : GENE LIST LINK
         role_user = get_role(self.request)
         context["genome"] = self.object
         context["active_tab"] = "explore"
+        context["active_subtab"] = "genome"
         context["role_user"] = role_user
 
         ## Figure with plotly :
@@ -664,6 +687,7 @@ class GenomeDetailView(DetailView):  ### TO DO : GENE LIST LINK
         fig.update_layout(
             yaxis_title="Strand",
             xaxis_title="Position",
+            yaxis=dict(range=[-1.3, 1.6], dtick=1),
         )
         # convert to html
         plot_genome = fig.to_html(
@@ -672,6 +696,15 @@ class GenomeDetailView(DetailView):  ### TO DO : GENE LIST LINK
         context["plot_genome"] = plot_genome
 
         return context
+
+    def get(self, request, *args, **kwargs):
+        if "genelist" in request.GET:
+            url = (
+                reverse("main:exploreGenePep")
+                + f"?idChrom__idGenome__id__icontains={self.get_object()}&notannotated=on&inwork=on&validated=on"
+            )
+            return HttpResponseRedirect(url)
+        return super().get(request, *args, **kwargs)
 
 
 ### Get sequence of genome
@@ -693,6 +726,7 @@ class GenomeSeqDetailView(DetailView):
         role_user = get_role(self.request)
         context["genome"] = self.object
         context["active_tab"] = "explore"
+        context["active_subtab"] = "genome"
         context["role_user"] = role_user
         # get all sequence from chromosomes of genome
         chromosomes = Chromosome.objects.filter(
@@ -706,12 +740,13 @@ class GenomeSeqDetailView(DetailView):
         context["sequence"] = sequence
         return context
 
+
 ### Download sequence of Genome
 class GenomeSeqDownloadView(View):
     def get(self, request, *args, **kwargs):
-        genome_id = kwargs.get('genome_id')
+        genome_id = kwargs.get("genome_id")
         chromosomes = Chromosome.objects.filter(idGenome=genome_id)
-        sequence = ''
+        sequence = ""
         for chrom in chromosomes:
             chrom_seq = ChromosomeSeq.objects.get(idChrom=chrom)
             # Insert line breaks every 60 characters
@@ -723,6 +758,7 @@ class GenomeSeqDownloadView(View):
         response = HttpResponse(sequence, content_type='text/plain')
         response['Content-Disposition'] = f'attachment; filename="seq_{genome_id}.fa"'
         return response
+
 
 ##############################################################################################
 ######### Gene reading, annotation and validation
@@ -798,6 +834,7 @@ class GeneDetailView(DetailView):
 
         # add info for tabs and role
         context_all["active_tab"] = "explore"
+        context_all["active_subtab"] = "gene"
         context_all["role"] = "reader"
         context_all["role_user"] = role_user
         return context_all
@@ -1040,6 +1077,10 @@ class genomeAdmin(SingleTableMixin, FilterView):
         context["role_user"] = get_role(self.request)
         return context
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.order_by("id")
+
 
 class sequenceAdmin(SingleTableMixin, FilterView):
     model = Gene
@@ -1069,7 +1110,39 @@ class sequenceAdmin(SingleTableMixin, FilterView):
         genome_id = self.request.GET.get("idChrom__idGenome__id__icontains")
         if genome_id:
             queryset = queryset.filter(idChrom__idGenome__id=genome_id)
-        return queryset
+        return queryset.order_by("id")
+
+    def post(self, request, *args, **kwargs):
+
+        if "assign" in request.POST:
+            # get gene list filtered : one for those without annotator, one for those without validator
+            genes_no_annot = AdminGeneFilter(
+                request.GET,
+                queryset=Gene.objects.filter(Q(emailAnnotator__isnull=True)),
+            ).qs
+            genes_no_valid = AdminGeneFilter(
+                request.GET,
+                queryset=Gene.objects.filter(Q(emailValidator__isnull=True)),
+            ).qs
+            # get all annotators and
+            annotators = CustomUser.objects.filter(role=1)
+            validators = CustomUser.objects.filter(role=2)
+            genes = [genes_no_annot, genes_no_valid]
+            users = [annotators, validators]
+            for r in range(2):
+                i = 0
+                user = users[r]
+                if len(user) != 0:
+                    for gene in genes[r]:
+                        email = user[i % len(user)]
+                        if r == 0:
+                            gene.emailAnnotator = CustomUser.objects.get(email=email)
+                        elif r == 1:
+                            gene.emailValidator = CustomUser.objects.get(email=email)
+                        gene.save()
+                        i += 1
+
+        return super().get(request, *args, **kwargs)
 
 
 class accountAdmin(SingleTableMixin, FilterView):
@@ -1099,7 +1172,7 @@ class accountAdmin(SingleTableMixin, FilterView):
         email = self.request.GET.get("email__contains")
         if email:
             queryset = queryset.filter(email=email)
-        return queryset
+        return queryset.order_by("email")
 
 
 class accountAssignAdmin(SingleTableMixin, FilterView):
@@ -1138,6 +1211,9 @@ class accountAssignAdmin(SingleTableMixin, FilterView):
             if view_name == "sequenceAdmin":
                 # store url only if page sequence
                 self.request.session["previous_url"] = previous_url
+            else:
+                previous_url = reverse("main:sequenceAdmin")
+
         except Resolver404:
             previous_url = reverse("main:sequenceAdmin")
         return context
