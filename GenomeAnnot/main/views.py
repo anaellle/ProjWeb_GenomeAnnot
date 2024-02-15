@@ -271,6 +271,11 @@ class ExploreGenomeView(PaginatedFilterViews, FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
+        # Pagination for request without submit :
+        if not self.request.GET: # Technique de petit cochon (qui fonctionne) !!!!!!!!!!!!!!
+            context["querystring"] = "id__contains=&submitsearch=&species__contains=&strain__contains=&substrain__contains=&notannotated=on&inwork=on&validated=on"
+        
         role_user = get_role(self.request)
         context["role_user"] = role_user  # pas sûre que ça serve
         context["active_tab"] = "explore"
@@ -290,6 +295,11 @@ class ExploreGenePepView(PaginatedFilterViews, FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
+        # Pagination for request without submit :
+        if not self.request.GET:
+            context["querystring"] = "id__contains=&submitsearch=&idChrom__idGenome__id__icontains=&idChrom__chromName__icontains=&notannotated=on&inwork=on&validated=on&geneName__contains=&geneSymbol__contains=&motif_sequence_gene=&id_pep=&name_pep=&motif_sequence_pep="
+        
         role_user = get_role(self.request)
         context["role_user"] = role_user  # pas sûre que ça serve
         context["active_tab"] = "explore"
@@ -368,8 +378,11 @@ class AnnotateView(AccessMixin, PaginatedFilterViews, FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if not self.request.GET: # Technique de petit cochon (qui fonctionne) !!!!!!!!!!!!!!
+        
+        # Pagination for request without submit :
+        if not self.request.GET:
             context["querystring"] = "id__contains=&submitsearch=&idChrom__idGenome__species__icontains=&geneName__contains=&geneSymbol__contains=&sequence_gene=&sequence_pep=&notannotated=on&inwork=on&review=on&submited=on&validated=on"
+        
         role_user = get_role(self.request)
         context["role_user"] = role_user
         context["active_tab"] = "annotate"
@@ -449,8 +462,11 @@ class ValidateView(AccessMixin, PaginatedFilterViews, FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if not self.request.GET: # Technique de petit cochon (qui fonctionne) !!!!!!!!!!!!!!
+        
+        # Pagination for request without submit :
+        if not self.request.GET:
             context["querystring"] = "id__contains=&submitsearch=&idChrom__idGenome__species__icontains=&geneName__contains=&geneSymbol__contains=&sequence_gene=&sequence_pep=&notannotated=on&tovalidate=on&validated=on"
+        
         role_user = get_role(self.request)
         context["role_user"] = role_user
         context["active_tab"] = "validate"
