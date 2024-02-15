@@ -1,11 +1,15 @@
-# myapp/tables.py
 import django_tables2 as tables
 from django.urls import reverse
 from django.utils.html import format_html
 from .models import Genome, Gene, CustomUser, Chromosome
+from django.db.models import Q
 
 
 ##################################################################
+#             Admin genome
+###################################################################
+
+
 class TableGenome(tables.Table):
     nbgene = tables.Column(
         verbose_name="Number of Genes", empty_values=(), orderable=False
@@ -72,7 +76,7 @@ class TableGenome(tables.Table):
             return round(valid_percentage, 2)
 
     def render_status(self, value):
-        # include status.html not possible :bug
+        # include status.html not possible
         if value == "Not annotated":
             string = ' <span class="grey"> \
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"\
@@ -98,6 +102,8 @@ class TableGenome(tables.Table):
 
 
 ##################################################################
+#              Admin sequence
+###################################################################
 
 
 class TableGene(tables.Table):
@@ -147,7 +153,8 @@ class TableGene(tables.Table):
         )
 
     def render_status(self, value):
-        # include status.html not possible :bug
+        # include status.html not possible : format_html doesn't seem to manage {{}} and {%%}
+        # So included by hand :
         if value == "Not annotated":
             string = '<span class="grey">  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-dash" viewBox="0 0 16 16"><path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8"/></svg>Not Annotated  </span>'
         elif value == "Being annotated":
@@ -181,11 +188,62 @@ class TableGene(tables.Table):
 
 
 ###################################################################
+#          Admin account
+###################################################################
+
+
+def assigned_gene_count(self, record):  # count number of gene assigned to user
+    user = CustomUser.objects.get(email=record.email)
+    if user.role == 1:
+        return Gene.objects.filter(emailAnnotator=user).count()
+    elif user.role == 2:
+        return Gene.objects.filter(emailValidator=user).count()
+    else:
+        return None
+
+
+def finish_gene_count(self, record):
+    # count % of gene assigned that are finished for the user (can decrease if annotation rejected)
+    user = CustomUser.objects.get(email=record.email)
+    if user.role == 1:  # if annotator
+        gene_count = Gene.objects.filter(emailAnnotator=user).count()
+        if gene_count != 0:
+            pourcentage = (
+                Gene.objects.filter(
+                    Q(status=Gene.Status.SUBMITTED)
+                    | Q(status=Gene.Status.VALIDATED),
+                    emailAnnotator=user,
+                ).count()
+                / gene_count
+                * 100
+            )
+            return round(pourcentage, 2)
+    elif user.role == 2:  # if validator
+        gene_count = Gene.objects.filter(emailValidator=user).count()
+        if gene_count != 0:
+            pourcentage = (
+                Gene.objects.filter(
+                    emailValidator=user, status=Gene.Status.VALIDATED
+                ).count()
+                / gene_count
+                * 100
+            )
+            return round(pourcentage, 2)
+    else:
+        return None
 
 
 class TableAccount(tables.Table):
 
     phoneNumber = tables.Column(verbose_name="Phone", orderable=False)
+
+    assigned_gene_count = tables.Column(
+        verbose_name="Assigned Genes", empty_values=(), orderable=False
+    )
+
+    finish_gene_count = tables.Column(
+        verbose_name="Work Done (%)", empty_values=(), orderable=False
+    )
 
     class Meta:
         template_name = "django_tables2/table.html"
@@ -200,7 +258,15 @@ class TableAccount(tables.Table):
             "last_login",
         )
 
+    def render_assigned_gene_count(self, record):
+        return assigned_gene_count(self, record)
 
+    def render_finish_gene_count(self, record):
+        return finish_gene_count(self, record)
+
+
+###################################################################
+#            Admin assign gene to account
 ###################################################################
 
 
@@ -236,37 +302,7 @@ class TableAssignAccount(tables.Table):
         )
 
     def render_assigned_gene_count(self, record):
-        user = CustomUser.objects.get(email=record.email)
-        if user.role == 1:
-            return Gene.objects.filter(emailAnnotator=user).count()
-        elif user.role == 2:
-            return Gene.objects.filter(emailValidator=user).count()
-        else:
-            return None
+        return assigned_gene_count(self, record)
 
     def render_finish_gene_count(self, record):
-        user = CustomUser.objects.get(email=record.email)
-        if user.role == 1:
-            gene_count = Gene.objects.filter(emailAnnotator=user).count()
-            if gene_count != 0:
-                pourcentage = (
-                    Gene.objects.filter(
-                        emailAnnotator=user, status=Gene.Status.SUBMITTED
-                    ).count()
-                    / gene_count
-                    * 100
-                )
-                return round(pourcentage, 2)
-        elif user.role == 2:
-            gene_count = Gene.objects.filter(emailValidator=user).count()
-            if gene_count != 0:
-                pourcentage = (
-                    Gene.objects.filter(
-                        emailValidator=user, status=Gene.Status.VALIDATED
-                    ).count()
-                    / gene_count
-                    * 100
-                )
-                return round(pourcentage, 2)
-        else:
-            return None
+        return finish_gene_count(self, record)

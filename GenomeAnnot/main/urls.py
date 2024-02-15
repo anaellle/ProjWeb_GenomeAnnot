@@ -29,20 +29,15 @@ app_name = "main"
 urlpatterns = [
     # Home :
     path("", views.home, name="home"),
-    
     # Login - Logout :
     path("login/", CustomUserLoginView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(next_page="main:login"), name="logout"),
-    
     # Sign up :
     path("signUp/", SignUpView.as_view(), name="signUp"),
-    
     # Update profile :
     path("profile/", views.profile, name="profile"),
-    
     # Change password (once logged in) :
     path("password-change/", ChangePasswordView.as_view(), name="password_change"),
-    
     # Reset password (if forgotten) :
     path("password-reset/", ResetPasswordView.as_view(), name="password_reset"),
     path(
@@ -60,18 +55,14 @@ urlpatterns = [
         ),
         name="password_reset_complete",
     ),
-    
     # Blast and blast with sequence:
     path("blast/", views.blast, name="blast"),
     path("blast/<str:sequence>", views.blast, name="blastseq"),
-    
     # Add genome :
     path("addGenome", views.addGenome, name="addGenome"),
-    
     # Explore and read gene/genome info :
-    # path("explore/", views.explore, name="explore"),  # change to listview !!!
-    path("explore/genome/", ExploreGenomeView.as_view(), name="exploreGenome"),  # CHANGED to list view ##
-    path("explore/genepep/", ExploreGenePepView.as_view(), name="exploreGenePep"),  # !! Only accessible via URL (no button on the web page yet)
+    path("explore/genome/", ExploreGenomeView.as_view(), name="exploreGenome"),
+    path("explore/genepep/", ExploreGenePepView.as_view(), name="exploreGenePep"),
     path("explore/genome<str:genome_id>", GenomeDetailView.as_view(), name="genome"),
     path(
         "explore/genome<str:genome_id>/sequence",
@@ -84,23 +75,20 @@ urlpatterns = [
         name="downloadGenomeSeq",
     ),
     path("explore/gene<str:gene_id>", GeneDetailView.as_view(), name="gene"),
-    
     # Annotate gene info :
-    path("annotate/", AnnotateView.as_view(), name="annotate"),  # CHANGED to list view ##
+    path("annotate/", AnnotateView.as_view(), name="annotate"),
     path(
         "annotate/gene<str:gene_id>",
         GeneUpdateView.as_view(),
         name="geneAnnot",
     ),
-    
     # Validate gene info :
-    path("validate/", ValidateView.as_view(), name="validate"),  # CHANGED to list view ##
+    path("validate/", ValidateView.as_view(), name="validate"),
     path(
         "validate/gene<str:gene_id>",
         GeneValidDetailView.as_view(),
         name="geneValid",
     ),
-    
     # Admin
     path("administrator/genome/", genomeAdmin.as_view(), name="genomeAdmin"),
     path("administrator/sequence/", sequenceAdmin.as_view(), name="sequenceAdmin"),
