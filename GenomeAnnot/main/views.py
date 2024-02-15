@@ -337,7 +337,7 @@ class ExploreGenePepView(PaginatedFilterViews, FilterView):
 class AnnotateView(AccessMixin, PaginatedFilterViews, FilterView):
     model = Gene
     template_name = "main/annotate/main_annotate.html"
-    paginate_by = 20
+    paginate_by = 5
     filterset_class = AnnotateFilter
 
     # return home page if url blocked for this user
@@ -351,6 +351,8 @@ class AnnotateView(AccessMixin, PaginatedFilterViews, FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        if not self.request.GET: # Technique de petit cochon (qui fonctionne) !!!!!!!!!!!!!!
+            context["querystring"] = "id__contains=&submitsearch=&idChrom__idGenome__species__icontains=&geneName__contains=&geneSymbol__contains=&sequence_gene=&sequence_pep=&notannotated=on&inwork=on&review=on&submited=on&validated=on"
         role_user = get_role(self.request)
         context["role_user"] = role_user
         context["active_tab"] = "annotate"
@@ -416,7 +418,7 @@ class AnnotateView(AccessMixin, PaginatedFilterViews, FilterView):
 class ValidateView(AccessMixin, PaginatedFilterViews, FilterView):
     model = Gene
     template_name = "main/validate/main_validate.html"
-    paginate_by = 20
+    paginate_by = 5
     filterset_class = ValidateFilter
 
     # return home page if url blocked for this user
@@ -430,6 +432,8 @@ class ValidateView(AccessMixin, PaginatedFilterViews, FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        if not self.request.GET: # Technique de petit cochon (qui fonctionne) !!!!!!!!!!!!!!
+            context["querystring"] = "id__contains=&submitsearch=&idChrom__idGenome__species__icontains=&geneName__contains=&geneSymbol__contains=&sequence_gene=&sequence_pep=&notannotated=on&tovalidate=on&validated=on"
         role_user = get_role(self.request)
         context["role_user"] = role_user
         context["active_tab"] = "validate"
