@@ -70,7 +70,7 @@ class AdminGeneFilter(django_filters.FilterSet):
     idChrom__idGenome__id__icontains = django_filters.CharFilter(
         field_name="idChrom__idGenome__id",
         lookup_expr="icontains",
-        label="Genome",
+        label="Genome ID (exact)",
         widget=forms.TextInput(attrs={"placeholder": ""}),
     )
     geneName__contains = django_filters.CharFilter(

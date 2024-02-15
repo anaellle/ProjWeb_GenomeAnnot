@@ -1015,20 +1015,32 @@ class sequenceAdmin(SingleTableMixin, FilterView):
     def post(self, request, *args, **kwargs):
 
         if "assign" in request.POST:
-            # get gene list filtered : one for those without annotator, one for those without validator
-            # exclude gene already validated
-            genes_no_annot = AdminGeneFilter(
-                request.GET,
-                queryset=Gene.objects.filter(
+
+            if not self.request.GET.dict():
+                genes_no_annot = Gene.objects.filter(
                     Q(emailAnnotator__isnull=True) & ~Q(status=Gene.Status.VALIDATED)
-                ),
-            ).qs
-            genes_no_valid = AdminGeneFilter(
-                request.GET,
-                queryset=Gene.objects.filter(
+                )
+                genes_no_valid = Gene.objects.filter(
                     Q(emailValidator__isnull=True) & ~Q(status=Gene.Status.VALIDATED)
-                ),
-            ).qs
+                )
+            else:
+                # get gene list filtered : one for those without annotator, one for those without validator
+                # exclude gene already validated
+                genes_no_annot = AdminGeneFilter(
+                    request.GET,
+                    queryset=Gene.objects.filter(
+                        Q(emailAnnotator__isnull=True)
+                        & ~Q(status=Gene.Status.VALIDATED)
+                    ),
+                ).qs
+                genes_no_valid = AdminGeneFilter(
+                    request.GET,
+                    queryset=Gene.objects.filter(
+                        Q(emailValidator__isnull=True)
+                        & ~Q(status=Gene.Status.VALIDATED)
+                    ),
+                ).qs
+
             # get all annotators and validators
             annotators = CustomUser.objects.filter(role=1)
             validators = CustomUser.objects.filter(role=2)
