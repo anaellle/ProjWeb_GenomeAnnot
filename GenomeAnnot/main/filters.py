@@ -67,10 +67,10 @@ class AdminGeneFilter(django_filters.FilterSet):
         exclude=True,
         label="Validator assigned ",
     )
-    idChrom__idGenome__id__icontains = django_filters.CharFilter(
+    idChrom__idGenome__id__contains = django_filters.CharFilter(
         field_name="idChrom__idGenome__id",
         lookup_expr="icontains",
-        label="Genome ID (exact)",
+        label="Genome ID",
         widget=forms.TextInput(attrs={"placeholder": ""}),
     )
     geneName__contains = django_filters.CharFilter(
@@ -101,7 +101,7 @@ class AdminGeneFilter(django_filters.FilterSet):
     class Meta:
         model = Gene
         fields = {
-            "idChrom__idGenome__id": ["icontains"],
+            "idChrom__idGenome__id": ["contains"],
             "id": ["contains"],
             "geneName": ["contains"],
             "status": ["exact"],
