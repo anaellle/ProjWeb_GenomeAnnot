@@ -38,117 +38,6 @@
                 {% endif %}
             </nav>
 
-            {% comment %} <!-- Button trigger modal -->
-            <button id="login" type="button" class="btn " data-bs-toggle="modal" data-bs-target="#LoginModal" >
-                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
-                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
-                    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
-                  </svg>
-                  <span id="login">Login</span> 
-            </button>
-            
-            <!-- Modal -->
-            <div class="modal fade" id="LoginModal" tabindex="-1" aria-labelledby="LoginModal" aria-hidden="true" data-bs-backdrop="false">
-                <div class="modal-dialog modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="titleLogin">Login</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-
-                    <form > <!--method="post" role="form" action="/" -->
-                        {% csrf_token %}
-                          <div class="modal-body container" >
-                            <div class="row g-0">
-                              <div class="col-md-4">
-                                <img src="{% static 'main/images/password.png' %}" class="img-fluid rounded-start" alt="...">
-                              </div>
-                              <div class="col-md-8 card-body align-items-center d-flex flex-column justify-content-center">
-
-                                <!-------- Email -------->
-
-                                <div class="d-flex align-items-center " style="text-align: center;">
-                                    <label for="email" class="form-label ">Email</label>
-                                </div>
-                                <div class="d-flex align-items-center ">
-                                    <input type="email" class="form-control " id="email" name="email">
-                                </div>
-
-                                 <!-------- Password -------->
-
-                                <div class="d-flex align-items-center ">
-                                    <label for="password" class="form-label">Password</label>
-                                </div>
-                                <div class="d-flex align-items-center ">
-                                    <input type="password" class="form-control " id="password" name="password">
-                                </div>   
-
-                                 <!--------------- Create user ------------------>
-                                
-                                <div id="formCreateUser" style="display: none;">
-
-                                     <!-------- First name -------->
-
-                                    <div class="d-flex align-items-center ">
-                                        <label for="firstname" class="form-label">First Name</label>
-                                    </div>
-                                    <div class="d-flex align-items-center ">
-                                        <input type="text" class="form-control " id="firstname" name="firstname">
-                                    </div>
-
-                                    <!-------- Last name -------->
-
-                                    <div class="d-flex align-items-center ">
-                                        <label for="lastname" class="form-label">Last Name</label>
-                                    </div>
-                                    <div class="d-flex align-items-center ">
-                                        <input type="text" class="form-control " id="lastname" name="lastname">
-                                    </div>
-                                     
-
-                                     <!-------- Phone Number -------->
-
-                                    <div class="d-flex align-items-center ">
-                                        <label for="phone" class="form-label">Phone Number</label>
-                                    </div>
-                                    <div class="d-flex align-items-center ">
-                                        <input type="tel" class="form-control " id="phone" name="phone">
-                                    </div>
-
-                                     <!-------- Role -------->
-                                     
-                                     <div class="d-flex align-items-center ">
-                                        <span class="form-label">Role</span>
-                                    
-                                    <select name="role" id="role-select" class="btn">
-                                        <option value="reader" class="ebony"> Reader </option>
-                                        <option value="annotator" class="ebony" > Annotator </option>
-                                        <option value="validator" class="ebony" > Validator </option>
-                                      </select>
-                                    </div>
-                                      
-                                </div>
-
-                              </div>
-                            </div>
-                          </div>
-
-                    <div class="modal-footer" id="login_footer">
-                    <span class="left-card">
-                    <button type="button" id="user_left" class="btn btn-primary" onclick="changeToCreateUser()">Create User</button>
-                    <button type="button" id="login_left" class="btn btn-primary d-none" onclick="changeToLogin()">Log in</button>
-                    </span>
-                    <span class="right-card">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary" id="login_right" value="connection_submit">Connection</button>
-                    <button type="submit" class="btn btn-primary d-none" id="user_right" value="createuser_submit" >Create User</button>
-                    </span>
-                    </div>
-                </form>
-
-                </div>
-                </div>
-            </div> {% endcomment %}
 
    </header>
     
@@ -178,11 +67,21 @@
                         </a>
                     </li>
                 <li class="nav-item" >
-                    <a class="nav-link  {% if active_tab == 'explore' %}active{% endif %}" id="nav-explore" href="{% url 'main:exploreGenome' %}" >
+                    <a class="mb-2  nav-link  {% if active_tab == 'explore' %}active{% endif %}" id="nav-explore" href="{% url 'main:exploreGenome' %}" >
                         <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-search icon" viewBox="0 0 16 16">
                             <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
                         </svg>
                         Explore
+                    </a>
+                </li>
+                <li class="nav-item" >
+                    <a class="ms-5  nav-link  {% if active_subtab == 'genome' %}active{% endif %}" id="nav-explore" href="{% url 'main:exploreGenome' %}" >
+                        Genomes
+                    </a>
+                </li>
+                <li class="nav-item" >
+                    <a class=" ms-5  nav-link  {% if active_subtab == 'gene' %}active{% endif %}" id="nav-explore" href="{% url 'main:exploreGenePep' %}" >  
+                        Genes
                     </a>
                 </li>
                 <li class="nav-item" {% if role_user != 1 and role_user != 3 %} data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Not a annotator or not connected"{% endif %}>

@@ -1,17 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import DetailView, UpdateView, CreateView, View
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.urls import reverse, resolve
 from django.urls.exceptions import Resolver404
 from django.utils.html import format_html
 from django.core.paginator import Paginator
+from django.db.models import Q
+from django.contrib import messages
+from urllib.parse import urlparse
 
-from django_tables2 import SingleTableView
-from django_tables2.views import SingleTableMixin
-from django_tables2.paginators import LazyPaginator
-from django_filters.views import FilterView
-import plotly.graph_objects as go
 
+# import our codes/models :
 from .forms import GeneUpdateForm, PeptideUpdateForm, CommentForm, UploadFileForm
 from .tables import TableGenome, TableGene, TableAccount, TableAssignAccount
 from .models import Gene, Message, Genome, Chromosome, CustomUser, ChromosomeSeq
@@ -25,11 +24,17 @@ from .filters import (
     AnnotateFilter,
     ValidateFilter,
 )
-
 from .insertion import uploadAndFill
 
-from django.contrib import messages
-from django.db.models import Q
+
+# Library required for tables
+from django_tables2.views import SingleTableMixin
+
+# Library required for filter
+from django_filters.views import FilterView
+
+# Libraries required for visualisation
+import plotly.graph_objects as go
 
 # Libraries required for sign up
 from django.contrib.auth.mixins import AccessMixin
@@ -187,76 +192,22 @@ class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
 ######### Search views (explore, annotate and validate)
 ##############################################################################################
 
+
+def get_query_page_changed(self):
+    if self.request.GET:
+        querystring = self.request.GET.copy()  # get parameters in query
+        if self.request.GET.get("page"):  # delete the one about page number
+            del querystring["page"]
+        return querystring.urlencode()  # encode parameters to url
+    return None
+
+
 class PaginatedFilterViews(View):
     def get_context_data(self, **kwargs):
         context = super(PaginatedFilterViews, self).get_context_data(**kwargs)
-        if self.request.GET:
-            querystring = self.request.GET.copy()
-            if self.request.GET.get("page"):
-                del querystring["page"]
-            context["querystring"] = querystring.urlencode()
+        context["querystring"] = get_query_page_changed(self)
         return context
 
-# def explore(request):
-#     context = {"active_tab": "explore", "role_user": get_role(request)}
-
-#     if request.method == "GET":
-#         if "submit_download" in request.GET:
-#             ...  # download info gene with gene_id
-
-#         if "submitsearch" in request.GET:
-#             # get parameters of search
-#             context["searchbar"] = request.GET.get("searchbar")
-#             context["type_res"] = request.GET.get("res_type")
-
-#             if context["type_res"] == "genome":
-#                 context["strain"] = request.GET.get("strain")
-#                 context["species"] = request.GET.get("species")
-#                 for status in [
-#                     "status0_genome",
-#                     "status1_genome",
-#                     "status2_genome",
-#                 ]:
-#                     if status in request.GET:
-#                         context[status] = "checked"
-#                     else:
-#                         context[status] = "unchecked"
-#                 # get info about genome
-#                 context["genomes_info"] = Genome.objects.all()  # TO DO : filter
-
-#             elif context["type_res"] == "gene" or context["type_res"] == "prot":
-#                 # get info filter/search
-#                 for info in ["genome", "chrom", "motif", "seq"]:
-#                     context[info] = request.GET.get(info)
-#                 for status in [
-#                     "status0",
-#                     "status123",
-#                     "status4",
-#                 ]:
-#                     if status in request.GET:
-#                         context[status] = "checked"
-#                     else:
-#                         context[status] = "unchecked"
-
-#                 # get info about gene/prot
-#                 genes = Gene.objects.all()  # TO DO : filter
-#                 genes_info = []
-#                 for gene in genes:
-#                     genome = gene.idChrom.idGenome
-#                     peptide = gene.peptide_set.first()
-#                     gene_info = {
-#                         "gene_id": gene.id,
-#                         "gene_name": gene.geneName,
-#                         "status": gene.status,
-#                         "peptide_id": peptide.id if peptide else None,
-#                         "peptide_name": peptide.transcriptName if peptide else None,
-#                         "genome_id": genome.id,
-#                         "genome_species": genome.species,
-#                     }
-#                     genes_info.append(gene_info)
-#                     context["genes_info"] = genes_info
-
-#     return render(request, "main/explore/main_explore.html", context)
 
 class ExploreGenomeView(PaginatedFilterViews, FilterView):
     model = Genome
@@ -266,10 +217,22 @@ class ExploreGenomeView(PaginatedFilterViews, FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # Pagination for request without submit :
+        if not self.request.GET:  # (Mauvaise manière de faire, mais fonctionnelle :)
+            context["querystring"] = (
+                "id__contains=&submitsearch=&species__contains=&strain__contains=&substrain__contains=&notannotated=on&inwork=on&validated=on"
+            )
         role_user = get_role(self.request)
-        context["role_user"] = role_user # pas sûre que ça serve
+        context["role_user"] = role_user
         context["active_tab"] = "explore"
+        context["active_subtab"] = "genome"
         return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.order_by("id")
+
 
 class ExploreGenePepView(PaginatedFilterViews, FilterView):
     model = Gene
@@ -279,59 +242,37 @@ class ExploreGenePepView(PaginatedFilterViews, FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # Pagination for request without submit :
+        if not self.request.GET:
+            context["querystring"] = (
+                "id__contains=&submitsearch=&idChrom__idGenome__id__icontains=&idChrom__chromName__icontains=&notannotated=on&inwork=on&validated=on&geneName__contains=&geneSymbol__contains=&motif_sequence_gene=&id_pep=&name_pep=&motif_sequence_pep="
+            )
+
         role_user = get_role(self.request)
-        context["role_user"] = role_user # pas sûre que ça serve
+        context["role_user"] = role_user
         context["active_tab"] = "explore"
+        context["active_subtab"] = "gene"
         return context
 
-# def annotate(request):
-#     context = {"active_tab": "annotate", "role_user": get_role(request)}
-#     if context["role_user"] != 1 and context["role_user"] != 3:
-#         return redirect("main:home")
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.order_by("id")
 
-#     # get info about gene/prot
-#     # filter on annotator
-#     genes = Gene.objects.filter(emailAnnotator=request.user)
-#     genes_info = []
-#     for gene in genes:
-#         genome = gene.idChrom.idGenome
-#         peptide = gene.peptide_set.first()
-#         gene_info = {
-#             "gene_id": gene.id,
-#             "gene_name": gene.geneName,
-#             "status": gene.status,
-#             "peptide_id": peptide.id if peptide else None,
-#             "peptide_name": peptide.transcriptName if peptide else None,
-#             "genome_id": genome.id,
-#             "genome_species": genome.species,
-#         }
-#         genes_info.append(gene_info)
-#         context["genes_info"] = genes_info
+    def get_success_url(self):
+        url = self.request.META.get("HTTP_REFERER")
+        print(url)
+        if url:
+            return HttpResponseRedirect(url)
+        return reverse("main:exploreGenePep")
 
-#     if request.method == "GET":
-#         if "submitsearch" in request.GET:
-#             # get parameters of search
-#             for info in [
-#                 "searchbar",
-#                 "genome",
-#                 "chrom",
-#                 "motif_gene",
-#                 "motif_prot",
-#             ]:
-#                 context[info] = request.GET.get(info)
-#             for status in [
-#                 "status0",
-#                 "status1",
-#                 "status2",
-#                 "status3",
-#                 "status4",
-#             ]:
-#                 if status in request.GET:
-#                     context[status] = "checked"
-#                 else:
-#                     context[status] = "unchecked"
+    def post(self, request, *args, **kwargs):
+        if "genes_download" in request.POST:
+            genes = ExploreGenePepFilter(request.GET, queryset=Gene.objects.all()).qs
+            for gene in genes:
+                print(gene.status)
+        return HttpResponseRedirect(request.get_full_path())
 
-#     return render(request, "main/annotate/main_annotate.html", context)
 
 class AnnotateView(AccessMixin, PaginatedFilterViews, FilterView):
     model = Gene
@@ -350,6 +291,13 @@ class AnnotateView(AccessMixin, PaginatedFilterViews, FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # Pagination for request without submit :
+        if not self.request.GET:
+            context["querystring"] = (
+                "id__contains=&submitsearch=&idChrom__idGenome__species__icontains=&geneName__contains=&geneSymbol__contains=&sequence_gene=&sequence_pep=&notannotated=on&inwork=on&review=on&submited=on&validated=on"
+            )
+
         role_user = get_role(self.request)
         context["role_user"] = role_user
         context["active_tab"] = "annotate"
@@ -363,53 +311,6 @@ class AnnotateView(AccessMixin, PaginatedFilterViews, FilterView):
             assigned_genes = queryset.filter(emailAnnotator=user)
             queryset = queryset.filter(Q(id__in=assigned_genes))
         return queryset.order_by("id")
-
-
-# def validate(request):
-#     context = {"active_tab": "validate", "role_user": get_role(request)}
-#     if context["role_user"] != 2 and context["role_user"] != 3:
-#         return redirect("main:home")
-#     # get info about gene/prot
-#     # filter on validator
-#     genes = Gene.objects.filter(emailValidator=request.user)
-#     genes_info = []
-#     for gene in genes:
-#         genome = gene.idChrom.idGenome
-#         peptide = gene.peptide_set.first()
-#         gene_info = {
-#             "gene_id": gene.id,
-#             "gene_name": gene.geneName,
-#             "status": gene.status,
-#             "peptide_id": peptide.id if peptide else None,
-#             "peptide_name": peptide.transcriptName if peptide else None,
-#             "genome_id": genome.id,
-#             "genome_species": genome.species,
-#         }
-#         genes_info.append(gene_info)
-#         context["genes_info"] = genes_info
-
-#     if request.method == "GET":
-#         if "submitsearch" in request.GET:
-#             # get parameters of search
-#             for info in [
-#                 "searchbar",
-#                 "genome",
-#                 "chrom",
-#                 "motif_gene",
-#                 "motif_prot",
-#             ]:
-#                 context[info] = request.GET.get(info)
-
-#             for status in [
-#                 "status012",
-#                 "status3",
-#                 "status4",
-#             ]:
-#                 if status in request.GET:
-#                     context[status] = "checked"
-#                 else:
-#                     context[status] = "unchecked"
-#     return render(request, "main/validate/main_validate.html", context)
 
 
 class ValidateView(AccessMixin, PaginatedFilterViews, FilterView):
@@ -429,6 +330,13 @@ class ValidateView(AccessMixin, PaginatedFilterViews, FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # Pagination for request without submit :
+        if not self.request.GET:
+            context["querystring"] = (
+                "id__contains=&submitsearch=&idChrom__idGenome__species__icontains=&geneName__contains=&geneSymbol__contains=&sequence_gene=&sequence_pep=&notannotated=on&tovalidate=on&validated=on"
+            )
+
         role_user = get_role(self.request)
         context["role_user"] = role_user
         context["active_tab"] = "validate"
@@ -555,7 +463,7 @@ def addGenome(request):
                 genomefile = request.FILES.get("genomefile")
                 cdsfile = request.FILES.get("cdsfile")
                 peptidefile = request.FILES.get("peptidefile")
-                genomeName = genomefile.name.split('.')[0]
+                genomeName = genomefile.name.split(".")[0]
                 print(genomeName)
                 # check if the files names are the same
                 if (genomeName in cdsfile.name) and (genomeName in peptidefile.name):
@@ -590,7 +498,7 @@ def get_color_status(status):
 
 
 ### See genome
-class GenomeDetailView(DetailView):  ### TO DO : GENE LIST LINK
+class GenomeDetailView(DetailView):
     model = Genome
     template_name = "main/explore/genome.html"
     pk_url_kwarg = "genome_id"
@@ -608,6 +516,7 @@ class GenomeDetailView(DetailView):  ### TO DO : GENE LIST LINK
         role_user = get_role(self.request)
         context["genome"] = self.object
         context["active_tab"] = "explore"
+        context["active_subtab"] = "genome"
         context["role_user"] = role_user
 
         ## Figure with plotly :
@@ -626,6 +535,7 @@ class GenomeDetailView(DetailView):  ### TO DO : GENE LIST LINK
         context["page_obj"] = page_obj
         context["gene_per_page"] = gene_per_page
 
+        # create visualisation for each gene
         decalage_strand_1 = 0
         decalage_strand_2 = 0
         for gene in page_obj:
@@ -645,7 +555,6 @@ class GenomeDetailView(DetailView):  ### TO DO : GENE LIST LINK
                 name=gene.id,
                 line=dict(color=get_color_status(gene.status), width=6),
                 opacity=0.8,
-                # hoverinfo="none",
                 hovertemplate=text_pos,
             )
             fig.add_trace(line)
@@ -661,13 +570,13 @@ class GenomeDetailView(DetailView):  ### TO DO : GENE LIST LINK
                 y=gene.strand + decalage,
                 text=link_to_gene,
                 ay=-20,
-                # showarrow=False,
             )
 
         # add label
         fig.update_layout(
             yaxis_title="Strand",
             xaxis_title="Position",
+            yaxis=dict(range=[-1.3, 1.6], dtick=1),
         )
         # convert to html
         plot_genome = fig.to_html(
@@ -676,6 +585,15 @@ class GenomeDetailView(DetailView):  ### TO DO : GENE LIST LINK
         context["plot_genome"] = plot_genome
 
         return context
+
+    def get(self, request, *args, **kwargs):
+        if "genelist" in request.GET:
+            url = (
+                reverse("main:exploreGenePep")
+                + f"?idChrom__idGenome__id__icontains={self.get_object()}&notannotated=on&inwork=on&validated=on"
+            )
+            return HttpResponseRedirect(url)
+        return super().get(request, *args, **kwargs)
 
 
 ### Get sequence of genome
@@ -697,6 +615,7 @@ class GenomeSeqDetailView(DetailView):
         role_user = get_role(self.request)
         context["genome"] = self.object
         context["active_tab"] = "explore"
+        context["active_subtab"] = "genome"
         context["role_user"] = role_user
         # get all sequence from chromosomes of genome
         chromosomes = Chromosome.objects.filter(
@@ -709,6 +628,39 @@ class GenomeSeqDetailView(DetailView):
 
         context["sequence"] = sequence
         return context
+
+
+### Download sequence of Genome
+class GenomeSeqDownloadView(View):
+    def get(self, request, *args, **kwargs):
+        genome_id = kwargs.get("genome_id")
+        chromosomes = Chromosome.objects.filter(idGenome=genome_id)
+        sequence = ""
+        for chrom in chromosomes:
+            chrom_seq = ChromosomeSeq.objects.get(idChrom=chrom)
+            # Insert line breaks every 60 characters
+            sequence_with_line_breaks = "\n".join(
+                str(chrom_seq.sequence)[i : i + 60]
+                for i in range(0, len(str(chrom_seq.sequence)), 60)
+            )
+            sequence += (
+                ">Chromosome dna:chromosome chromosome:"
+                + str(chrom.id)
+                + ":Chromosome:"
+                + str(chrom.startPos)
+                + ":"
+                + str(chrom.endPos)
+                + ":"
+                + str(chrom.strand)
+                + " REF\n"
+                + sequence_with_line_breaks
+                + "\n"
+            )
+        response = HttpResponse(sequence, content_type="text/plain")
+        response["Content-Disposition"] = (
+            f'attachment; filename="seq_{genome_id}.fa"'
+        )
+        return response
 
 
 ##############################################################################################
@@ -785,6 +737,7 @@ class GeneDetailView(DetailView):
 
         # add info for tabs and role
         context_all["active_tab"] = "explore"
+        context_all["active_subtab"] = "gene"
         context_all["role"] = "reader"
         context_all["role_user"] = role_user
         return context_all
@@ -1025,7 +978,12 @@ class genomeAdmin(SingleTableMixin, FilterView):
         context["active_tab"] = "admin"
         context["active_tab_admin"] = "genome"
         context["role_user"] = get_role(self.request)
+        context["query_params"] = get_query_page_changed(self)
         return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.order_by("id")
 
 
 class sequenceAdmin(SingleTableMixin, FilterView):
@@ -1047,7 +1005,7 @@ class sequenceAdmin(SingleTableMixin, FilterView):
         context["active_tab"] = "admin"
         context["active_tab_admin"] = "sequence"
         context["role_user"] = get_role(self.request)
-
+        context["query_params"] = get_query_page_changed(self)
         return context
 
     # filter by genome
@@ -1056,7 +1014,45 @@ class sequenceAdmin(SingleTableMixin, FilterView):
         genome_id = self.request.GET.get("idChrom__idGenome__id__icontains")
         if genome_id:
             queryset = queryset.filter(idChrom__idGenome__id=genome_id)
-        return queryset
+        return queryset.order_by("id")
+
+    def post(self, request, *args, **kwargs):
+
+        if "assign" in request.POST:
+            # get gene list filtered : one for those without annotator, one for those without validator
+            # exclude gene already validated
+            genes_no_annot = AdminGeneFilter(
+                request.GET,
+                queryset=Gene.objects.filter(
+                    Q(emailAnnotator__isnull=True) & ~Q(status=Gene.Status.VALIDATED)
+                ),
+            ).qs
+            genes_no_valid = AdminGeneFilter(
+                request.GET,
+                queryset=Gene.objects.filter(
+                    Q(emailValidator__isnull=True) & ~Q(status=Gene.Status.VALIDATED)
+                ),
+            ).qs
+            # get all annotators and validators
+            annotators = CustomUser.objects.filter(role=1)
+            validators = CustomUser.objects.filter(role=2)
+            genes = [genes_no_annot, genes_no_valid]
+            users = [annotators, validators]
+            for r in range(2):
+                i = 0
+                user = users[r]
+                if len(user) != 0:
+                    for gene in genes[r]:
+                        email = user[i % len(user)]
+                        # assign gene :
+                        if r == 0:
+                            gene.emailAnnotator = CustomUser.objects.get(email=email)
+                        elif r == 1:
+                            gene.emailValidator = CustomUser.objects.get(email=email)
+                        gene.save()
+                        i += 1
+
+        return super().get(request, *args, **kwargs)
 
 
 class accountAdmin(SingleTableMixin, FilterView):
@@ -1078,6 +1074,7 @@ class accountAdmin(SingleTableMixin, FilterView):
         context["active_tab"] = "admin"
         context["active_tab_admin"] = "account"
         context["role_user"] = get_role(self.request)
+        context["query_params"] = get_query_page_changed(self)
         return context
 
     # filter by email
@@ -1086,7 +1083,7 @@ class accountAdmin(SingleTableMixin, FilterView):
         email = self.request.GET.get("email__contains")
         if email:
             queryset = queryset.filter(email=email)
-        return queryset
+        return queryset.order_by("email")
 
 
 class accountAssignAdmin(SingleTableMixin, FilterView):
@@ -1116,15 +1113,18 @@ class accountAssignAdmin(SingleTableMixin, FilterView):
         context["active_tab"] = "admin"
         context["active_tab_admin"] = "account"
         context["role_user"] = get_role(self.request)
+        context["query_params"] = get_query_page_changed(self)
         previous_url = self.request.META.get(
             "HTTP_REFERER", reverse("main:sequenceAdmin")
         )
         try:
-            match = resolve(previous_url)
-            view_name = match.view_name
-            if view_name == "sequenceAdmin":
+            # not a good way, but check if view is adminSequence doesn't work, so check url string insteed :
+            if "administrator/sequence" in previous_url:
                 # store url only if page sequence
+                print(previous_url)
                 self.request.session["previous_url"] = previous_url
+            else:
+                self.request.session["previous_url"] = reverse("main:sequenceAdmin")
         except Resolver404:
             previous_url = reverse("main:sequenceAdmin")
         return context

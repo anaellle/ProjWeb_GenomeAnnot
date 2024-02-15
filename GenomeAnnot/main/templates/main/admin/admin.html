@@ -30,31 +30,33 @@
             </form>   
         </div>
     </div>
-    
+    {% if active_tab_admin == "sequence" %}
+<form method="post">
+{% csrf_token %}
+<input type="submit" name="assign" class="btn btn-primary my-2"  value="Assign all genes">
+</form>
+{%endif%}
 {% endif %} 
+
+
+
 {% render_table table 'django_tables2/bootstrap.html' %}
 
 
-    <nav class=" mb-4">
-        <ul class="pagination override">
-            {% if page_obj.has_previous %}            
-                <li class=" page-item "><a class=" page-link" href="?page=1">&laquo; First</a></li>
-                <li class="page-item "><a class=" page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
-            {% endif %}
-    
-            <li class="page-item ">
-                <span class="page-link">
-                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-            </span>
-            </li>
-    
-            {% if page_obj.has_next %}
-            <li class="page-item "><a class=" page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
-            <li class="page-item "><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
-            {% endif %}
-        
-        </ul>  
-        </nav>
+<nav class="mb-4">
+    <ul class="pagination override">
+        {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page=1&{{ query_params }}">&laquo; First</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&{{ query_params }}">Previous</a></li>
+        {% endif %}
+        <li class="page-item"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.</span></li>
+        {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&{{ query_params }}">Next</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&{{ query_params }}">Last &raquo;</a></li>
+        {% endif %}
+    </ul>
+</nav>
+
     
 
 {% endblock %}

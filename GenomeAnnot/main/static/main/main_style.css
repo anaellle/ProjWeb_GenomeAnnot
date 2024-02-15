@@ -4,7 +4,7 @@
   --celadon_clair: rgb(183, 228, 196);
   --nyanza: rgb(205, 239, 215);
   --roseebony: rgb(105, 72, 72);
-  --roseebony_clair: rgba(210, 200, 200);
+  --roseebony_clair: #e6dfdf;
   --feldgrau: rgb(60, 73, 63);
   --shadow: rgba(51, 0, 255, 0.2);
   --light_green: rgb(99, 211, 99);
@@ -283,7 +283,7 @@ h6 {
 }
 
 .orange {
-  color: rgb(250, 180, 49) !important;
+  color: #ff7800 !important;
 }
 
 .red {

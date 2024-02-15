@@ -5,6 +5,8 @@ from .models import Genome, Gene, Peptide, CustomUser
 
 
 ####################################################################################
+# Admin genome
+# ####################################################################################
 
 
 class AdminGenomeFilter(django_filters.FilterSet):
@@ -46,6 +48,8 @@ class AdminGenomeFilter(django_filters.FilterSet):
 
 
 ####################################################################################
+# Admin sequence
+# ####################################################################################
 
 
 class AdminGeneFilter(django_filters.FilterSet):
@@ -107,6 +111,8 @@ class AdminGeneFilter(django_filters.FilterSet):
 
 
 ####################################################################################
+# Admin account
+# ####################################################################################
 
 
 class AdminAccountFilter(django_filters.FilterSet):
@@ -153,6 +159,11 @@ class AdminAccountFilter(django_filters.FilterSet):
         }
 
 
+####################################################################################
+# Admin assign
+# ####################################################################################
+
+
 class AdminAssignFilter(django_filters.FilterSet):
     firstName__contains = django_filters.CharFilter(
         field_name="firstName",
@@ -189,12 +200,6 @@ class AdminAssignFilter(django_filters.FilterSet):
 
 class AnnotateFilter(django_filters.FilterSet):
 
-    # idChrom__idGenome__species = django_filters.ChoiceFilter(
-    #     field_name="idChrom__idGenome__species",
-    #     label="Species",
-    #     choices=[(species, species) for species in Genome.objects.values_list('species', flat=True).distinct()],
-    #     widget=forms.Select(attrs={"class": "form-control"})
-    # )
     idChrom__idGenome__species__icontains = django_filters.CharFilter(
         field_name="idChrom__idGenome__species",
         lookup_expr="icontains",
@@ -247,12 +252,6 @@ class AnnotateFilter(django_filters.FilterSet):
             }
         ),
     )
-    # status__exact = django_filters.ChoiceFilter(
-    #     field_name="status",
-    #     label="Status",
-    #     choices=Gene.Status.choices,
-    #     widget=forms.Select(attrs={"class": "form-control"}),
-    # )
 
     notannotated = django_filters.BooleanFilter(
         field_name="status",
@@ -315,15 +314,6 @@ class AnnotateFilter(django_filters.FilterSet):
             return queryset.exclude(status=Gene.Status.VALIDATED)
         return queryset
 
-    # class Meta:
-    #     model = Gene
-    #     fields = {
-    #         "idChrom__idGenome__species":  ["exact"],
-    #         "id": ["contains"],
-    #         "geneName": ["contains"],
-    #         "geneSymbol": ["contains"],
-    #     }
-
 
 # ####################################################################################
 # ## Validate
@@ -331,7 +321,7 @@ class AnnotateFilter(django_filters.FilterSet):
 
 
 class ValidateFilter(django_filters.FilterSet):
-    
+
     idChrom__idGenome__species__icontains = django_filters.CharFilter(
         field_name="idChrom__idGenome__species",
         lookup_expr="icontains",
@@ -406,12 +396,6 @@ class ValidateFilter(django_filters.FilterSet):
             attrs={"class": "form-check-input", "checked": "checked"}
         ),
     )
-    # status__exact = django_filters.ChoiceFilter(
-    #     field_name="status",
-    #     label="Status",
-    #     choices=Gene.Status.choices,
-    #     widget=forms.Select(attrs={"class": "form-control"}),
-    # )
 
     def filter_notannotated(self, queryset, name, value):
         if value == False:
@@ -437,6 +421,7 @@ class ValidateFilter(django_filters.FilterSet):
 # ####################################################################################
 # ## Explore
 # ####################################################################################
+
 
 class ExploreGenomeFilter(django_filters.FilterSet):
 
@@ -509,7 +494,7 @@ class ExploreGenomeFilter(django_filters.FilterSet):
         if value == False:
             queryset = queryset.exclude(status=Genome.Status.COMPLETE)
         return queryset
-    
+
     class Meta:
         model = Genome
         fields = {
@@ -523,10 +508,10 @@ class ExploreGenomeFilter(django_filters.FilterSet):
 class ExploreGenePepFilter(django_filters.FilterSet):
 
     # Filters on Genome
-    idChrom__idGenome__species__icontains = django_filters.CharFilter(
-        field_name="idChrom__idGenome__species",
+    idChrom__idGenome__id__icontains = django_filters.CharFilter(
+        field_name="idChrom__idGenome__id",
         lookup_expr="icontains",
-        label="Species",
+        label="Genome ID",
         widget=forms.TextInput(attrs={"placeholder": ""}),
     )
     # Filters on Chromosome
