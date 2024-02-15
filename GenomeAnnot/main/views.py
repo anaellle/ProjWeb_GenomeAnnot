@@ -446,29 +446,33 @@ def blast(request, sequence=None):
 
 
 def addGenome(request):
+    '''
+    Allow the user to add information in the database by uploading fasta files on the website.
+    The files are put in the parser and then the information are added to the database.
+    The 3 files need to have the same name minus _cds and _pep in order to be parsed.
+    '''
     if not request.user.is_authenticated:
         return redirect("main:home")
     context = {"role_user": get_role(request)}
     if request.method == "POST":
         if "submit_addgenome" in request.POST:
-            # get parameters
+            # get the form
             form = UploadFileForm(request.POST, request.FILES)
             if form.is_valid():
+                # get the files
                 genomefile = request.FILES.get("genomefile")
                 cdsfile = request.FILES.get("cdsfile")
                 peptidefile = request.FILES.get("peptidefile")
                 genomeName = genomefile.name.split(".")[0]
                 print(genomeName)
+                # check if the files names are the same
                 if (genomeName in cdsfile.name) and (genomeName in peptidefile.name):
-
+                    # parse the files and add to the database 
                     uploadAndFill(genomefile, cdsfile, peptidefile)
-                    messages.success(
-                        request, "Your files were successfully uploaded"
-                    )
-                else:
-                    messages.error(
-                        request, "Your files are not from the same genome"
-                    )
+                    messages.success(request, 'Your files were successfully uploaded')
+                else :
+                    # inform the user that the files names are not corrects
+                    messages.error(request, "Your files are not from the same genome")
                 return render(request, "main/addGenome/addGenome.html", context)
             else:
                 messages.error(
