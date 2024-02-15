@@ -23,7 +23,6 @@
     {% endif %}
 
 <div class="filter p-4">
-   
     <div class="container pt-3 pb-3">
         <h4 class="mb-4">Add a genome to the database</h4>
     <form enctype="multipart/form-data" method="post">
@@ -49,4 +48,30 @@
     </form>
     </div>
 </div>
+<br>
+<h3 class="mt-0"> Information :</h3>
+<h class="middle"> Files <B>must</B> be named as follows : 
+    <br>
+    <ul>
+        <li>Genome file : <I>speciesname.fa</I> </li>
+        <li>CDS file : <I>speciesname_cds.fa</I> </li>
+        <li>Peptide file : <I>speciesname_pep.fa</I> </li>
+    </ul>
+    If you have the information, you can specify the strain and the substrain by adding in the name of the file <I>_str_</I> 
+    followed by the value of the strain or <I>_substr_</I> followed by the value of the subtrain.
+    <br>
+    <br>
+    For example :
+    <ul>
+        <li><I>new_coli.fa</I> is the genome file giving only the species name "new_coli"</li>
+        <li><I>new_coli_cds.fa</I> is the CDS file giving also only the species</li>
+        <li><I>new_coli_str_k_5_cds.fa</I> is the CDS file giving the species and the strain "k_5"</li>
+        <li><I>new_coli_str_k_5_substr_md450_pep.fa</I> is the peptide file giving the species "new_coli", the strain "k_5" and the substr "md450"</li>
+    </ul>
+    If you specify the strain and the substrain, <B>all your files must have</B> the specification !
+</h>
+<br>
+<br>
+<br>
+<br>
 {% endblock %}
