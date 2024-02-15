@@ -16,7 +16,7 @@ import plotly.graph_objects as go
 
 from .forms import GeneUpdateForm, PeptideUpdateForm, CommentForm, UploadFileForm
 from .tables import TableGenome, TableGene, TableAccount, TableAssignAccount
-from .models import Gene, Message, Genome, Chromosome, CustomUser, ChromosomeSeq
+from .models import Gene, Message, Genome, Chromosome, CustomUser, ChromosomeSeq,NucleotidicSeq,PeptideSeq
 from .filters import (
     AdminGenomeFilter,
     AdminGeneFilter,
@@ -285,7 +285,29 @@ class ExploreGenomeView(PaginatedFilterViews, FilterView):
     def get_queryset(self):
         queryset = super().get_queryset()
         return queryset.order_by("id")
+    
+    def post(self,request,*args,**kwargs):
+        if "genome_download" in request.POST:
+            genomes = ExploreGenomeFilter(request.GET,queryset=Genome.objects.all()).qs
+            sequence = ""
+            for genome in genomes:
+                chromosomes = Chromosome.objects.filter(idGenome=genome.id)
+                for chrom in chromosomes:
+                    chrom_seq = ChromosomeSeq.objects.get(idChrom=chrom)
+                    # Insert line breaks every 60 characters
+                    sequence_with_line_breaks = '\n'.join(str(chrom_seq.sequence)[i:i+60] for i in range(0, len(str(chrom_seq.sequence)), 60))
+                    sequence += ('>Chromosome dna:chromosome chromosome:'+str(chrom.id)+
+                                ':Chromosome:'+str(chrom.startPos)+':'+str(chrom.endPos)+':'+str(chrom.strand)+
+                                ' REF\n'+
+                                sequence_with_line_breaks+'\n')
+                    
+            response = HttpResponse(sequence, content_type='text/plain')
+            response["Content-Disposition"] = 'attachment; filename="genomes.fa"'
+            return response
+        
+        return redirect("main:exploreGenome")
 
+import csv
 
 class ExploreGenePepView(PaginatedFilterViews, FilterView):
     model = Gene
@@ -309,6 +331,23 @@ class ExploreGenePepView(PaginatedFilterViews, FilterView):
     def get_queryset(self):
         queryset = super().get_queryset()
         return queryset.order_by("id")
+    
+    def post(self,request,*args,**kwargs):
+        if "genes_download" in request.POST:
+            genes = ExploreGenePepFilter(request.GET,queryset=Gene.objects.all()).qs
+
+            response = HttpResponse(content_type="text/csv")
+            response["Content-Disposition"] = 'attachment; filename="genes.csv"'
+
+            writer = csv.writer(response)
+            # Écrivez les en-têtes du fichier CSV (si nécessaire)
+            writer.writerow(["Genome","Gene ID", "Gene Name","Gene Symbol","Gene Biotype","Strand","Startpos","EndPos","descriptionGene","Chromosome","GeneSeq","PeptideSeq"])
+
+            for gene in genes:
+                writer.writerow([gene.idChrom.idGenome,gene.id, gene.geneName,gene.geneSymbol,gene.geneBiotype,gene.strand,gene.startPos,gene.endPos,gene.descriptionGene,gene.idChrom,NucleotidicSeq.objects.filter(idGene=gene.id).first().sequence,PeptideSeq.objects.filter(idPeptide=gene.id).first().sequence])
+            return response
+        
+        return redirect("main:exploreGenePep")
 
 
 # def annotate(request):
