@@ -672,6 +672,15 @@ class GenomeSeqDetailView(DetailView):
 
 ### Download sequence of a Genome
 class GenomeSeqDownloadView(View):
+    
+    # return home page if url blocked for this user
+    def dispatch(self, request, *args, **kwargs):
+        genome = get_object_or_404(Genome, pk=self.kwargs.get("genome_id"))
+        if not request.user.is_authenticated:
+            return redirect("main:home")
+        return super().dispatch(request, *args, **kwargs)
+
+    # Download the sequence of a genome
     def get(self, request, *args, **kwargs):
         genome_id = kwargs.get("genome_id")
         chromosomes = Chromosome.objects.filter(idGenome=genome_id)
