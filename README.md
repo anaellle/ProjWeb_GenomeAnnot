@@ -18,7 +18,7 @@ Django version 4.2.7. <br>
 
 - plotly==5.18.0 
 
--> See the requiements.txt file for details
+-> See the requirements.txt file for details
 
 ### How-to use
 
