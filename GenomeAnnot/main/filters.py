@@ -6,7 +6,7 @@ from .models import Genome, Gene, Peptide, CustomUser
 
 ####################################################################################
 # Admin genome
-# ####################################################################################
+####################################################################################
 
 
 class AdminGenomeFilter(django_filters.FilterSet):
@@ -49,7 +49,7 @@ class AdminGenomeFilter(django_filters.FilterSet):
 
 ####################################################################################
 # Admin sequence
-# ####################################################################################
+####################################################################################
 
 
 class AdminGeneFilter(django_filters.FilterSet):
@@ -112,7 +112,7 @@ class AdminGeneFilter(django_filters.FilterSet):
 
 ####################################################################################
 # Admin account
-# ####################################################################################
+####################################################################################
 
 
 class AdminAccountFilter(django_filters.FilterSet):
@@ -161,7 +161,7 @@ class AdminAccountFilter(django_filters.FilterSet):
 
 ####################################################################################
 # Admin assign
-# ####################################################################################
+####################################################################################
 
 
 class AdminAssignFilter(django_filters.FilterSet):
@@ -193,19 +193,21 @@ class AdminAssignFilter(django_filters.FilterSet):
         }
 
 
-# ####################################################################################
-# ## Annotate
-# ####################################################################################
+#####################################################################################
+# Annotate
+#####################################################################################
 
 
 class AnnotateFilter(django_filters.FilterSet):
 
+    # Filters on Genome (species)
     idChrom__idGenome__species__icontains = django_filters.CharFilter(
         field_name="idChrom__idGenome__species",
         lookup_expr="icontains",
         label="Species",
         widget=forms.TextInput(attrs={"placeholder": ""}),
     )
+    # Filters on Gene
     id__contains = django_filters.CharFilter(
         field_name="id",
         lookup_expr="icontains",
@@ -241,6 +243,7 @@ class AnnotateFilter(django_filters.FilterSet):
             }
         ),
     )
+    # Filter on Peptide
     sequence_pep = django_filters.CharFilter(
         field_name="peptide__peptideseq__sequence",
         lookup_expr="icontains",
@@ -252,7 +255,7 @@ class AnnotateFilter(django_filters.FilterSet):
             }
         ),
     )
-
+    # Filters on Gene' status
     notannotated = django_filters.BooleanFilter(
         field_name="status",
         method="filter_notannotated",
@@ -315,19 +318,21 @@ class AnnotateFilter(django_filters.FilterSet):
         return queryset
 
 
-# ####################################################################################
-# ## Validate
-# ####################################################################################
+#####################################################################################
+# Validate
+#####################################################################################
 
 
 class ValidateFilter(django_filters.FilterSet):
 
+    # Filters on Genome (species)
     idChrom__idGenome__species__icontains = django_filters.CharFilter(
         field_name="idChrom__idGenome__species",
         lookup_expr="icontains",
         label="Species",
         widget=forms.TextInput(attrs={"placeholder": ""}),
     )
+    # Filters on Gene
     id__contains = django_filters.CharFilter(
         field_name="id",
         lookup_expr="icontains",
@@ -363,6 +368,7 @@ class ValidateFilter(django_filters.FilterSet):
             }
         ),
     )
+    # Filters on Peptide
     sequence_pep = django_filters.CharFilter(
         field_name="peptide__peptideseq__sequence",
         lookup_expr="icontains",
@@ -374,7 +380,7 @@ class ValidateFilter(django_filters.FilterSet):
             }
         ),
     )
-
+    # Filters on Gene' status
     notannotated = django_filters.BooleanFilter(
         field_name="status",
         method="filter_notannotated",
@@ -418,9 +424,9 @@ class ValidateFilter(django_filters.FilterSet):
         return queryset
 
 
-# ####################################################################################
-# ## Explore
-# ####################################################################################
+#####################################################################################
+# Explore
+#####################################################################################
 
 
 class ExploreGenomeFilter(django_filters.FilterSet):

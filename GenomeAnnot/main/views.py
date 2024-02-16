@@ -36,14 +36,14 @@ from django_filters.views import FilterView
 # Libraries required for visualisation
 import plotly.graph_objects as go
 
-# Libraries required for sign up
+# Libraries required to sign up
 from django.contrib.auth.mixins import AccessMixin
 from django.shortcuts import redirect
 from django.views.generic.edit import FormView
 from .forms import CustomUserCreationForm
 from django.contrib.auth import login
 
-# Libraries required to login
+# Libraries required to log in
 from django.contrib.auth.views import LoginView
 from django.contrib import messages
 from django.urls import reverse_lazy
@@ -59,7 +59,11 @@ from django.contrib.auth.views import PasswordChangeView
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.messages.views import SuccessMessageMixin
 
+# Library required for download in csv
+import csv
+
 # Libraries required for lauching the Blast API
+import re  # regular expression library
 from Bio.Blast import NCBIWWW
 from Bio import SeqIO
 from Bio import SearchIO
@@ -171,7 +175,7 @@ class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
 
 
 ##############################################################################################
-######### Reset password (if forgotten) --> non-functional (email not set)
+######### Reset password (if forgotten) --> reset via terminal (email not set)
 ##############################################################################################
 
 
@@ -203,6 +207,9 @@ def get_query_page_changed(self):
 
 
 class PaginatedFilterViews(View):
+    ''' A generic view used to specifically manage the pagination of 
+    the results list on the Explore, Annotate and Validate pages '''
+    
     def get_context_data(self, **kwargs):
         context = super(PaginatedFilterViews, self).get_context_data(**kwargs)
         context["querystring"] = get_query_page_changed(self)
@@ -219,7 +226,7 @@ class ExploreGenomeView(PaginatedFilterViews, FilterView):
         context = super().get_context_data(**kwargs)
 
         # Pagination for request without submit :
-        if not self.request.GET:  # (Mauvaise manière de faire, mais fonctionnelle :)
+        if not self.request.GET:  # (Wrong way of doing things, but functional :)
             context["querystring"] = (
                 "id__contains=&submitsearch=&species__contains=&strain__contains=&substrain__contains=&notannotated=on&inwork=on&validated=on"
             )
@@ -232,8 +239,10 @@ class ExploreGenomeView(PaginatedFilterViews, FilterView):
     def get_queryset(self):
         queryset = super().get_queryset()
         return queryset.order_by("id")
-        
+    
     def post(self,request,*args,**kwargs):
+        ''' Manages the download of the filtered list of genomes '''
+        
         if "genome_download" in request.POST:
             genomes = ExploreGenomeFilter(request.GET,queryset=Genome.objects.all()).qs
             sequence = ""
@@ -243,7 +252,7 @@ class ExploreGenomeView(PaginatedFilterViews, FilterView):
                     chrom_seq = ChromosomeSeq.objects.get(idChrom=chrom)
                     # Insert line breaks every 60 characters
                     sequence_with_line_breaks = '\n'.join(str(chrom_seq.sequence)[i:i+60] for i in range(0, len(str(chrom_seq.sequence)), 60))
-                    sequence += ('>Chromosome dna:chromosome chromosome:'+str(chrom.id)+
+                    sequence += ('>Genome:'+str(genome.id)+' dna:chromosome chromosome:'+str(chrom.id)+
                                 ':Chromosome:'+str(chrom.startPos)+':'+str(chrom.endPos)+':'+str(chrom.strand)+
                                 ' REF\n'+
                                 sequence_with_line_breaks+'\n')
@@ -253,7 +262,6 @@ class ExploreGenomeView(PaginatedFilterViews, FilterView):
             return response
 
         return redirect("main:exploreGenome")
-import csv
 
 class ExploreGenePepView(PaginatedFilterViews, FilterView):
     model = Gene
@@ -288,6 +296,8 @@ class ExploreGenePepView(PaginatedFilterViews, FilterView):
         return reverse("main:exploreGenePep")
 
     def post(self,request,*args,**kwargs):
+        ''' Manages the download of the filtered list of genes and their associated proteins '''
+        
         if "genes_download" in request.POST:
             genes = ExploreGenePepFilter(request.GET,queryset=Gene.objects.all()).qs
 
@@ -295,7 +305,6 @@ class ExploreGenePepView(PaginatedFilterViews, FilterView):
             response["Content-Disposition"] = 'attachment; filename="genes.csv"'
 
             writer = csv.writer(response)
-            # Écrivez les en-têtes du fichier CSV (si nécessaire)
             writer.writerow(["Genome","Gene ID", "Gene Name","Gene Symbol","Gene Biotype","Strand","Startpos","EndPos","descriptionGene","Chromosome","GeneSeq","PeptideSeq"])
 
             for gene in genes:
@@ -311,7 +320,7 @@ class AnnotateView(AccessMixin, PaginatedFilterViews, FilterView):
     paginate_by = 20
     filterset_class = AnnotateFilter
 
-    # return home page if url blocked for this user
+    # Return home page if url blocked for this user
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated or request.user.role not in (
             CustomUser.Role.ANNOTATOR,
@@ -336,7 +345,8 @@ class AnnotateView(AccessMixin, PaginatedFilterViews, FilterView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        # Apply the filter to get genes assigned to the current user
+        
+        # Apply the filter to get genes assigned to the current annotator
         user = self.request.user
         if user:
             assigned_genes = queryset.filter(emailAnnotator=user)
@@ -350,7 +360,7 @@ class ValidateView(AccessMixin, PaginatedFilterViews, FilterView):
     paginate_by = 20
     filterset_class = ValidateFilter
 
-    # return home page if url blocked for this user
+    # Return home page if url blocked for this user
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated or request.user.role not in (
             CustomUser.Role.VALIDATOR,
@@ -375,7 +385,8 @@ class ValidateView(AccessMixin, PaginatedFilterViews, FilterView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        # Apply the filter to get genes assigned to the current user
+        
+        # Apply the filter to get genes assigned to the current validator
         user = self.request.user
         if user:
             assigned_genes = queryset.filter(emailValidator=user)
@@ -388,11 +399,9 @@ class ValidateView(AccessMixin, PaginatedFilterViews, FilterView):
 ##############################################################################################
 
 
-import re  # regular expression library
-
-
 def kind_of_sequence(sequence):
-    # Vérifier si la séquence est une séquence d'ADN ou de protéine
+    ''' Checks whether the sequence is DNA or a protein sequence '''
+    
     if re.match(r"^[ACGTURYKMSWBDHVNacgturykmswbdhvn]*$", sequence):
         return "nuc"
     elif re.match(
@@ -404,23 +413,21 @@ def kind_of_sequence(sequence):
 
 
 def blast(request, sequence=None):
+    ''' Request to ncbi blast api '''
+    
     context = {
         "active_tab": "blast",
         "role_user": get_role(request),
         "sequence": sequence,
     }
 
-    # return render(request, "main/blast/main_blast.html", context)
-
     if request.method == "POST":
         sequence = request.POST["sequence"]
         program = request.POST["program"]
-
-        # db = request.POST['database']
         alignments = request.POST["alignments"]
-        # Request to ncbi blast api, rajouter gestion des erreurs ensuite
-
+        
         seq = kind_of_sequence(sequence)
+        
         if seq == "pb_seq":
             context["error_message"] = (
                 "Please verify that your query is a protein or a nuc sequence"
@@ -452,19 +459,21 @@ def blast(request, sequence=None):
                 hitlist_size=5,
             )
             blast_results = SearchIO.read(result_handle, "blast-xml")
-        except Exception as e:
-            # Gérer les erreurs, par exemple, en renvoyant un message d'erreur à l'utilisateur
 
+        # Handles errors, returning an error message to the user
+        except Exception as e:
             context["error_message"] = (
                 "No API access, please verify your internet connection"
             )
             return render(request, "main/blast/error_blast.html", context)
+
         if not blast_results:
             return render(
                 request,
                 "main/blast/error_blast.html",
                 {"error_message": "No results found"},
             )
+
         context["results"] = blast_results
         return render(request, "main/blast/blast_results.html", context)
 
@@ -661,7 +670,7 @@ class GenomeSeqDetailView(DetailView):
         return context
 
 
-### Download sequence of Genome
+### Download sequence of a Genome
 class GenomeSeqDownloadView(View):
     def get(self, request, *args, **kwargs):
         genome_id = kwargs.get("genome_id")
