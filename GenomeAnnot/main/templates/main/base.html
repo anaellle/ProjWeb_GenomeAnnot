@@ -66,21 +66,21 @@
                             Home
                         </a>
                     </li>
-                <li class="nav-item" {% if not role_user%} data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Not connected"{% endif %} >
-                    <a class="mb-2  nav-link  {% if not role_user %}disabled{% endif %} {% if active_tab == 'explore' %}active{% endif %}" id="nav-explore" href="{% url 'main:exploreGenome' %}" >
+                <li class="nav-item" >
+                    <a class="mb-2  nav-link {% if active_tab == 'explore' %}active{% endif %}" id="nav-explore" href="{% url 'main:exploreGenome' %}" >
                         <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-search icon" viewBox="0 0 16 16">
                             <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
                         </svg>
                         Explore
                     </a>
                 </li>
-                <li class="nav-item" {% if not role_user%} data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Not connected"{% endif %} >
-                    <a class="ms-5  nav-link  {% if not role_user %}disabled{% endif %} {% if active_subtab == 'genome' %}active{% endif %}" id="nav-explore" href="{% url 'main:exploreGenome' %}" >
+                <li class="nav-item" >
+                    <a class="ms-5  nav-link {% if active_subtab == 'genome' %}active{% endif %}" id="nav-explore" href="{% url 'main:exploreGenome' %}" >
                         Genomes
                     </a>
                 </li>
-                <li class="nav-item" {% if not role_user%} data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Not connected"{% endif %} >
-                    <a class=" ms-5  nav-link  {% if not role_user %}disabled{% endif %} {% if active_subtab == 'gene' %}active{% endif %}" id="nav-explore" href="{% url 'main:exploreGenePep' %}" >  
+                <li class="nav-item" >
+                    <a class=" ms-5  nav-link {% if active_subtab == 'gene' %}active{% endif %}" id="nav-explore" href="{% url 'main:exploreGenePep' %}" >  
                         Genes
                     </a>
                 </li>
@@ -103,8 +103,8 @@
                         Validate
                     </a>
                 </li>
-                <li class="nav-item" {% if not role_user%} data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Not connected"{% endif %} >                     
-                    <a  class="nav-link  {% if not role_user %}disabled{% endif %} {% if active_tab == 'blast' %}active{% endif %}" id="nav-blast" href="{% url 'main:blast' %}">
+                <li class="nav-item" >                     
+                    <a  class="nav-link {% if active_tab == 'blast' %}active{% endif %}" id="nav-blast" href="{% url 'main:blast' %}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-ladder icon" viewBox="0 0 16 16" style="transform: rotate(90deg);">
                             <path d="M4.5 1a.5.5 0 0 1 .5.5V2h6v-.5a.5.5 0 0 1 1 0v14a.5.5 0 0 1-1 0V15H5v.5a.5.5 0 0 1-1 0v-14a.5.5 0 0 1 .5-.5M5 14h6v-2H5zm0-3h6V9H5zm0-3h6V6H5zm0-3h6V3H5z"/>
                         </svg> 

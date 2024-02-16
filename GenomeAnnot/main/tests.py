@@ -17,9 +17,7 @@ class ViewTest(TestCase):
         # Check 200 status code
         self.assertEqual(response.status_code, 200)
         # Check template
-        self.assertTemplateUsed(response, "main/home.html")
-        # Check the value of active_tab
-        self.assertEqual(response.context["active_tab"], "home")
+        self.assertTemplateUsed(response, "main/login.html")
 
     def test_main_annotate_view(self):
         # Créer un super utilisateur

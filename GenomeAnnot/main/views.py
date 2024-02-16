@@ -216,17 +216,11 @@ class PaginatedFilterViews(View):
         return context
 
 
-class ExploreGenomeView(AccessMixin, PaginatedFilterViews, FilterView):
+class ExploreGenomeView(PaginatedFilterViews, FilterView):
     model = Genome
     template_name = "main/explore/main_exploreGenome.html"
     paginate_by = 20
     filterset_class = ExploreGenomeFilter
-
-    # Return login page if user not unauthenticated
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated :
-            return redirect("main:login")
-        return super().dispatch(request, *args, **kwargs)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -269,17 +263,11 @@ class ExploreGenomeView(AccessMixin, PaginatedFilterViews, FilterView):
 
         return redirect("main:exploreGenome")
 
-class ExploreGenePepView(AccessMixin, PaginatedFilterViews, FilterView):
+class ExploreGenePepView(PaginatedFilterViews, FilterView):
     model = Gene
     template_name = "main/explore/main_exploreGenePep.html"
     paginate_by = 20
     filterset_class = ExploreGenePepFilter
-
-    # Return login page if user not unauthenticated
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated :
-            return redirect("main:login")
-        return super().dispatch(request, *args, **kwargs)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -428,7 +416,6 @@ def kind_of_sequence(sequence):
         return "pb_seq"
 
 
-@login_required(login_url=reverse_lazy("main:login"))
 def blast(request, sequence=None):
     ''' Request to ncbi blast api '''
     
