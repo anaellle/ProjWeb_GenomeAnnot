@@ -22,25 +22,11 @@ Django version 4.2.7. <br>
 
 ### How-to use
 
-
-- First be sure to clean the environment in ProjWeb_GenomeAnnot:
-```
-git clean -n -d -x
-``` 
-
-```
-git clean -f -d -x
-```
-  
 - Go to the GenomeAnnot directory :
 ```
 cd GenomeAnnot
 ```
   - To create the database :
-```
-python manage.py makemigrations main 
-``` 
-then
 ```
 python manage.py migrate
 ```
