@@ -547,11 +547,11 @@ class GenomeDetailView(DetailView):
     template_name = "main/explore/genome.html"
     pk_url_kwarg = "genome_id"
 
-    # return home page if url blocked for this user
+    # return login page if url blocked for this user
     def dispatch(self, request, *args, **kwargs):
         genome = get_object_or_404(Genome, pk=self.kwargs.get("genome_id"))
         if not request.user.is_authenticated:
-            return redirect("main:home")
+            return redirect("main:login")
         return super().dispatch(request, *args, **kwargs)
 
     # context to extract from DB
@@ -646,11 +646,11 @@ class GenomeSeqDetailView(DetailView):
     template_name = "main/explore/genomeSeq.html"
     pk_url_kwarg = "genome_id"
 
-    # return home page if url blocked for this user
+    # return login page if url blocked for this user
     def dispatch(self, request, *args, **kwargs):
         genome = get_object_or_404(Genome, pk=self.kwargs.get("genome_id"))
         if not request.user.is_authenticated:
-            return redirect("main:home")
+            return redirect("main:login")
         return super().dispatch(request, *args, **kwargs)
 
     # context to extract from DB
@@ -677,11 +677,11 @@ class GenomeSeqDetailView(DetailView):
 ### Download sequence of a Genome
 class GenomeSeqDownloadView(View):
     
-    # return home page if url blocked for this user
+    # return login page if url blocked for this user
     def dispatch(self, request, *args, **kwargs):
         genome = get_object_or_404(Genome, pk=self.kwargs.get("genome_id"))
         if not request.user.is_authenticated:
-            return redirect("main:home")
+            return redirect("main:login")
         return super().dispatch(request, *args, **kwargs)
 
     # Download the sequence of a genome
@@ -757,11 +757,11 @@ class GeneDetailView(DetailView):
     template_name = "main/gene.html"
     pk_url_kwarg = "gene_id"
 
-    # return home page if url blocked for this user
+    # return login page if url blocked for this user
     def dispatch(self, request, *args, **kwargs):
         gene = get_object_or_404(Gene, pk=self.kwargs.get("gene_id"))
         if not request.user.is_authenticated:
-            return redirect("main:home")
+            return redirect("main:login")
         return super().dispatch(request, *args, **kwargs)
 
     # context to extract from DB
