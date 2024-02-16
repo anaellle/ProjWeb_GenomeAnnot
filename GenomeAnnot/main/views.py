@@ -428,6 +428,7 @@ def kind_of_sequence(sequence):
         return "pb_seq"
 
 
+@login_required(login_url=reverse_lazy("main:login"))
 def blast(request, sequence=None):
     ''' Request to ncbi blast api '''
     
