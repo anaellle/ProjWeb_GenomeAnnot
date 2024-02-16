@@ -216,12 +216,18 @@ class PaginatedFilterViews(View):
         return context
 
 
-class ExploreGenomeView(PaginatedFilterViews, FilterView):
+class ExploreGenomeView(AccessMixin, PaginatedFilterViews, FilterView):
     model = Genome
     template_name = "main/explore/main_exploreGenome.html"
     paginate_by = 20
     filterset_class = ExploreGenomeFilter
 
+    # Return login page if user not unauthenticated
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated :
+            return redirect("main:login")
+        return super().dispatch(request, *args, **kwargs)
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -263,12 +269,18 @@ class ExploreGenomeView(PaginatedFilterViews, FilterView):
 
         return redirect("main:exploreGenome")
 
-class ExploreGenePepView(PaginatedFilterViews, FilterView):
+class ExploreGenePepView(AccessMixin, PaginatedFilterViews, FilterView):
     model = Gene
     template_name = "main/explore/main_exploreGenePep.html"
     paginate_by = 20
     filterset_class = ExploreGenePepFilter
 
+    # Return login page if user not unauthenticated
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated :
+            return redirect("main:login")
+        return super().dispatch(request, *args, **kwargs)
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -322,7 +334,9 @@ class AnnotateView(AccessMixin, PaginatedFilterViews, FilterView):
 
     # Return home page if url blocked for this user
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated or request.user.role not in (
+        if not request.user.is_authenticated :
+            return redirect("main:login")
+        elif request.user.role not in (
             CustomUser.Role.ANNOTATOR,
             CustomUser.Role.ADMIN,
         ):
@@ -362,7 +376,9 @@ class ValidateView(AccessMixin, PaginatedFilterViews, FilterView):
 
     # Return home page if url blocked for this user
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated or request.user.role not in (
+        if not request.user.is_authenticated :
+            return redirect("main:login")
+        elif request.user.role not in (
             CustomUser.Role.VALIDATOR,
             CustomUser.Role.ADMIN,
         ):
