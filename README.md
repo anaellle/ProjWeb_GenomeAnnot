@@ -3,7 +3,7 @@ __Emeline Bruyère<sup>1</sup>, Anaëlle Cossard<sup>1</sup>, Elora Vigo<sup>1</
 <br>
 <sub>1. Université Paris-Saclay
 
-Master 2 Web Project for functional annotation and analysis of bacterial genomes
+Master 2 Web Project for functional annotation and analysis of bacterial genomes. The goal was to produce a website allowing users to create an account with different roles and differents actions associted. The website enables to look at the database, visualize genomes, get the list of genes and peptides associated etc. Users can upload information to the database using a formular with fasta files.
 
 ### Requirements
 Django version 4.2.7. <br>
