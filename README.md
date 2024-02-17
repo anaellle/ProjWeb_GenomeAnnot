@@ -36,5 +36,5 @@ python manage.py init-my-data
 ```
   - To run the website :
 ```
-python manage.py runserver
+python manage.py runserver --insecure
 ```
