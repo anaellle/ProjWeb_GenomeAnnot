@@ -13,7 +13,16 @@ from urllib.parse import urlparse
 # import our codes/models :
 from .forms import GeneUpdateForm, PeptideUpdateForm, CommentForm, UploadFileForm
 from .tables import TableGenome, TableGene, TableAccount, TableAssignAccount
-from .models import Gene, Message, Genome, Chromosome, CustomUser, ChromosomeSeq,NucleotidicSeq,PeptideSeq
+from .models import (
+    Gene,
+    Message,
+    Genome,
+    Chromosome,
+    CustomUser,
+    ChromosomeSeq,
+    NucleotidicSeq,
+    PeptideSeq,
+)
 from .filters import (
     AdminGenomeFilter,
     AdminGeneFilter,
@@ -207,9 +216,9 @@ def get_query_page_changed(self):
 
 
 class PaginatedFilterViews(View):
-    ''' A generic view used to specifically manage the pagination of 
-    the results list on the Explore, Annotate and Validate pages '''
-    
+    """A generic view used to specifically manage the pagination of
+    the results list on the Explore, Annotate and Validate pages"""
+
     def get_context_data(self, **kwargs):
         context = super(PaginatedFilterViews, self).get_context_data(**kwargs)
         context["querystring"] = get_query_page_changed(self)
@@ -221,7 +230,7 @@ class ExploreGenomeView(PaginatedFilterViews, FilterView):
     template_name = "main/explore/main_exploreGenome.html"
     paginate_by = 20
     filterset_class = ExploreGenomeFilter
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -239,36 +248,53 @@ class ExploreGenomeView(PaginatedFilterViews, FilterView):
     def get_queryset(self):
         queryset = super().get_queryset()
         return queryset.order_by("id")
-    
-    def post(self,request,*args,**kwargs):
-        ''' Manages the download of the filtered list of genomes '''
-        
+
+    def post(self, request, *args, **kwargs):
+        """Manages the download of the filtered list of genomes"""
+
         if "genome_download" in request.POST:
-            genomes = ExploreGenomeFilter(request.GET,queryset=Genome.objects.all()).qs
+            genomes = ExploreGenomeFilter(
+                request.GET, queryset=Genome.objects.all()
+            ).qs
             sequence = ""
             for genome in genomes:
                 chromosomes = Chromosome.objects.filter(idGenome=genome.id)
                 for chrom in chromosomes:
                     chrom_seq = ChromosomeSeq.objects.get(idChrom=chrom)
                     # Insert line breaks every 60 characters
-                    sequence_with_line_breaks = '\n'.join(str(chrom_seq.sequence)[i:i+60] for i in range(0, len(str(chrom_seq.sequence)), 60))
-                    sequence += ('>Genome:'+str(genome.id)+' dna:chromosome chromosome:'+str(chrom.id)+
-                                ':Chromosome:'+str(chrom.startPos)+':'+str(chrom.endPos)+':'+str(chrom.strand)+
-                                ' REF\n'+
-                                sequence_with_line_breaks+'\n')
+                    sequence_with_line_breaks = "\n".join(
+                        str(chrom_seq.sequence)[i : i + 60]
+                        for i in range(0, len(str(chrom_seq.sequence)), 60)
+                    )
+                    sequence += (
+                        ">Genome:"
+                        + str(genome.id)
+                        + " dna:chromosome chromosome:"
+                        + str(chrom.id)
+                        + ":Chromosome:"
+                        + str(chrom.startPos)
+                        + ":"
+                        + str(chrom.endPos)
+                        + ":"
+                        + str(chrom.strand)
+                        + " REF\n"
+                        + sequence_with_line_breaks
+                        + "\n"
+                    )
 
-            response = HttpResponse(sequence, content_type='text/plain')
+            response = HttpResponse(sequence, content_type="text/plain")
             response["Content-Disposition"] = 'attachment; filename="genomes.fa"'
             return response
 
         return redirect("main:exploreGenome")
+
 
 class ExploreGenePepView(PaginatedFilterViews, FilterView):
     model = Gene
     template_name = "main/explore/main_exploreGenePep.html"
     paginate_by = 20
     filterset_class = ExploreGenePepFilter
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -295,20 +321,54 @@ class ExploreGenePepView(PaginatedFilterViews, FilterView):
             return HttpResponseRedirect(url)
         return reverse("main:exploreGenePep")
 
-    def post(self,request,*args,**kwargs):
-        ''' Manages the download of the filtered list of genes and their associated proteins '''
-        
+    def post(self, request, *args, **kwargs):
+        """Manages the download of the filtered list of genes and their associated proteins"""
+
         if "genes_download" in request.POST:
-            genes = ExploreGenePepFilter(request.GET,queryset=Gene.objects.all()).qs
+            genes = ExploreGenePepFilter(request.GET, queryset=Gene.objects.all()).qs
 
             response = HttpResponse(content_type="text/csv")
             response["Content-Disposition"] = 'attachment; filename="genes.csv"'
 
             writer = csv.writer(response)
-            writer.writerow(["Genome","Gene ID", "Gene Name","Gene Symbol","Gene Biotype","Strand","Startpos","EndPos","descriptionGene","Chromosome","GeneSeq","PeptideSeq"])
+            writer.writerow(
+                [
+                    "Genome",
+                    "Gene ID",
+                    "Gene Name",
+                    "Gene Symbol",
+                    "Gene Biotype",
+                    "Strand",
+                    "Startpos",
+                    "EndPos",
+                    "descriptionGene",
+                    "Chromosome",
+                    "GeneSeq",
+                    "PeptideSeq",
+                ]
+            )
 
             for gene in genes:
-                writer.writerow([gene.idChrom.idGenome,gene.id, gene.geneName,gene.geneSymbol,gene.geneBiotype,gene.strand,gene.startPos,gene.endPos,gene.descriptionGene,gene.idChrom,NucleotidicSeq.objects.filter(idGene=gene.id).first().sequence,PeptideSeq.objects.filter(idPeptide=gene.id).first().sequence])
+                writer.writerow(
+                    [
+                        gene.idChrom.idGenome,
+                        gene.id,
+                        gene.geneName,
+                        gene.geneSymbol,
+                        gene.geneBiotype,
+                        gene.strand,
+                        gene.startPos,
+                        gene.endPos,
+                        gene.descriptionGene,
+                        gene.idChrom,
+                        NucleotidicSeq.objects.filter(idGene=gene.id)
+                        .first()
+                        .sequence,
+                        PeptideSeq.objects.filter(idPeptide=gene.id)
+                        .first()
+                        .sequence,
+                    ]
+                )
             return response
 
         return redirect("main:exploreGenePep")
@@ -322,7 +382,7 @@ class AnnotateView(AccessMixin, PaginatedFilterViews, FilterView):
 
     # Return home page if url blocked for this user
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated :
+        if not request.user.is_authenticated:
             return redirect("main:login")
         elif request.user.role not in (
             CustomUser.Role.ANNOTATOR,
@@ -347,7 +407,7 @@ class AnnotateView(AccessMixin, PaginatedFilterViews, FilterView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        
+
         # Apply the filter to get genes assigned to the current annotator
         user = self.request.user
         if user:
@@ -364,7 +424,7 @@ class ValidateView(AccessMixin, PaginatedFilterViews, FilterView):
 
     # Return home page if url blocked for this user
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated :
+        if not request.user.is_authenticated:
             return redirect("main:login")
         elif request.user.role not in (
             CustomUser.Role.VALIDATOR,
@@ -389,7 +449,7 @@ class ValidateView(AccessMixin, PaginatedFilterViews, FilterView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        
+
         # Apply the filter to get genes assigned to the current validator
         user = self.request.user
         if user:
@@ -404,8 +464,8 @@ class ValidateView(AccessMixin, PaginatedFilterViews, FilterView):
 
 
 def kind_of_sequence(sequence):
-    ''' Checks whether the sequence is DNA or a protein sequence '''
-    
+    """Checks whether the sequence is DNA or a protein sequence"""
+
     if re.match(r"^[ACGTURYKMSWBDHVNacgturykmswbdhvn]*$", sequence):
         return "nuc"
     elif re.match(
@@ -417,8 +477,8 @@ def kind_of_sequence(sequence):
 
 
 def blast(request, sequence=None):
-    ''' Request to ncbi blast api '''
-    
+    """Request to ncbi blast api"""
+
     context = {
         "active_tab": "blast",
         "role_user": get_role(request),
@@ -429,9 +489,9 @@ def blast(request, sequence=None):
         sequence = request.POST["sequence"]
         program = request.POST["program"]
         alignments = request.POST["alignments"]
-        
+
         seq = kind_of_sequence(sequence)
-        
+
         if seq == "pb_seq":
             context["error_message"] = (
                 "Please verify that your query is a protein or a nuc sequence"
@@ -490,11 +550,11 @@ def blast(request, sequence=None):
 
 
 def addGenome(request):
-    '''
+    """
     Allow the user to add information in the database by uploading fasta files on the website.
     The files are put in the parser and then the information are added to the database.
     The 3 files need to have the same name minus _cds and _pep in order to be parsed.
-    '''
+    """
     if not request.user.is_authenticated:
         return redirect("main:home")
     context = {"role_user": get_role(request)}
@@ -511,12 +571,16 @@ def addGenome(request):
                 print(genomeName)
                 # check if the files names are the same
                 if (genomeName in cdsfile.name) and (genomeName in peptidefile.name):
-                    # parse the files and add to the database 
+                    # parse the files and add to the database
                     uploadAndFill(genomefile, cdsfile, peptidefile)
-                    messages.success(request, 'Your files were successfully uploaded')
-                else :
+                    messages.success(
+                        request, "Your files were successfully uploaded"
+                    )
+                else:
                     # inform the user that the files names are not corrects
-                    messages.error(request, "Your files are not from the same genome")
+                    messages.error(
+                        request, "Your files are not from the same genome"
+                    )
                 return render(request, "main/addGenome/addGenome.html", context)
             else:
                 messages.error(
@@ -676,7 +740,7 @@ class GenomeSeqDetailView(DetailView):
 
 ### Download sequence of a Genome
 class GenomeSeqDownloadView(View):
-    
+
     # return login page if url blocked for this user
     def dispatch(self, request, *args, **kwargs):
         genome = get_object_or_404(Genome, pk=self.kwargs.get("genome_id"))
@@ -844,6 +908,16 @@ class GeneUpdateView(UpdateView):
         context_all["previous_url"] = self.request.META.get(
             "HTTP_REFERER", reverse("main:annotate")
         )
+        if (
+            role_user == 1 or role_user == 3
+        ) and gene.emailAnnotator == self.request.user:
+            context_all["accesAnnot"] = True
+
+        if (
+            role_user == 2 or role_user == 3
+        ) and gene.emailValidator == self.request.user:
+            context_all["accesValid"] = True
+
         return context_all
 
     # get informations of forms and do actions
@@ -942,6 +1016,16 @@ class GeneValidDetailView(DetailView):
             "HTTP_REFERER", reverse("main:validate")
         )
         self.request.session["genome_id"] = context_all["genome"].id
+        if (
+            role_user == 1 or role_user == 3
+        ) and gene.emailAnnotator == self.request.user:
+            context_all["accesAnnot"] = True
+
+        if (
+            role_user == 2 or role_user == 3
+        ) and gene.emailValidator == self.request.user:
+            context_all["accesValid"] = True
+
         return context_all
 
     # get informations of forms and do actions (post form)
